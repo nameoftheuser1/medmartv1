@@ -61,9 +61,9 @@ Before you begin, ensure you have met the following requirements:
     DB_CONNECTION=mysql
     DB_HOST=127.0.0.1
     DB_PORT=3306
-    DB_DATABASE=your_database_name
-    DB_USERNAME=your_database_user
-    DB_PASSWORD=your_database_password
+    DB_DATABASE=medmartv1
+    DB_USERNAME=root
+    DB_PASSWORD=''
     ```
 
 ## Database Migrations
