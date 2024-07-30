@@ -37,7 +37,7 @@
 
             <div class="mb-4">
                 <label for="batch_number">Batch Number:</label>
-                <input type="number" name="batch_number" id="batch_number" class="input"
+                <input type="text" name="batch_number" id="batch_number" class="input"
                     value="{{ $productBatches->batch_number }}">
                 @error('batch_number')
                     <p class="error">{{ $message }}</p>
