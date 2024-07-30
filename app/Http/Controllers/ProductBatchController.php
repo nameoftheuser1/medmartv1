@@ -58,7 +58,7 @@ class ProductBatchController extends Controller
         $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
-            'batch_number' => ['required', 'integer'],
+            'batch_number' => ['required', 'max:50'],
             'expiration_date' => ['required', 'date'],
             'supplier_price' => ['required', 'numeric'],
             'received_date' => ['required', 'date'],

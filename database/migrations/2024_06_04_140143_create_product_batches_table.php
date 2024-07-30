@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('supplier_id')->nullable();
             $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('set null');
-            $table->integer('batch_number');
+            $table->string('batch_number', 50);
             $table->date('expiration_date');
             $table->decimal('supplier_price', 8, 2);
             $table->date('received_date');
