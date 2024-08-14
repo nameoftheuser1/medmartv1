@@ -19,7 +19,7 @@
             </div>
 
             <div class="mb-4">
-                <label for="supplier_id">Supplier:</label>
+                <label for="supplier_id">Supplier(optional):</label>
                 <select name="supplier_id" id="supplier_id" class="input">
                     <option value="">None</option>
                     @foreach ($suppliers as $supplier)
@@ -33,7 +33,7 @@
             </div>
 
             <div class="mb-4">
-                <label for="batch_number">Batch Number:</label>
+                <label for="batch_number">Batch Name and Number:</label>
                 <input type="text" name="batch_number" id="batch_number" class="input"
                     value="{{ old('batch_number') }}">
                 @error('batch_number')
@@ -46,6 +46,14 @@
                 <input type="date" name="expiration_date" id="expiration_date" class="input"
                     value="{{ old('expiration_date') }}">
                 @error('expiration_date')
+                    <p class="error">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-4">
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" id="quantity" class="input" value="{{ old('quantity') }}">
+                @error('quantity')
                     <p class="error">{{ $message }}</p>
                 @enderror
             </div>

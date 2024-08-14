@@ -1,13 +1,13 @@
 <x-layout>
     <h1 class="mb-4 text-2xl font-bold">Dashboard</h1>
-    <div class="mb-6">
-        <h2 class="text-xl font-bold mb-2">Products About to Expire</h2>
-        <p class="mb-5">Here showing the products that are about to expire in 30 days</p>
+    <div class="mb-6 bg-white rounded-lg shadow-sm p-4">
+        <h2 class="text-xl font-bold mb-2 font-mono">Products About to Expire</h2>
+        <p class="mb-5 text-gray-500 text-sm">Here showing the products that are about to expire in 30 days</p>
         @if ($expiringBatches->isEmpty())
-            <p>No products are about to expire within the next 30 days.</p>
+            <p class="text-gray-200">No products are about to expire within the next 30 days.</p>
         @else
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white">
+            <div class="overflow-x-auto ">
+                <table class="min-w-full">
                     <thead>
                         <tr>
                             <th class="px-4 py-2 border">Product Name</th>
@@ -20,9 +20,9 @@
                         @foreach ($expiringBatches as $batch)
                             <tr>
                                 <td class="px-4 py-2 border">{{ $batch->product->product_name }}</td>
-                                <td class="px-4 py-2 border">{{ $batch->batch_number }}</td>
-                                <td class="px-4 py-2 border">{{ $batch->expiration_date->format('Y-m-d') }}</td>
-                                <td class="px-4 py-2 border">{{ $batch->inventories->sum('quantity') }}</td>
+                                <td class="px-4 py-2 border text-center">{{ $batch->batch_number }}</td>
+                                <td class="px-4 py-2 border text-center">{{ $batch->expiration_date->format('Y-m-d') }}</td>
+                                <td class="px-4 py-2 border text-center">{{ $batch->inventories->sum('quantity') }}</td>
                             </tr>
                         @endforeach
                     </tbody>

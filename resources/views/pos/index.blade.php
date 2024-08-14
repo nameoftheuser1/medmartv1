@@ -20,12 +20,14 @@
             @foreach ($products as $product)
                 <div class="product-card card sm:w-60 w-full border p-4 m-2 cursor-pointer" data-id="{{ $product->id }}"
                     data-name="{{ $product->product_name }}" data-price="{{ $product->price }}">
-                    <h3>{{ $product->product_name }}</h3>
-                    @if ($product->generic_name)
-                        <p>Generic Name: {{ $product->generic_name }}</p>
-                    @else
-                        <p class="text-gray-500 italic">No generic name</p>
-                    @endif
+                    <div class="divide-y grid grid-cols-1 gap-2">
+                        <h3 class="font-bold">{{ $product->product_name }}</h3>
+                        @if ($product->generic_name)
+                            <p>Generic Name: {{ $product->generic_name }}</p>
+                        @else
+                            <p class="text-gray-500 italic">No generic name</p>
+                        @endif
+                    </div>
                     <p>Available Inventory: {{ $product->total_inventory }}</p>
                     <p>₱{{ $product->price }}</p>
                 </div>

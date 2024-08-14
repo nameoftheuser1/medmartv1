@@ -49,10 +49,6 @@
                             <td class="px-4 py-4 sm:px-6">{{ $inventory->quantity }}</td>
                             <td class="px-4 py-4 sm:px-6">
                                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                    <x-tooltip message="Click to view the full details of the product batch">
-                                        <a href="{{ route('inventories.show', $inventory->id) }}"
-                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
-                                    </x-tooltip>
                                     <a href="{{ route('inventories.edit', $inventory->id) }}"
                                         class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                                     <form action="{{ route('inventories.destroy', $inventory) }}" method="POST">
