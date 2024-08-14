@@ -81,7 +81,14 @@ class ProductBatchController extends Controller
      */
     public function show(ProductBatch $productBatch)
     {
-        //
+        $products = Product::all();
+        $suppliers = Supplier::all();
+
+        return view('product_batches.show', [
+            'productBatch' => $productBatch,
+            'products' => $products,
+            'suppliers' => $suppliers,
+        ]);
     }
 
     /**

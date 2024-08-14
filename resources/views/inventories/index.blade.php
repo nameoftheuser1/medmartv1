@@ -10,9 +10,9 @@
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
         </div>
-        <div class="flex mb-5">
+        {{-- <div class="flex mb-5">
             <a href="{{ route('inventories.create') }}" class="btn text-lg">Add Inventory</a>
-        </div>
+        </div> --}}
         <div>
             @if (session('success'))
                 <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
