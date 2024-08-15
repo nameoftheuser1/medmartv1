@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
             $table->integer('quantity');
             $table->decimal('price', 10, 2);
+            $table->decimal('discount', 10, 2)->nullable();
             $table->string('transaction_key', 7)->unique();
             $table->timestamps();
         });

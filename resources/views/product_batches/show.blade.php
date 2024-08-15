@@ -39,7 +39,7 @@
                     <a href="{{ route('product_batches.index') }}" class="btn text-lg">Go back</a>
                 </div>
                 <div class="mx-auto">
-                    <a href="{{ route('product_batches.edit', $productBatch->id) }}" class="btn text-lg">Edit Product
+                    <a href="{{ route('product_batches.edit', $productBatch->id) }}" class="btn text-lg">Edit
                         Batch</a>
                 </div>
             </div>

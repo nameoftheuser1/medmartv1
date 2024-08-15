@@ -10,9 +10,6 @@
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
         </div>
-        {{-- <div class="flex mb-5">
-            <a href="{{ route('inventories.create') }}" class="btn text-lg">Add Inventory</a>
-        </div> --}}
         <div>
             @if (session('success'))
                 <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
@@ -25,12 +22,12 @@
             <table class="w-full text-left rtl:text-right">
                 <thead class="uppercase">
                     <tr>
-                        <th scope="col" class="px-4 py-3 sm:px-6">ID</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6">Product Name</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Batch Number</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Expiration Date</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Supplier Price</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Received Date</th>
+                        <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
+                        <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Product Name</th>
+                        <th scope="col" class="px-4 py-3 sm:px-6 ">Batch Number</th>
+                        <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Expiration Date</th>
+                        <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Supplier Price</th>
+                        <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Received Date</th>
                         <th scope="col" class="px-4 py-3 sm:px-6">Quantity</th>
                         <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
                     </tr>
@@ -38,14 +35,19 @@
 
                 <tbody>
                     @foreach ($inventories as $inventory)
-                        <tr class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
-                            <td class="px-4 py-4 sm:px-6">{{ $inventory->id }}</td>
-                            <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
+                        <tr
+                            class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
+                            <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $inventory->id }}</td>
+                            <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
                                 {{ $inventory->productBatch->product->product_name }}</td>
-                            <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">{{ $inventory->productBatch->batch_number }}</td>
-                            <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">{{ $inventory->productBatch->expiration_date->format('Y-m-d') }}</td>
-                            <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">₱{{ number_format($inventory->productBatch->supplier_price, 2) }}</td>
-                            <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">{{ $inventory->productBatch->received_date->format('Y-m-d') }}</td>
+                            <td class="px-4 py-4 sm:px-6 ">
+                                {{ $inventory->productBatch->batch_number }}</td>
+                            <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
+                                {{ $inventory->productBatch->expiration_date->format('Y-m-d') }}</td>
+                            <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
+                                ₱{{ number_format($inventory->productBatch->supplier_price, 2) }}</td>
+                            <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
+                                {{ $inventory->productBatch->received_date->format('Y-m-d') }}</td>
                             <td class="px-4 py-4 sm:px-6">{{ $inventory->quantity }}</td>
                             <td class="px-4 py-4 sm:px-6">
                                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">

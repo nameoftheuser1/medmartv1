@@ -28,9 +28,9 @@
                     <thead class="uppercase">
                         <tr>
                             <th scope="col" class="px-2 py-3 sm:px-6">ID</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6">Product</th>
+                            <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Product</th>
                             <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Supplier</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Batch Number</th>
+                            <th scope="col" class="px-2 py-3 sm:px-6 ">Batch Number</th>
                             <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Expiration Date</th>
                             <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Supplier Price</th>
                             <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Received Date</th>
@@ -42,13 +42,13 @@
                             <tr
                                 class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
                                 <td class="px-2 py-4 sm:px-6">{{ $productBatch->id }}</td>
-                                <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
+                                <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden sm:table-cell">
                                     {{ Str::limit($productBatch->product->product_name, 15) }}
                                 </td>
                                 <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">
                                     {{ $productBatch->supplier->name ?? 'N/A' }}
                                 </td>
-                                <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">
+                                <td class="px-2 py-4 sm:px-6">
                                     {{ Str::limit($productBatch->batch_number, 10) }}
                                 </td>
                                 <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">

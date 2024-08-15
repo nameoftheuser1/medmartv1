@@ -85,7 +85,7 @@
                         </li>
                         <li class="mb-2 flex items-center">
                             <a href="{{ route('inventories.index') }}"
-                                class="hover:text-slate-700 w-full hover:bg-gray-300 h-[40px] px-2 flex items-center gap-2 rounded-md {{ Route::currentRouteName() == 'inventory.index' ? 'bg-gray-300 text-slate-700' : '' }}">
+                                class="hover:text-slate-700 w-full hover:bg-gray-300 h-[40px] px-2 flex items-center gap-2 rounded-md {{ Route::currentRouteName() == 'inventories.index' ? 'bg-gray-300 text-slate-700' : '' }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="size-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
