@@ -37,4 +37,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/pos/remove-item', [POSController::class, 'removeItem'])->name('pos.removeItem');
     Route::post('/pos/update-item', [POSController::class, 'updateItem'])->name('pos.updateItem');
     Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
+    Route::post('/pos/apply-discount', [POSController::class, 'applyDiscount'])->name('pos.applyDiscount');
 });

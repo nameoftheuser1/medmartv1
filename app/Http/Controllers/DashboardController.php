@@ -8,12 +8,30 @@ use App\Models\ProductBatch;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $startOfWeek = Carbon::now()->startOfWeek();
+        $endOfWeek = Carbon::now()->endOfWeek();
+
+        $salesData = Sale::select(DB::raw('DATE(created_at) as date'), DB::raw('sum(total_amount) as total'))
+            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $categories = [];
+        $salesSeries = [];
+
+        for ($date = $startOfWeek; $date <= $endOfWeek; $date->addDay()) {
+            $formattedDate = $date->format('Y-m-d');
+            $categories[] = $date->format('D');
+            $salesSeries[] = $salesData->firstWhere('date', $formattedDate)->total ?? 0;
+        }
+
         $productCount = Product::count();
         $supplierCount = Supplier::count();
 
@@ -38,6 +56,8 @@ class DashboardController extends Controller
             'supplierCount' => $supplierCount,
             'expiringBatches' => $expiringBatches,
             'totalSalesToday' => $totalSalesToday,
+            'categories' => $categories,
+            'salesSeries' => $salesSeries,
         ]);
     }
 }

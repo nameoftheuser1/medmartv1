@@ -54,51 +54,82 @@
             @php
                 $totalPrice = 0;
             @endphp
-            <table class="w-full text-left rtl:text-right">
-                <thead class="uppercase">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">Product</th>
-                        <th scope="col" class="px-6 py-3">Quantity</th>
-                        <th scope="col" class="px-6 py-3">Price</th>
-                        <th scope="col" class="px-6 py-3">Total</th>
-                        <th scope="col" class="px-6 py-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($saleDetails as $detail)
-                        @php
-                            $product = \App\Models\Product::find($detail['product_id']);
-                            $totalPrice += $detail['quantity'] * $detail['price'];
-                        @endphp
-                        <tr
-                            class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
-                            <td class="px-6 py-4">{{ $product->product_name }}</td>
-                            <td class="px-6 py-4">{{ $detail['quantity'] }}</td>
-                            <td class="px-6 py-4">₱{{ $detail['price'] }}</td>
-                            <td class="px-6 py-4">₱{{ $detail['quantity'] * $detail['price'] }}</td>
-                            <td class="px-6 py-4 flex gap-2">
-                                <form action="{{ route('pos.removeItem') }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $detail['product_id'] }}">
-                                    <button type="submit"
-                                        class="font-medium text-red-600 dark:text-red-500 hover:underline m-1">Remove</button>
-                                </form>
-                                <form action="{{ route('pos.updateItem') }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    <input type="hidden" name="product_id" value="{{ $detail['product_id'] }}">
-                                    <input type="number" name="quantity" value="{{ $detail['quantity'] }}"
-                                        min="1" class="px-2 py-1 border rounded">
-                                    <button type="submit"
-                                        class="font-medium text-blue-600 dark:text-blue-500 hover:underline m-1">Update</button>
-                                </form>
-                            </td>
+            <div class="overflow-x-auto sm:overflow-x-visible">
+                <table class="w-full text-left rtl:text-right">
+                    <thead class="uppercase">
+                        <tr class="sm:hidden">
+                            <th scope="col" class="px-2 py-3">Product Details</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                        <tr class="hidden sm:table-row">
+                            <th scope="col" class="px-2 sm:px-4 py-3">Product</th>
+                            <th scope="col" class="px-2 sm:px-4 py-3">Qty</th>
+                            <th scope="col" class="px-2 sm:px-4 py-3">Price</th>
+                            <th scope="col" class="px-2 sm:px-4 py-3">Total</th>
+                            <th scope="col" class="px-2 sm:px-4 py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($saleDetails as $detail)
+                            @php
+                                $product = \App\Models\Product::find($detail['product_id']);
+                                $totalPrice += $detail['quantity'] * $detail['price'];
+                            @endphp
+                            <tr
+                                class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700 block sm:table-row mb-4 sm:mb-0">
+                                <td class="px-2 sm:px-4 py-2 sm:py-4 flex flex-col sm:table-cell">
+                                    <span class="font-bold sm:hidden">Product:</span>
+                                    {{ $product->product_name }}
+                                    <div class="sm:hidden mt-2">
+                                        <span class="font-bold">Quantity:</span> {{ $detail['quantity'] }}<br>
+                                        <span class="font-bold">Price:</span> ₱{{ $detail['price'] }}<br>
+                                        <span class="font-bold">Total:</span>
+                                        ₱{{ $detail['quantity'] * $detail['price'] }}
+                                    </div>
+                                </td>
+                                <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">{{ $detail['quantity'] }}
+                                </td>
+                                <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">₱{{ $detail['price'] }}</td>
+                                <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">
+                                    ₱{{ $detail['quantity'] * $detail['price'] }}</td>
+                                <td class="px-2 sm:px-4 py-2 sm:py-4 flex flex-col sm:flex-row gap-2">
+                                    <form action="{{ route('pos.removeItem') }}" method="POST" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $detail['product_id'] }}">
+                                        <button type="submit"
+                                            class="font-medium text-red-600 dark:text-red-500 hover:underline">Remove</button>
+                                    </form>
+                                    <form action="{{ route('pos.updateItem') }}" method="POST"
+                                        class="inline flex-col sm:flex-row items-start sm:items-center gap-2">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $detail['product_id'] }}">
+                                        <input type="number" name="quantity" value="{{ $detail['quantity'] }}"
+                                            min="1" class="px-2 py-1 border rounded w-20">
+                                        <button type="submit"
+                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <form action="{{ route('pos.applyDiscount') }}" method="POST">
+                @csrf
+                <div>
+                    <label for="discount_percentage">Discount (%):</label>
+                    <input type="number" name="discount_percentage" id="discount_percentage" class="input w-16"
+                        value="{{ $discountPercentage }}" min="0" max="100">
+                </div>
+                <div class="flex justify-center mt-4">
+                    <button type="submit" class="btn text-lg">Apply Discount</button>
+                </div>
+            </form>
 
             <div class="mt-4">
                 <h3>Total Price: ₱{{ $totalPrice }}</h3>
+                <h3>Discount: {{ $discountPercentage }}%</h3>
+                <h3>Final Price: ₱{{ $totalPrice * (1 - $discountPercentage / 100) }}</h3>
             </div>
 
             <form action="{{ route('pos.checkout') }}" method="POST">
@@ -136,6 +167,19 @@
                 });
             });
         });
+
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     const discountInput = document.getElementById('discount_percentage');
+
+        //     discountInput.addEventListener('input', function() {
+        //         let discount = parseFloat(this.value);
+        //         if (isNaN(discount) || discount < 0) {
+        //             this.value = 0;
+        //         } else if (discount > 100) {
+        //             this.value = 100;
+        //         }
+        //     });
+        // });
     </script>
 
     <style>

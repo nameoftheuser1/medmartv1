@@ -82,7 +82,7 @@
             </div>
         </div>
         <div class="mt-4">
-            {{ $productBatches->appends(['search' => request('search')])->links() }}
+            {{ $productBatches->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
     </div>
 </x-layout>

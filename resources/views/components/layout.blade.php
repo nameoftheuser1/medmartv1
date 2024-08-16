@@ -130,7 +130,7 @@
                     <form action="{{ route('logout') }}" method="post">
                         @csrf
                         <button class="text-slate-700 hover:bg-gray-100 text-left w-full flex gap-2 rounded-md ">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox=6+"0 0 24 24"
                                 stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M9 12h12m0 0l-3-3m3 3l-3 3" />
@@ -141,7 +141,6 @@
                 </div>
             </div>
             <div class="flex-1 mx-auto md:ps-72 md:pe-8 px-4 pt-20">
-                <!-- Apply different padding for mobile and larger screens -->
                 {{ $slot }}
             </div>
         </div>
