@@ -37,7 +37,7 @@ class DashboardController extends Controller
             'productCount' => $productCount,
             'supplierCount' => $supplierCount,
             'expiringBatches' => $expiringBatches,
-            'totalSalesToday' => $totalSalesToday, // Pass the total sales to the view
+            'totalSalesToday' => $totalSalesToday,
         ]);
     }
 }

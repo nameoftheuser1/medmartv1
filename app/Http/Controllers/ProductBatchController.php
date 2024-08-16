@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProductBatch;
 use App\Http\Requests\StoreProductBatchRequest;
 use App\Http\Requests\UpdateProductBatchRequest;
+use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
@@ -55,18 +56,24 @@ class ProductBatchController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
-            'batch_number' => ['required', 'integer'],
+            'batch_number' => ['required', 'string'],
             'expiration_date' => ['required', 'date'],
             'supplier_price' => ['required', 'numeric'],
             'received_date' => ['required', 'date'],
+            'quantity' => ['required', 'integer'],
         ]);
 
-        ProductBatch::create($request->all());
+        $productBatch = ProductBatch::create($validatedData);
 
-        return redirect()->route('product_batches.index')->with('success', 'Product batch created successfully.');
+        Inventory::create([
+            'batch_id' => $productBatch->id,
+            'quantity' => $validatedData['quantity'],
+        ]);
+
+        return redirect()->route('product_batches.index')->with('success', 'Product batch and inventory created successfully.');
     }
 
     /**
@@ -74,7 +81,14 @@ class ProductBatchController extends Controller
      */
     public function show(ProductBatch $productBatch)
     {
-        //
+        $products = Product::all();
+        $suppliers = Supplier::all();
+
+        return view('product_batches.show', [
+            'productBatch' => $productBatch,
+            'products' => $products,
+            'suppliers' => $suppliers,
+        ]);
     }
 
     /**
@@ -100,7 +114,7 @@ class ProductBatchController extends Controller
         $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
-            'batch_number' => ['required', 'integer'],
+            'batch_number' => ['required', 'max:50'],
             'expiration_date' => ['required', 'date'],
             'supplier_price' => ['required', 'numeric'],
             'received_date' => ['required', 'date'],

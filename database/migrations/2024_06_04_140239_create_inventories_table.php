@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('batch_id')->nullable();
-            $table->foreign('batch_id')->references('id')->on('product_batches')->onDelete('set null');
+            $table->foreign('batch_id')->references('id')->on('product_batches')->onDelete('cascade');
             $table->integer('quantity');
             $table->timestamps();
         });
