@@ -152,39 +152,25 @@
                 productCards.forEach(card => {
                     const productName = card.getAttribute('data-name').toLowerCase();
                     if (productName.includes(query)) {
-                        card.style.display = 'block';
+                        card.classList.remove('hidden');
                     } else {
-                        card.style.display = 'none';
+                        card.classList.add('hidden');
                     }
                 });
             });
 
             productCards.forEach(card => {
                 card.addEventListener('click', function() {
+                    productCards.forEach(card => card.classList.remove('ring', 'ring-green-500',
+                        'bg-green-50'));
+
+                    this.classList.add('ring', 'ring-green-500', 'bg-green-50');
+
                     const productId = this.getAttribute('data-id');
                     selectedProductIdInput.value = productId;
                     addToSaleForm.classList.remove('hidden');
                 });
             });
         });
-
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     const discountInput = document.getElementById('discount_percentage');
-
-        //     discountInput.addEventListener('input', function() {
-        //         let discount = parseFloat(this.value);
-        //         if (isNaN(discount) || discount < 0) {
-        //             this.value = 0;
-        //         } else if (discount > 100) {
-        //             this.value = 100;
-        //         }
-        //     });
-        // });
     </script>
-
-    <style>
-        .product-container {
-            max-height: 24rem;
-        }
-    </style>
 </x-layout>

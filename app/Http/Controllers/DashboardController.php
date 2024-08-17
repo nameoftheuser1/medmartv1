@@ -14,11 +14,11 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $startOfWeek = Carbon::now()->startOfWeek();
-        $endOfWeek = Carbon::now()->endOfWeek();
+        $startDate = Carbon::now()->subDays(6);
+        $endDate = Carbon::now();
 
         $salesData = Sale::select(DB::raw('DATE(created_at) as date'), DB::raw('sum(total_amount) as total'))
-            ->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('date')
             ->orderBy('date', 'asc')
             ->get();
@@ -26,7 +26,7 @@ class DashboardController extends Controller
         $categories = [];
         $salesSeries = [];
 
-        for ($date = $startOfWeek; $date <= $endOfWeek; $date->addDay()) {
+        for ($date = $startDate; $date <= $endDate; $date->addDay()) {
             $formattedDate = $date->format('Y-m-d');
             $categories[] = $date->format('D');
             $salesSeries[] = $salesData->firstWhere('date', $formattedDate)->total ?? 0;
