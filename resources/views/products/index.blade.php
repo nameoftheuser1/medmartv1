@@ -2,7 +2,7 @@
     <div class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
             <h1 class="text-2xl font-bold mb-2 sm:mb-0">Product List</h1>
-            <p class="mb-2 sm:mb-0">Total Products: {{ $products->total() }}</p>
+            <p class="mb-2 sm:mb-0">@lang('message.total') Products: {{ $products->total() }}</p>
             <form method="GET" action="{{ route('products.index') }}" class="flex w-full sm:w-auto">
                 <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}"
                     class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -11,7 +11,8 @@
             </form>
         </div>
         <div class="flex mb-5">
-            <a href="{{ route('products.create') }}" class="btn text-lg w-full sm:w-auto text-center">Add Product</a>
+            <a href="{{ route('products.create') }}" class="btn text-lg w-full sm:w-auto text-center">@lang('message.add', ['item' => 'Product'])
+            </a>
         </div>
         <div>
             @if (session('success'))
@@ -27,7 +28,7 @@
                     <thead class="uppercase">
                         <tr>
                             <th scope="col" class="px-2 py-3 sm:px-6">ID</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6">Name</th>
+                            <th scope="col" class="px-2 py-3 sm:px-6">@lang('message.name')</th>
                             <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Generic</th>
                             <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Category</th>
                             <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Description</th>

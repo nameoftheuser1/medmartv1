@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\POSController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
@@ -39,3 +40,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
     Route::post('/pos/apply-discount', [POSController::class, 'applyDiscount'])->name('pos.applyDiscount');
 });
+
+Route::get('locale/{lang}', [LocaleController::class, 'setLocale']);

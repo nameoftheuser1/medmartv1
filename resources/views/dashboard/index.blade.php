@@ -19,18 +19,19 @@
                 </div>
             </div>
             <div>
-                <!-- Dropdown Button -->
+                <div class="mb-4">
+                    <label for="period" class="block text-sm font-medium text-gray-700">Select Period:</label>
+                    <select id="period" name="period"
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="weekly" {{ $currentPeriod == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                        <option value="monthly" {{ $currentPeriod == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                        <option value="yearly" {{ $currentPeriod == 'yearly' ? 'selected' : '' }}>Yearly</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div id="line-chart"></div>
         <div class="grid grid-cols-1 items-center border-gray-200 border-t justify-between mt-2.5">
-            <div class="pt-5">
-                <a href="#"
-                    class="px-5 py-2.5 text-sm font-medium text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                    <!-- View full report button SVG -->
-                    View full report
-                </a>
-            </div>
         </div>
     </div>
     <div class="mb-6 bg-white rounded-lg shadow-sm p-4 md:w-1/2">
@@ -91,76 +92,88 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const options = {
-                chart: {
-                    height: "100%",
-                    maxWidth: "100%",
-                    type: "line",
-                    fontFamily: "Inter, sans-serif",
-                    dropShadow: {
-                        enabled: false
+            const periodSelector = document.getElementById('period');
+            let chart;
+
+            function initChart() {
+                const options = {
+                    chart: {
+                        height: "100%",
+                        maxWidth: "100%",
+                        type: "line",
+                        fontFamily: "Inter, sans-serif",
+                        dropShadow: {
+                            enabled: false
+                        },
+                        toolbar: {
+                            show: false
+                        },
                     },
-                    toolbar: {
-                        show: false
-                    },
-                },
-                tooltip: {
-                    enabled: true,
-                    x: {
-                        show: false
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    width: 6
-                },
-                grid: {
-                    show: true,
-                    strokeDashArray: 4,
-                    padding: {
-                        left: 2,
-                        right: 2,
-                        top: -26
-                    },
-                },
-                series: [{
-                    name: "Sales",
-                    data: @json($salesSeries),
-                    color: "#1A56DB",
-                }],
-                legend: {
-                    show: false
-                },
-                stroke: {
-                    curve: 'smooth'
-                },
-                xaxis: {
-                    categories: @json($categories),
-                    labels: {
-                        show: true,
-                        style: {
-                            fontFamily: "Inter, sans-serif",
-                            cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+                    tooltip: {
+                        enabled: true,
+                        x: {
+                            show: false
                         }
                     },
-                    axisBorder: {
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        width: 6
+                    },
+                    grid: {
+                        show: true,
+                        strokeDashArray: 4,
+                        padding: {
+                            left: 2,
+                            right: 2,
+                            top: -26
+                        },
+                    },
+                    series: [{
+                        name: "Sales",
+                        data: @json($salesSeries),
+                        color: "#1A56DB",
+                    }],
+                    legend: {
                         show: false
                     },
-                    axisTicks: {
+                    stroke: {
+                        curve: 'smooth'
+                    },
+                    xaxis: {
+                        categories: @json($categories),
+                        labels: {
+                            show: true,
+                            style: {
+                                fontFamily: "Inter, sans-serif",
+                                cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+                            }
+                        },
+                        axisBorder: {
+                            show: false
+                        },
+                        axisTicks: {
+                            show: false
+                        },
+                    },
+                    yaxis: {
                         show: false
                     },
-                },
-                yaxis: {
-                    show: false
-                },
-            };
+                };
 
-            if (document.getElementById("line-chart") && typeof ApexCharts !== 'undefined') {
-                const chart = new ApexCharts(document.getElementById("line-chart"), options);
-                chart.render();
+                if (document.getElementById("line-chart") && typeof ApexCharts !== 'undefined') {
+                    chart = new ApexCharts(document.getElementById("line-chart"), options);
+                    chart.render();
+                }
             }
+
+            initChart();
+
+            periodSelector.addEventListener('change', function() {
+                const selectedPeriod = this.value;
+                window.location.href = `{{ route('dashboard') }}?period=${selectedPeriod}`;
+            });
         });
     </script>
 </x-layout>
