@@ -5,17 +5,17 @@
             <div class="grid gap-4 grid-cols-2">
                 <div>
                     <h5 class="inline-flex items-center text-gray-500 leading-none font-normal mb-2">
+                        Total Sales
+                        <!-- Tooltip SVG and content -->
+                    </h5>
+                    <p class="text-gray-900 text-2xl leading-none font-bold">{{ $totalSales }}</p>
+                </div>
+                <div>
+                    <h5 class="inline-flex items-center text-gray-500 leading-none font-normal mb-2">
                         Total Sales Today
                         <!-- Tooltip SVG and content -->
                     </h5>
                     <p class="text-gray-900 text-2xl leading-none font-bold">{{ $totalSalesToday }}</p>
-                </div>
-                <div>
-                    <h5 class="inline-flex items-center text-gray-500 leading-none font-normal mb-2">
-                        Product Count
-                        <!-- Tooltip SVG and content -->
-                    </h5>
-                    <p class="text-gray-900 text-2xl leading-none font-bold">{{ $productCount }}</p>
                 </div>
             </div>
             <div>
@@ -34,39 +34,49 @@
         <div class="grid grid-cols-1 items-center border-gray-200 border-t justify-between mt-2.5">
         </div>
     </div>
-    <div class="mb-6 bg-white rounded-lg shadow-sm p-4 md:w-1/2">
-        <h2 class="text-xl font-bold mb-2 font-mono">Products About to Expire</h2>
-        <p class="mb-5 text-gray-500 text-sm">Here showing the products that are about to expire in 30 days</p>
-        @if ($expiringBatches->isEmpty())
-            <p class="text-gray-200">No products are about to expire within the next 30 days.</p>
-        @else
-            <div class="overflow-x-auto ">
-                <table class="min-w-full">
-                    <thead>
-                        <tr>
-                            <th class="px-4 py-2 border">Product Name</th>
-                            <th class="px-4 py-2 border">Batch Number</th>
-                            <th class="px-4 py-2 border">Expiration Date</th>
-                            <th class="px-4 py-2 border">Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($expiringBatches as $batch)
+    <div class="flex justify-between mb-6">
+        <div class="card p-4 bg-white shadow rounded mx-auto ">
+            <p class="text-lg font-semibold">Total Sales Today:</p>
+            <h1 class="text-3xl font-bold text-center mt-2">
+                {{ $totalSalesToday }}
+            </h1>
+        </div>
+        <div class="bg-white rounded-lg shadow-sm p-4 md:w-1/2">
+            <h2 class="text-xl font-bold mb-2 font-mono">Products About to Expire</h2>
+            <p class="mb-5 text-gray-500 text-sm">Here showing the products that are about to expire in 30 days</p>
+            @if ($expiringBatches->isEmpty())
+                <p class="text-gray-200">No products are about to expire within the next 30 days.</p>
+            @else
+                <div class="overflow-x-auto ">
+                    <table class="min-w-full">
+                        <thead>
                             <tr>
-                                <td class="px-4 py-2 border">{{ $batch->product->product_name }}</td>
-                                <td class="px-4 py-2 border text-center">{{ $batch->batch_number }}</td>
-                                <td class="px-4 py-2 border text-center">{{ $batch->expiration_date->format('Y-m-d') }}
-                                </td>
-                                <td class="px-4 py-2 border text-center">{{ $batch->inventories->sum('quantity') }}</td>
+                                <th class="px-4 py-2 border">Product Name</th>
+                                <th class="px-4 py-2 border">Batch Number</th>
+                                <th class="px-4 py-2 border">Expiration Date</th>
+                                <th class="px-4 py-2 border">Quantity</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4">
-                {{ $expiringBatches->links() }}
-            </div>
-        @endif
+                        </thead>
+                        <tbody>
+                            @foreach ($expiringBatches as $batch)
+                                <tr>
+                                    <td class="px-4 py-2 border">{{ $batch->product->product_name }}</td>
+                                    <td class="px-4 py-2 border text-center">{{ $batch->batch_number }}</td>
+                                    <td class="px-4 py-2 border text-center">
+                                        {{ $batch->expiration_date->format('Y-m-d') }}
+                                    </td>
+                                    <td class="px-4 py-2 border text-center">{{ $batch->inventories->sum('quantity') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4">
+                    {{ $expiringBatches->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
+                </div>
+            @endif
+        </div>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div class="card p-4 bg-white shadow rounded">
@@ -81,12 +91,7 @@
                 {{ $supplierCount }}
             </h1>
         </div>
-        <div class="card p-4 bg-white shadow rounded">
-            <p class="text-lg font-semibold">Total Sales Today:</p>
-            <h1 class="text-3xl font-bold text-center mt-2">
-                {{ $totalSalesToday }}
-            </h1>
-        </div>
+
     </div>
     <script src="{{ asset('tailwindcharts\js\apexcharts.js') }}"></script>
 
@@ -158,7 +163,16 @@
                         },
                     },
                     yaxis: {
-                        show: false
+                        labels: {
+                            show: true,
+                            formatter: function(value) {
+                                return '₱' + value.toLocaleString();
+                            },
+                            style: {
+                                fontFamily: "Inter, sans-serif",
+                                cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+                            }
+                        }
                     },
                 };
 

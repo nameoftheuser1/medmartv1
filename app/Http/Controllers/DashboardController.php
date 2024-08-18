@@ -31,7 +31,7 @@ class DashboardController extends Controller
                 $dateFormat = 'Y';
                 $displayFormat = 'Y';
                 break;
-            default: // weekly
+            default:
                 $startDate = Carbon::now()->subDays(6);
                 $endDate = Carbon::now();
                 $groupBy = 'DATE(created_at)';
@@ -48,12 +48,15 @@ class DashboardController extends Controller
 
         $categories = [];
         $salesSeries = [];
+        $totalSales = 0;
 
         $currentDate = $startDate->copy();
         while ($currentDate <= $endDate) {
             $formattedDate = $currentDate->format($dateFormat);
             $categories[] = $currentDate->format($displayFormat);
-            $salesSeries[] = $salesData->get($formattedDate)->total ?? 0;
+            $dailySales = $salesData->get($formattedDate)->total ?? 0;
+            $salesSeries[] = $dailySales;
+            $totalSales += $dailySales;
 
             if ($period === 'weekly') {
                 $currentDate->addDay();
@@ -87,6 +90,7 @@ class DashboardController extends Controller
             'totalSalesToday' => $totalSalesToday,
             'categories' => $categories,
             'salesSeries' => $salesSeries,
+            'totalSales' => $totalSales,
             'currentPeriod' => $period,
         ]);
     }

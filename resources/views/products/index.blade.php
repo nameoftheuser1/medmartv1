@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
             <h1 class="text-2xl font-bold mb-2 sm:mb-0">Product List</h1>
             <p class="mb-2 sm:mb-0">@lang('message.total') Products: {{ $products->total() }}</p>
