@@ -68,7 +68,7 @@
         </div>
 
         <div class="mt-4">
-            {{ $suppliers->appends(['search' => request('search')])->links() }}
+            {{ $suppliers->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
     </div>
 </x-layout>

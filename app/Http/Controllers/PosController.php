@@ -25,9 +25,11 @@ class POSController extends Controller
         });
 
         $saleDetails = session()->get('saleDetails', []);
+        $discountPercentage = session()->get('discountPercentage', 0);
 
-        return view('pos.index', compact('products', 'saleDetails'));
+        return view('pos.index', compact('products', 'saleDetails', 'discountPercentage'));
     }
+
     public function addItem(Request $request)
     {
         $request->validate([
@@ -108,7 +110,7 @@ class POSController extends Controller
 
         foreach ($saleDetails as &$saleDetail) {
             if ($saleDetail['product_id'] == $request->product_id) {
-                $saleDetail['quantity'] = $request->quantity;
+                $saleDetail['quantity'] = $quantity;
                 break;
             }
         }
@@ -118,9 +120,21 @@ class POSController extends Controller
         return redirect()->route('pos.index');
     }
 
+    public function applyDiscount(Request $request)
+    {
+        $request->validate([
+            'discount_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        session()->put('discountPercentage', $request->discount_percentage);
+
+        return redirect()->route('pos.index');
+    }
+
     public function checkout(Request $request)
     {
         $saleDetails = session()->get('saleDetails', []);
+        $discountPercentage = session()->get('discountPercentage', 0);
 
         if (empty($saleDetails)) {
             return redirect()->route('pos.index')->with('error', 'No items in the sale.');
@@ -131,9 +145,12 @@ class POSController extends Controller
             $totalAmount += $saleDetail['quantity'] * $saleDetail['price'];
         }
 
+        $totalAmount = $totalAmount * (1 - $discountPercentage / 100);
+
         $sale = Sale::create([
             'user_id' => auth()->user()->id,
             'total_amount' => $totalAmount,
+            'discount_percentage' => $discountPercentage,
         ]);
 
         foreach ($saleDetails as $saleDetail) {
@@ -167,6 +184,7 @@ class POSController extends Controller
         }
 
         session()->forget('saleDetails');
+        session()->forget('discountPercentage');
 
         return redirect()->route('pos.index')->with('success', 'Sale completed successfully.');
     }

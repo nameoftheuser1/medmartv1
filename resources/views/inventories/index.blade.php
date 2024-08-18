@@ -38,7 +38,8 @@
                         <tr
                             class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
                             <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $inventory->id }}</td>
-                            <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
+                            <td
+                                class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
                                 {{ $inventory->productBatch->product->product_name }}</td>
                             <td class="px-4 py-4 sm:px-6 ">
                                 {{ $inventory->productBatch->batch_number }}</td>
@@ -67,7 +68,7 @@
             </table>
         </div>
         <div class="mt-4">
-            {{ $inventories->appends(['search' => request('search')])->links() }}
+            {{ $inventories->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
     </div>
 </x-layout>

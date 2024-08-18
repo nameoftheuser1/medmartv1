@@ -8,19 +8,67 @@ use App\Models\ProductBatch;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $period = $request->input('period', 'weekly');
+
+        switch ($period) {
+            case 'monthly':
+                $startDate = Carbon::now()->startOfMonth()->subMonths(11);
+                $endDate = Carbon::now()->endOfMonth();
+                $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")';
+                $dateFormat = 'Y-m';
+                $displayFormat = 'M Y';
+                break;
+            case 'yearly':
+                $startDate = Carbon::now()->startOfYear()->subYears(4);
+                $endDate = Carbon::now()->endOfYear();
+                $groupBy = 'YEAR(created_at)';
+                $dateFormat = 'Y';
+                $displayFormat = 'Y';
+                break;
+            default: // weekly
+                $startDate = Carbon::now()->subDays(6);
+                $endDate = Carbon::now();
+                $groupBy = 'DATE(created_at)';
+                $dateFormat = 'Y-m-d';
+                $displayFormat = 'D';
+        }
+
+        $salesData = Sale::select(DB::raw("$groupBy as date"), DB::raw('SUM(total_amount) as total'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->keyBy('date');
+
+        $categories = [];
+        $salesSeries = [];
+
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $formattedDate = $currentDate->format($dateFormat);
+            $categories[] = $currentDate->format($displayFormat);
+            $salesSeries[] = $salesData->get($formattedDate)->total ?? 0;
+
+            if ($period === 'weekly') {
+                $currentDate->addDay();
+            } elseif ($period === 'monthly') {
+                $currentDate->addMonth();
+            } else {
+                $currentDate->addYear();
+            }
+        }
+
         $productCount = Product::count();
         $supplierCount = Supplier::count();
 
-        // Calculate the date 30 days from now
         $thresholdDate = Carbon::now()->addDays(30);
 
-        // Fetch product batches that are about to expire and have a positive quantity
         $expiringBatches = ProductBatch::with(['product', 'inventories'])
             ->where('expiration_date', '<=', $thresholdDate)
             ->whereHas('inventories', function ($query) {
@@ -29,7 +77,6 @@ class DashboardController extends Controller
             ->orderBy('expiration_date', 'asc')
             ->paginate(5);
 
-        // Calculate the total sales for the current day
         $totalSalesToday = Sale::whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
@@ -38,6 +85,9 @@ class DashboardController extends Controller
             'supplierCount' => $supplierCount,
             'expiringBatches' => $expiringBatches,
             'totalSalesToday' => $totalSalesToday,
+            'categories' => $categories,
+            'salesSeries' => $salesSeries,
+            'currentPeriod' => $period,
         ]);
     }
 }
