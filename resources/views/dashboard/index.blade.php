@@ -37,6 +37,12 @@
     <div class="flex flex-col md:flex-row justify-between mb-6 gap-3">
         <div class="card p-4 bg-white shadow rounded mx-auto md:mb-0 md:w-1/2   ">
             <div id="column-chart"></div>
+            <select name="inventory-type" onchange="this.form.submit()">
+                <option value="highest" {{ $currentInventoryType == 'highest' ? 'selected' : '' }}>Highest Inventory
+                </option>
+                <option value="lowest" {{ $currentInventoryType == 'lowest' ? 'selected' : '' }}>Lowest Inventory
+                </option>
+            </select>
         </div>
         <div class="bg-white rounded-lg shadow-sm p-4 md:w-1/2 max-h-96 min-h-96 overflow-y-scroll">
             <h2 class="text-xl font-bold mb-2 font-mono">Products About to Expire</h2>
@@ -197,30 +203,21 @@
             });
         });
     </script>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const highestInventories = @json($highestInventoryBatches);
-            const lowestInventories = @json($lowestInventoryBatches);
+            const inventoryBatches = @json($inventoryBatches);
 
             const options = {
                 colors: ["#1A56DB", "#FDBA8C"],
                 series: [{
-                        name: "Highest Inventory",
-                        color: "#1A56DB",
-                        data: highestInventories.map(batch => ({
-                            x: batch.batch_number,
-                            y: batch.quantity
-                        })),
-                    },
-                    {
-                        name: "Lowest Inventory",
-                        color: "#FDBA8C",
-                        data: lowestInventories.map(batch => ({
-                            x: batch.batch_number,
-                            y: batch.quantity
-                        })),
-                    },
-                ],
+                    name: "{{ $currentInventoryType === 'highest' ? 'Highest Inventory' : 'Lowest Inventory' }}",
+                    color: "#1A56DB",
+                    data: inventoryBatches.map(batch => ({
+                        x: batch.batch_number,
+                        y: batch.quantity
+                    })),
+                }],
                 chart: {
                     type: "bar",
                     height: "320px",
@@ -302,6 +299,8 @@
             }
         });
     </script>
+
+
 
 
 </x-layout>

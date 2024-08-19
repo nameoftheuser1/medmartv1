@@ -16,7 +16,9 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $period = $request->input('period', 'weekly');
+        $inventoryType = $request->input('inventory-type', 'highest');
 
+        // Handle period selection
         switch ($period) {
             case 'monthly':
                 $startDate = Carbon::now()->startOfMonth()->subMonths(11);
@@ -84,34 +86,35 @@ class DashboardController extends Controller
         $totalSalesToday = Sale::whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
-        $highestInventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
-            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
-            ->groupBy('batch_id')
-            ->orderBy('quantity', 'desc')
-            ->limit(10)
-            ->get();
+        if ($inventoryType === 'highest') {
+            $inventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
+                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                ->groupBy('batch_id')
+                ->orderBy('quantity', 'desc')
+                ->limit(10)
+                ->get();
 
-        $highestInventoryBatches = ProductBatch::whereIn('id', $highestInventories->pluck('batch_id'))
-            ->get()
-            ->map(function ($batch) use ($highestInventories) {
-                $batch->quantity = $highestInventories->firstWhere('batch_id', $batch->id)->quantity;
-                return $batch;
-            });
+            $inventoryBatches = ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
+                ->get()
+                ->map(function ($batch) use ($inventories) {
+                    $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
+                    return $batch;
+                });
+        } else {
+            $inventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
+                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                ->groupBy('batch_id')
+                ->orderBy('quantity', 'asc')
+                ->limit(10)
+                ->get();
 
-        $lowestInventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
-            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
-            ->groupBy('batch_id')
-            ->orderBy('quantity', 'asc')
-            ->limit(10)
-            ->get();
-
-        $lowestInventoryBatches = ProductBatch::whereIn('id', $lowestInventories->pluck('batch_id'))
-            ->get()
-            ->map(function ($batch) use ($lowestInventories) {
-                $batch->quantity = $lowestInventories->firstWhere('batch_id', $batch->id)->quantity;
-                return $batch;
-            });
-
+            $inventoryBatches = ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
+                ->get()
+                ->map(function ($batch) use ($inventories) {
+                    $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
+                    return $batch;
+                });
+        }
 
         return view('dashboard.index', [
             'productCount' => $productCount,
@@ -122,8 +125,8 @@ class DashboardController extends Controller
             'salesSeries' => $salesSeries,
             'totalSales' => $totalSales,
             'currentPeriod' => $period,
-            'highestInventoryBatches' => $highestInventoryBatches,
-            'lowestInventoryBatches' => $lowestInventoryBatches,
+            'currentInventoryType' => $inventoryType,
+            'inventoryBatches' => $inventoryBatches,
         ]);
     }
 }
