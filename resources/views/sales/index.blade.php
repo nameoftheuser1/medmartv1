@@ -1,5 +1,5 @@
 <x-layout>
-    <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
             <h1 class="text-2xl font-bold mb-2 sm:mb-0">Sales List</h1>
             <p class="mb-2 sm:mb-0">Total Sales: {{ $sales->total() }}</p>
@@ -24,7 +24,7 @@
             @endforeach
         </div>
 
-        <div class="hidden sm:block relative overflow-x-auto shadow-md sm:rounded-lg">
+        <div class="hidden sm:block relative overflow-x-auto sm:rounded-lg">
             <table class="w-full text-left rtl:text-right">
                 <thead class="uppercase">
                     <tr>
@@ -48,7 +48,7 @@
                                 {{ $sale->discount > 0 ? $sale->discount . '%' : 'No Discount' }}
                             </td>
                             <td class="px-6 py-4">{{ $sale->transaction_key }}</td>
-                            <td class="px-6 py-4">{{ $sale->created_at }}</td>
+                            <td class="px-6 py-4">{{ $sale->created_at->format('F j, Y h:i A') }}</td>
                         </tr>
                     @endforeach
                 </tbody>

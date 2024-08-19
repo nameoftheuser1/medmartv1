@@ -16,7 +16,7 @@
             <input type="text" id="search-input" placeholder="Search products..." class="input w-full">
         </div>
 
-        <div class="product-container overflow-y-auto max-h-96 flex flex-wrap">
+        <div class="product-container overflow-y-auto max-h-[1000px] flex flex-wrap">
             @foreach ($products as $product)
                 <div class="product-card card sm:w-60 w-full border p-4 m-2 cursor-pointer" data-id="{{ $product->id }}"
                     data-name="{{ $product->product_name }}" data-price="{{ $product->price }}">
@@ -30,26 +30,25 @@
                     </div>
                     <p>Available Inventory: {{ $product->total_inventory }}</p>
                     <p>₱{{ $product->price }}</p>
+                    <form action="{{ route('pos.addItem') }}" method="POST" id="add-to-sale-form" class="hidden">
+                        @csrf
+                        <input type="hidden" name="product_id" id="selected-product-id">
+                        <div>
+                            <label for="quantity">Quantity:</label>
+                            <input type="number" name="quantity" id="quantity" class="input">
+                        </div>
+
+                        <div class="flex justify-center mt-4">
+                            <button type="submit" class="btn text-lg">Add to Cart</button>
+                        </div>
+                    </form>
                 </div>
             @endforeach
         </div>
-
-        <form action="{{ route('pos.addItem') }}" method="POST" id="add-to-sale-form" class="hidden">
-            @csrf
-            <input type="hidden" name="product_id" id="selected-product-id">
-            <div>
-                <label for="quantity">Quantity:</label>
-                <input type="number" name="quantity" id="quantity" class="input">
-            </div>
-
-            <div class="flex justify-center mt-4">
-                <button type="submit" class="btn text-lg">Add to Sale</button>
-            </div>
-        </form>
     </div>
 
-    <div class="card">
-        <h2>Sale Items</h2>
+    <div class="card min-h-96">
+        <h2>Cart Items</h2>
         @if (!empty($saleDetails))
             @php
                 $totalPrice = 0;

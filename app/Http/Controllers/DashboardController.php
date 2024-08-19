@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\ProductBatch;
 use App\Models\Sale;
+use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,9 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $period = $request->input('period', 'weekly');
+        $inventoryType = $request->input('inventory-type', 'highest');
 
+        // Handle period selection
         switch ($period) {
             case 'monthly':
                 $startDate = Carbon::now()->startOfMonth()->subMonths(11);
@@ -31,7 +34,7 @@ class DashboardController extends Controller
                 $dateFormat = 'Y';
                 $displayFormat = 'Y';
                 break;
-            default: // weekly
+            default:
                 $startDate = Carbon::now()->subDays(6);
                 $endDate = Carbon::now();
                 $groupBy = 'DATE(created_at)';
@@ -48,12 +51,15 @@ class DashboardController extends Controller
 
         $categories = [];
         $salesSeries = [];
+        $totalSales = 0;
 
         $currentDate = $startDate->copy();
         while ($currentDate <= $endDate) {
             $formattedDate = $currentDate->format($dateFormat);
             $categories[] = $currentDate->format($displayFormat);
-            $salesSeries[] = $salesData->get($formattedDate)->total ?? 0;
+            $dailySales = $salesData->get($formattedDate)->total ?? 0;
+            $salesSeries[] = $dailySales;
+            $totalSales += $dailySales;
 
             if ($period === 'weekly') {
                 $currentDate->addDay();
@@ -80,6 +86,36 @@ class DashboardController extends Controller
         $totalSalesToday = Sale::whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
+        if ($inventoryType === 'highest') {
+            $inventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
+                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                ->groupBy('batch_id')
+                ->orderBy('quantity', 'desc')
+                ->limit(10)
+                ->get();
+
+            $inventoryBatches = ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
+                ->get()
+                ->map(function ($batch) use ($inventories) {
+                    $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
+                    return $batch;
+                });
+        } else {
+            $inventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
+                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                ->groupBy('batch_id')
+                ->orderBy('quantity', 'asc')
+                ->limit(10)
+                ->get();
+
+            $inventoryBatches = ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
+                ->get()
+                ->map(function ($batch) use ($inventories) {
+                    $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
+                    return $batch;
+                });
+        }
+
         return view('dashboard.index', [
             'productCount' => $productCount,
             'supplierCount' => $supplierCount,
@@ -87,7 +123,10 @@ class DashboardController extends Controller
             'totalSalesToday' => $totalSalesToday,
             'categories' => $categories,
             'salesSeries' => $salesSeries,
+            'totalSales' => $totalSales,
             'currentPeriod' => $period,
+            'currentInventoryType' => $inventoryType,
+            'inventoryBatches' => $inventoryBatches,
         ]);
     }
 }
