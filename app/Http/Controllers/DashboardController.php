@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\ProductBatch;
 use App\Models\Sale;
+use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -83,6 +84,35 @@ class DashboardController extends Controller
         $totalSalesToday = Sale::whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
+        $highestInventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
+            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+            ->groupBy('batch_id')
+            ->orderBy('quantity', 'desc')
+            ->limit(10)
+            ->get();
+
+        $highestInventoryBatches = ProductBatch::whereIn('id', $highestInventories->pluck('batch_id'))
+            ->get()
+            ->map(function ($batch) use ($highestInventories) {
+                $batch->quantity = $highestInventories->firstWhere('batch_id', $batch->id)->quantity;
+                return $batch;
+            });
+
+        $lowestInventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
+            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+            ->groupBy('batch_id')
+            ->orderBy('quantity', 'asc')
+            ->limit(10)
+            ->get();
+
+        $lowestInventoryBatches = ProductBatch::whereIn('id', $lowestInventories->pluck('batch_id'))
+            ->get()
+            ->map(function ($batch) use ($lowestInventories) {
+                $batch->quantity = $lowestInventories->firstWhere('batch_id', $batch->id)->quantity;
+                return $batch;
+            });
+
+
         return view('dashboard.index', [
             'productCount' => $productCount,
             'supplierCount' => $supplierCount,
@@ -92,6 +122,8 @@ class DashboardController extends Controller
             'salesSeries' => $salesSeries,
             'totalSales' => $totalSales,
             'currentPeriod' => $period,
+            'highestInventoryBatches' => $highestInventoryBatches,
+            'lowestInventoryBatches' => $lowestInventoryBatches,
         ]);
     }
 }

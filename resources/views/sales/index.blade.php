@@ -48,7 +48,7 @@
                                 {{ $sale->discount > 0 ? $sale->discount . '%' : 'No Discount' }}
                             </td>
                             <td class="px-6 py-4">{{ $sale->transaction_key }}</td>
-                            <td class="px-6 py-4">{{ $sale->created_at }}</td>
+                            <td class="px-6 py-4">{{ $sale->created_at->format('F j, Y h:i A') }}</td>
                         </tr>
                     @endforeach
                 </tbody>

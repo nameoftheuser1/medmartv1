@@ -33,7 +33,7 @@
                 </a>
             </div>
         </nav>
-        <div class="flex -z-50">
+        <div class="flex -z-50 overflow-x-scroll:h">
             <div id="sidebar"
                 class="hidden md:flex flex-col justify-between fixed top-14 left-0 bottom-0 w-64 bg-inherit pt-2 px-3 bg-white z-50">
                 <div>
@@ -137,11 +137,12 @@
                             <span>Logout</span>
                         </button>
                     </form>
-                    <div class="flex w-full justify-center gap-2"><a href="locale/en">English</a>|<a href="locale/fil">Filipino</a></div>
+                    <div class="flex w-full justify-center gap-2"><a href="locale/en">English</a>|<a
+                            href="locale/fil">Filipino</a></div>
                     <p class="text-center text-sm text-gray-400">BSU 2024</p>
                 </div>
             </div>
-            <div class="flex-1 mx-auto md:ps-72 md:pe-8 px-4 pt-20">
+            <div class="flex-1 mx-auto md:ps-72 md:pe-8 px-2 pt-20 overflow-x-hidden">
                 {{ $slot }}
             </div>
         </div>

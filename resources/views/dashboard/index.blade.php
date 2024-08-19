@@ -1,5 +1,5 @@
 <x-layout>
-    <h1 class="mb-4 text-2xl font-bold">Dashboard</h1>
+    <h1 class="mb-4 text-5xl font-bold">Dashboard</h1>
     <div class="w-full bg-white rounded-lg shadow p-4 md:p-6 mb-3">
         <div class="flex justify-between mb-5">
             <div class="grid gap-4 grid-cols-2">
@@ -34,14 +34,11 @@
         <div class="grid grid-cols-1 items-center border-gray-200 border-t justify-between mt-2.5">
         </div>
     </div>
-    <div class="flex justify-between mb-6">
-        <div class="card p-4 bg-white shadow rounded mx-auto ">
-            <p class="text-lg font-semibold">Total Sales Today:</p>
-            <h1 class="text-3xl font-bold text-center mt-2">
-                {{ $totalSalesToday }}
-            </h1>
+    <div class="flex flex-col md:flex-row justify-between mb-6 gap-3">
+        <div class="card p-4 bg-white shadow rounded mx-auto md:mb-0 md:w-1/2   ">
+            <div id="column-chart"></div>
         </div>
-        <div class="bg-white rounded-lg shadow-sm p-4 md:w-1/2">
+        <div class="bg-white rounded-lg shadow-sm p-4 md:w-1/2 max-h-96 min-h-96 overflow-y-scroll">
             <h2 class="text-xl font-bold mb-2 font-mono">Products About to Expire</h2>
             <p class="mb-5 text-gray-500 text-sm">Here showing the products that are about to expire in 30 days</p>
             @if ($expiringBatches->isEmpty())
@@ -85,11 +82,21 @@
                 {{ $productCount }}
             </h1>
         </div>
-        <div class="card p-4 bg-white shadow rounded">
-            <p class="text-lg font-semibold">Supplier Count:</p>
-            <h1 class="text-3xl font-bold text-center mt-2">
-                {{ $supplierCount }}
-            </h1>
+        <div class="card p-4 bg-white shadow rounded flex">
+            <p
+                class="text-lg font-semibold h-full bg-green-500 p-2 rounded-lg flex items-center justify-center text-white w-1/4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-11">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+                </svg>
+            </p>
+            <div class="p-2">
+                <p>Supplier Count:</p>
+                <h1 class="text-3xl font-bold text-center mt-2">
+                    {{ $supplierCount }}
+                </h1>
+            </div>
         </div>
 
     </div>
@@ -138,7 +145,7 @@
                     series: [{
                         name: "Sales",
                         data: @json($salesSeries),
-                        color: "#1A56DB",
+                        color: "#009933",
                     }],
                     legend: {
                         show: false
@@ -190,4 +197,111 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const highestInventories = @json($highestInventoryBatches);
+            const lowestInventories = @json($lowestInventoryBatches);
+
+            const options = {
+                colors: ["#1A56DB", "#FDBA8C"],
+                series: [{
+                        name: "Highest Inventory",
+                        color: "#1A56DB",
+                        data: highestInventories.map(batch => ({
+                            x: batch.batch_number,
+                            y: batch.quantity
+                        })),
+                    },
+                    {
+                        name: "Lowest Inventory",
+                        color: "#FDBA8C",
+                        data: lowestInventories.map(batch => ({
+                            x: batch.batch_number,
+                            y: batch.quantity
+                        })),
+                    },
+                ],
+                chart: {
+                    type: "bar",
+                    height: "320px",
+                    fontFamily: "Inter, sans-serif",
+                    toolbar: {
+                        show: false,
+                    },
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: "70%",
+                        borderRadiusApplication: "end",
+                        borderRadius: 8,
+                    },
+                },
+                tooltip: {
+                    shared: true,
+                    intersect: false,
+                    style: {
+                        fontFamily: "Inter, sans-serif",
+                    },
+                },
+                states: {
+                    hover: {
+                        filter: {
+                            type: "darken",
+                            value: 1,
+                        },
+                    },
+                },
+                stroke: {
+                    show: true,
+                    width: 0,
+                    colors: ["transparent"],
+                },
+                grid: {
+                    show: false,
+                    strokeDashArray: 4,
+                    padding: {
+                        left: 2,
+                        right: 2,
+                        top: -14
+                    },
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+                legend: {
+                    show: false,
+                },
+                xaxis: {
+                    floating: false,
+                    labels: {
+                        show: true,
+                        style: {
+                            fontFamily: "Inter, sans-serif",
+                            cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+                        }
+                    },
+                    axisBorder: {
+                        show: false,
+                    },
+                    axisTicks: {
+                        show: false,
+                    },
+                },
+                yaxis: {
+                    show: false,
+                },
+                fill: {
+                    opacity: 1,
+                },
+            };
+
+            if (document.getElementById("column-chart") && typeof ApexCharts !== 'undefined') {
+                const chart = new ApexCharts(document.getElementById("column-chart"), options);
+                chart.render();
+            }
+        });
+    </script>
+
+
 </x-layout>

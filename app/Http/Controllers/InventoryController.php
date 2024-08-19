@@ -87,7 +87,6 @@ class InventoryController extends Controller
      */
     public function update(Request $request, Inventory $inventory)
     {
-        dd($request);
         $request->validate([
             'batch_id' => ['required', 'exists:product_batches,id'],
             'quantity' => ['required', 'integer'],
