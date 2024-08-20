@@ -17,7 +17,7 @@
                     <p><strong>ID:</strong> {{ $sale->id }}</p>
                     <p><strong>User:</strong> {{ $sale->user ? $sale->user->name : 'N/A' }}</p>
                     <p><strong>Total Amount:</strong> ₱{{ number_format($sale->total_amount, 2) }}</p>
-                    <p><strong>Discount:</strong> {{ $sale->discount > 0 ? $sale->discount . '%' : 'No Discount' }}</p>
+                    <p><strong>Discount:</strong> {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}</p>
                     <p><strong>Transaction Key:</strong> {{ $sale->transaction_key }}</p>
                     <p><strong>Sale Time:</strong> {{ $sale->created_at }}</p>
                 </div>
@@ -45,7 +45,7 @@
                                 {{ $sale->user ? $sale->user->name : 'N/A' }}</td>
                             <td class="px-6 py-4">₱{{ number_format($sale->total_amount, 2) }}</td>
                             <td class="px-6 py-4">
-                                {{ $sale->discount > 0 ? $sale->discount . '%' : 'No Discount' }}
+                                {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}
                             </td>
                             <td class="px-6 py-4">{{ $sale->transaction_key }}</td>
                             <td class="px-6 py-4">{{ $sale->created_at->format('F j, Y h:i A') }}</td>

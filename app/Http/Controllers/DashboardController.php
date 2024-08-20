@@ -102,6 +102,7 @@ class DashboardController extends Controller
             if ($inventoryType === 'highest') {
                 $inventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
                     ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                    ->where('quantity', '>', 0)
                     ->groupBy('batch_id')
                     ->orderBy('quantity', 'desc')
                     ->limit(10)
@@ -109,6 +110,7 @@ class DashboardController extends Controller
             } else {
                 $inventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
                     ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                    ->where('quantity', '>', 0)
                     ->groupBy('batch_id')
                     ->orderBy('quantity', 'asc')
                     ->limit(10)
@@ -122,6 +124,15 @@ class DashboardController extends Controller
                     return $batch;
                 });
         });
+
+
+        if ($request->ajax()) {
+            return response()->json([
+                'categories' => $categories,
+                'salesSeries' => $salesSeries,
+                'inventoryBatches' => $inventoryBatches,
+            ]);
+        }
 
         return view('dashboard.index', [
             'productCount' => $productCount,

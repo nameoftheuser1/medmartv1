@@ -13,7 +13,8 @@ class Sale extends Model
 
     protected $fillable = [
         'user_id',
-        'total_amount'
+        'total_amount',
+        'discount_percentage'
     ];
 
     public function user(): BelongsTo

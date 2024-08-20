@@ -41,16 +41,15 @@
     </div>
     <div class="flex flex-col md:flex-row justify-between mb-6 gap-3">
         <div class="card p-4 bg-white shadow rounded mx-auto md:mb-0 md:w-1/2 w-full">
-            <form method="GET" action="{{ e(route('dashboard')) }}">
+            <form id="inventory-form" method="GET" action="{{ e(route('dashboard')) }}">
                 <h2 class="text-xl font-bold mb-2 font-mono">Inventory Level</h2>
-                <select name="inventory-type" onchange="this.form.submit()" class="items-end">
+                <select id="inventory-type-selector" name="inventory-type" class="items-end">
                     <option value="highest" {{ e($currentInventoryType) == 'highest' ? 'selected' : '' }}>Highest
-                        Inventory
-                    </option>
+                        Inventory</option>
                     <option value="lowest" {{ e($currentInventoryType) == 'lowest' ? 'selected' : '' }}>Lowest Inventory
                     </option>
                 </select>
-                <input type="hidden" name="period" value="{{ e($currentPeriod) }}">
+                <input type="hidden" id="period" name="period" value="{{ e($currentPeriod) }}">
             </form>
             <div id="column-chart"></div>
         </div>
@@ -135,5 +134,6 @@
     </script>
 
     <script src="{{ asset('js/inventoryChart.js') }}"></script>
+    <script src="{{ asset('jquery/jquery-3.7.1.min.js') }}"></script>
 
 </x-layout>

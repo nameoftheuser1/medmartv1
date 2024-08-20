@@ -59,7 +59,7 @@ class ProductBatchController extends Controller
         $validatedData = $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
-            'batch_number' => ['required', 'string'],
+            'batch_number' => ['required', 'string', 'unique:product_batches'],
             'expiration_date' => ['required', 'date'],
             'supplier_price' => ['required', 'numeric'],
             'received_date' => ['required', 'date'],
@@ -114,7 +114,7 @@ class ProductBatchController extends Controller
         $request->validate([
             'product_id' => ['required', 'exists:products,id'],
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
-            'batch_number' => ['required', 'max:50'],
+            'batch_number' => ['required', 'string', 'unique:product_batches,batch_number,' . $productBatch->id],
             'expiration_date' => ['required', 'date'],
             'supplier_price' => ['required', 'numeric'],
             'received_date' => ['required', 'date'],

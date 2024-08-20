@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const periodSelector = document.getElementById('period');
     let chart;
 
-    function initChart() {
+    function initChart(salesSeries, categories) {
         const options = {
             chart: {
                 height: "100%",
@@ -77,15 +77,31 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         if (document.getElementById("line-chart") && typeof ApexCharts !== 'undefined') {
+            if (chart) {
+                chart.destroy();
+            }
             chart = new ApexCharts(document.getElementById("line-chart"), options);
             chart.render();
         }
     }
 
-    initChart();
+    initChart(salesSeries, categories);
 
     periodSelector.addEventListener('change', function () {
         const selectedPeriod = this.value;
-        window.location.href = `${dashboardRoute}?period=${selectedPeriod}`;
+
+        $.ajax({
+            url: dashboardRoute,
+            method: 'GET',
+            data: {
+                period: selectedPeriod
+            },
+            success: function (response) {
+                initChart(response.salesSeries, response.categories);
+            },
+            error: function () {
+                alert('An error occurred while fetching the data.');
+            }
+        });
     });
 });

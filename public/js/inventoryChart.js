@@ -83,7 +83,16 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         },
         yaxis: {
-            show: false,
+            show: true,
+            labels: {
+                style: {
+                    fontFamily: "Inter, sans-serif",
+                    cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+                },
+                formatter: function (val) {
+                    return Math.round(val);
+                }
+            }
         },
         fill: {
             opacity: 1,
