@@ -13,7 +13,7 @@
         <h2>Select Product</h2>
 
         <div class="mb-4">
-            <input type="text" id="search-input" placeholder="Search products..." class="input w-full">
+            <input type="text" id="search-input" placeholder="Search products..." class="input w-full m-1">
         </div>
 
         <div class="product-container overflow-y-auto max-h-[1000px] flex flex-wrap">
@@ -30,22 +30,23 @@
                     </div>
                     <p>Available Inventory: {{ $product->total_inventory }}</p>
                     <p>₱{{ $product->price }}</p>
-                    <form action="{{ route('pos.addItem') }}" method="POST" id="add-to-sale-form" class="hidden">
-                        @csrf
-                        <input type="hidden" name="product_id" id="selected-product-id">
-                        <div>
-                            <label for="quantity">Quantity:</label>
-                            <input type="number" name="quantity" id="quantity" class="input">
-                        </div>
-
-                        <div class="flex justify-center mt-4">
-                            <button type="submit" class="btn text-lg">Add to Cart</button>
-                        </div>
-                    </form>
                 </div>
             @endforeach
         </div>
     </div>
+
+    <form action="{{ route('pos.addItem') }}" method="POST" id="add-to-sale-form" class="hidden">
+        @csrf
+        <input type="hidden" name="product_id" id="selected-product-id">
+        <div>
+            <label for="quantity">Quantity:</label>
+            <input type="number" name="quantity" id="quantity" class="input">
+        </div>
+
+        <div class="flex justify-center mt-4">
+            <button type="submit" class="btn text-lg">Add to Cart</button>
+        </div>
+    </form>
 
     <div class="card min-h-96">
         <h2>Cart Items</h2>
@@ -90,12 +91,12 @@
                                 <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">₱{{ $detail['price'] }}</td>
                                 <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">
                                     ₱{{ $detail['quantity'] * $detail['price'] }}</td>
-                                <td class="px-2 sm:px-4 py-2 sm:py-4 flex flex-col sm:flex-row gap-2">
+                                <td class="px-2 sm:px-4 py-2 sm:py-4 flex flex-col sm:flex-row gap-3">
                                     <form action="{{ route('pos.removeItem') }}" method="POST" class="inline">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $detail['product_id'] }}">
                                         <button type="submit"
-                                            class="font-medium text-red-600 dark:text-red-500 hover:underline">Remove</button>
+                                            class="font-medium text-white hover:underline bg-red-700 rounded-lg p-2">Remove</button>
                                     </form>
                                     <form action="{{ route('pos.updateItem') }}" method="POST"
                                         class="inline flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -104,7 +105,7 @@
                                         <input type="number" name="quantity" value="{{ $detail['quantity'] }}"
                                             min="1" class="px-2 py-1 border rounded w-20">
                                         <button type="submit"
-                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Update</button>
+                                            class="font-medium text-white hover:underline bg-green-600 rounded-lg p-2">Update</button>
                                     </form>
                                 </td>
                             </tr>
@@ -117,7 +118,7 @@
                 @csrf
                 <div>
                     <label for="discount_percentage">Discount (%):</label>
-                    <input type="number" name="discount_percentage" id="discount_percentage" class="input w-16"
+                    <input type="number" name="discount_percentage" id="discount_percentage" class="input m-2"
                         value="{{ $discountPercentage }}" min="0" max="100">
                 </div>
                 <div class="flex justify-center mt-4">
