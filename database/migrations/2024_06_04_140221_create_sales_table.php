@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->decimal('total_amount', 10, 2);
-            $table->decimal('discount', 5, 2)->default(0);
+            $table->decimal('discount_percentage', 5, 2)->default(0);
             $table->string('transaction_key', 7)->unique();
             $table->timestamps();
         });
