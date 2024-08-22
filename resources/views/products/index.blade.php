@@ -63,58 +63,90 @@
             @endif
         </div>
 
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table class="w-full text-left rtl:text-right">
-                <thead class="uppercase">
-                    <tr>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6">Product Name</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Generic</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Category</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Description</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6">Price</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($products as $product)
-                        <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
-                            onclick="window.location='{{ route('products.show', $product->id) }}'">
-                            <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $product->id }}</td>
-                            <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
-                                {{ Str::limit($product->product_name, 15) }}
-                            </td>
-                            <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
-                                {{ Str::limit($product->generic_name, 15) }}</td>
-                            <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
-                                {{ Str::limit($product->category, 15) }}</td>
-                            <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
-                                {{ Str::limit($product->product_description, 20) }}
-                            </td>
-                            <td class="px-4 py-4 sm:px-6">₱{{ number_format($product->price, 2) }}</td>
-                            <td class="px-4 py-4 sm:px-6">
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                    <x-tooltip message="Click to view the full details of the product">
-                                        <a href="{{ route('products.show', $product->id) }}"
-                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                            onclick="event.stopPropagation();">View</a>
-                                    </x-tooltip>
-                                    <a href="{{ route('products.edit', $product->id) }}"
-                                        class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                                        onclick="event.stopPropagation();">Edit</a>
-                                    <form action="{{ route('products.destroy', $product) }}" method="POST"
-                                        onsubmit="event.stopPropagation();">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
-                                    </form>
-                                </div>
-                            </td>
+        <div class="relative overflow-x-auto sm:rounded-lg">
+            @if ($products->isEmpty())
+                <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
+            @else
+                <table class="w-full text-left rtl:text-right">
+                    <thead class="uppercase">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6">Product Name</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Generic</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Category</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Description</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6">Price</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($products as $product)
+                            <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
+                                onclick="window.location='{{ route('products.show', $product->id) }}'">
+                                <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $product->id }}</td>
+                                <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
+                                    {{ Str::limit($product->product_name, 15) }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
+                                    {{ Str::limit($product->generic_name, 15) }}</td>
+                                <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
+                                    {{ Str::limit($product->category, 15) }}</td>
+                                <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
+                                    {{ Str::limit($product->product_description, 20) }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 flex">
+                                    ₱{{ number_format($product->price, 2) }}
+
+                                    @if (!is_null($product->old_price))
+                                        @if ($product->old_price < $product->price)
+                                            <x-tooltip message="₱{{ number_format($product->old_price, 2) }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                    class="size-6 text-red-500 inline">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+                                                </svg>
+                                            </x-tooltip>
+                                        @elseif($product->old_price > $product->price)
+                                            <x-tooltip message="₱{{ number_format($product->old_price, 2) }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                    class="size-6 text-green-500 inline">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
+                                                </svg>
+                                            </x-tooltip>
+                                        @endif
+                                    @endif
+
+                                </td>
+
+
+
+                                <td class="px-4 py-4 sm:px-6">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                        <x-tooltip message="Click to view the full details of the product">
+                                            <a href="{{ route('products.show', $product->id) }}"
+                                                class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                                onclick="event.stopPropagation();">View</a>
+                                        </x-tooltip>
+                                        <a href="{{ route('products.edit', $product->id) }}"
+                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                                            onclick="event.stopPropagation();">Edit</a>
+                                        <form action="{{ route('products.destroy', $product) }}" method="POST"
+                                            onsubmit="event.stopPropagation();">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
         <div class="mt-4">
             {{ $products->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}

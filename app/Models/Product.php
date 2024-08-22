@@ -15,8 +15,20 @@ class Product extends Model
         'generic_name',
         'category',
         'product_description',
-        'price'
+        'price',
+        'old_price'
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($product) {
+            if ($product->isDirty('price')) {
+                $product->old_price = $product->getOriginal('price');
+            }
+        });
+    }
 
     public function productBatches(): HasMany
     {

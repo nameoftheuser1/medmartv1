@@ -84,7 +84,7 @@ class ProductController extends Controller
     {
         $validatedData = $request->validate([
             'product_name' => ['required', 'max:100'],
-            'generic_name' => ['max:100'],
+            'generic_name' => ['nullable', 'max:100'],
             'category' => ['required'],
             'product_description' => ['required'],
             'price' => ['required', 'numeric'],

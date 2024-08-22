@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('category');
             $table->text('product_description');
             $table->decimal('price', 10, 2);
+            $table->decimal('old_price', 10, 2)->nullable();
             $table->timestamps();
         });
     }

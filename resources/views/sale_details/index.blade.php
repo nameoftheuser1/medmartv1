@@ -20,32 +20,37 @@
         </div>
 
         <div class="relative overflow-x-auto sm:overflow-x-visible sm:rounded-lg">
-            <table class="w-full text-left rtl:text-right">
-                <thead class="uppercase">
-                    <tr>
-                        <th scope="col" class="px-2 py-3 sm:px-6">ID</th>
-                        <th scope="col" class="px-2 py-3 sm:px-6">Sale ID</th>
-                        <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Product</th>
-                        <th scope="col" class="px-2 py-3 sm:px-6">Quantity Bought</th>
-                        <th scope="col" class="px-2 py-3 sm:px-6">Price</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach ($saleDetails as $saleDetail)
-                        <tr
-                            class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
-                            <td class="px-2 py-4 sm:px-6">{{ $saleDetail->id }}</td>
-                            <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
-                                {{ $saleDetail->sale_id }}</td>
-                            <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">{{ $saleDetail->product->product_name }}
-                            </td>
-                            <td class="px-2 py-4 sm:px-6">{{ $saleDetail->quantity }}</td>
-                            <td class="px-2 py-4 sm:px-6">₱{{ number_format($saleDetail->price, 2) }}</td>
+            @if ($saleDetails->isEmpty())
+                <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
+            @else
+                <table class="w-full text-left rtl:text-right">
+                    <thead class="uppercase">
+                        <tr>
+                            <th scope="col" class="px-2 py-3 sm:px-6">ID</th>
+                            <th scope="col" class="px-2 py-3 sm:px-6">Sale ID</th>
+                            <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Product</th>
+                            <th scope="col" class="px-2 py-3 sm:px-6">Quantity Bought</th>
+                            <th scope="col" class="px-2 py-3 sm:px-6">Price</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($saleDetails as $saleDetail)
+                            <tr
+                                class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
+                                <td class="px-2 py-4 sm:px-6">{{ $saleDetail->id }}</td>
+                                <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
+                                    {{ $saleDetail->sale_id }}</td>
+                                <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">
+                                    {{ $saleDetail->product->product_name }}
+                                </td>
+                                <td class="px-2 py-4 sm:px-6">{{ $saleDetail->quantity }}</td>
+                                <td class="px-2 py-4 sm:px-6">₱{{ number_format($saleDetail->price, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
 
         <div class="mt-4">

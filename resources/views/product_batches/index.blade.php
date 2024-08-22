@@ -22,60 +22,64 @@
             @endif
         </div>
 
-        <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table class="w-full text-left rtl:text-right">
-                <thead class="uppercase">
-                    <tr>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Product</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6">Batch Number</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Expiration Date</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Supplier Price</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Received Date</th>
-                        <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach ($productBatches as $productBatch)
-                        <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
-                            onclick="window.location='{{ route('product_batches.show', $productBatch->id) }}'">
-                            <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $productBatch->id }}</td>
-                            <td
-                                class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
-                                {{ $productBatch->product->product_name }}
-                            </td>
-                            <td class="px-4 py-4 sm:px-6">
-                                {{ $productBatch->batch_number }}
-                            </td>
-                            <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                {{ $productBatch->expiration_date->format('Y-m-d') }}
-                            </td>
-                            <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                ₱{{ number_format($productBatch->supplier_price, 2) }}
-                            </td>
-                            <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
-                                {{ $productBatch->received_date->format('Y-m-d') }}
-                            </td>
-                            <td class="px-4 py-4 sm:px-6">
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                    <a href="{{ route('product_batches.show', $productBatch->id) }}"
-                                        class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
-                                    <a href="{{ route('product_batches.edit', $productBatch->id) }}"
-                                        class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                    <form action="{{ route('product_batches.destroy', $productBatch) }}"
-                                        method="post">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
-                                    </form>
-                                </div>
-                            </td>
+        <div class="relative overflow-x-auto sm:rounded-lg">
+            @if ($productBatches->isEmpty())
+                <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
+            @else
+                <table class="w-full text-left rtl:text-right">
+                    <thead class="uppercase">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Product</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6">Batch Number</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Expiration Date</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Supplier Price</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Received Date</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+
+                    <tbody>
+                        @foreach ($productBatches as $productBatch)
+                            <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
+                                onclick="window.location='{{ route('product_batches.show', $productBatch->id) }}'">
+                                <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $productBatch->id }}</td>
+                                <td
+                                    class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
+                                    {{ $productBatch->product->product_name }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6">
+                                    {{ $productBatch->batch_number }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
+                                    {{ $productBatch->expiration_date->format('Y-m-d') }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
+                                    ₱{{ number_format($productBatch->supplier_price, 2) }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
+                                    {{ $productBatch->received_date->format('Y-m-d') }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                        <a href="{{ route('product_batches.show', $productBatch->id) }}"
+                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                                        <a href="{{ route('product_batches.edit', $productBatch->id) }}"
+                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                                        <form action="{{ route('product_batches.destroy', $productBatch) }}"
+                                            method="post">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
         </div>
         <div class="mt-4">
             {{ $productBatches->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}

@@ -24,51 +24,55 @@
         </div>
 
         <div class="overflow-x-auto sm:overflow-x-visible">
-            <div class="w-full sm:max-w-full">
-                <table class="w-full text-left rtl:text-right">
-                    <thead class="uppercase">
-                        <tr>
-                            <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">ID</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6">Supplier Name</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Contact Info</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($suppliers as $supplier)
-                            <tr
-                                class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
-                                <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">{{ $supplier->id }}</td>
-                                <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap ">
-                                    {{ Str::limit($supplier->supplier_name, 15) }}
-                                </td>
-                                <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">
-                                    {{ Str::words($supplier->contact_info, 3) }}</td>
-                                <td class="px-2 py-4 sm:px-6">
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                        <x-tooltip message="Click to view the full details of the supplier">
-                                            <a href="{{ route('suppliers.show', $supplier) }}"
-                                                class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
-                                        </x-tooltip>
-                                        <a href="{{ route('suppliers.edit', $supplier) }}"
-                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                        <form action="{{ route('suppliers.destroy', $supplier) }}" method="post">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
-                                        </form>
-                                    </div>
-                                </td>
+            @if ($suppliers->isEmpty())
+                <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
+            @else
+                <div class="w-full sm:max-w-full">
+                    <table class="w-full text-left rtl:text-right">
+                        <thead class="uppercase">
+                            <tr>
+                                <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">ID</th>
+                                <th scope="col" class="px-2 py-3 sm:px-6">Supplier Name</th>
+                                <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Contact Info</th>
+                                <th scope="col" class="px-2 py-3 sm:px-6">Action</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach ($suppliers as $supplier)
+                                <tr
+                                    class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
+                                    <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">{{ $supplier->id }}</td>
+                                    <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap ">
+                                        {{ Str::limit($supplier->supplier_name, 15) }}
+                                    </td>
+                                    <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">
+                                        {{ Str::words($supplier->contact_info, 3) }}</td>
+                                    <td class="px-2 py-4 sm:px-6">
+                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                            <x-tooltip message="Click to view the full details of the supplier">
+                                                <a href="{{ route('suppliers.show', $supplier) }}"
+                                                    class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                                            </x-tooltip>
+                                            <a href="{{ route('suppliers.edit', $supplier) }}"
+                                                class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                                            <form action="{{ route('suppliers.destroy', $supplier) }}" method="post">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+            @endif
         </div>
+    </div>
 
-        <div class="mt-4">
-            {{ $suppliers->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
-        </div>
+    <div class="mt-4">
+        {{ $suppliers->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
+    </div>
     </div>
 </x-layout>

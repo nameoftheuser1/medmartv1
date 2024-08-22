@@ -16,7 +16,7 @@ body {
         @apply bg-slate-500 p-4 max-w-full mx-auto flex items-center justify-between;
     }
     .card {
-        @apply block p-6 bg-white border border-gray-200 rounded-lg shadow ;
+        @apply block p-6 bg-white border border-gray-200 ;
     }
     .card-title{
         @apply mb-2 text-2xl font-bold tracking-tight text-gray-900;

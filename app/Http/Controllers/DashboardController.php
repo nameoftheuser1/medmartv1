@@ -80,6 +80,10 @@ class DashboardController extends Controller
             return Supplier::count();
         });
 
+        $saleCount = cache()->remember('sale_count', now()->addMinutes(30), function(){
+            return Sale::count();
+        });
+
         $thresholdDate = Carbon::now()->addDays(30);
 
         $expiringBatches = cache()->remember('expiring_batches', now()->addMinutes(10), function () use ($thresholdDate) {
@@ -137,6 +141,7 @@ class DashboardController extends Controller
         return view('dashboard.index', [
             'productCount' => $productCount,
             'supplierCount' => $supplierCount,
+            'saleCount' => $saleCount,
             'expiringBatches' => $expiringBatches,
             'totalSalesToday' => $totalSalesToday,
             'categories' => $categories,
