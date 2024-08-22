@@ -3,9 +3,50 @@
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
             <h1 class="text-2xl font-bold mb-2 sm:mb-0">Product List</h1>
             <p class="mb-2 sm:mb-0">@lang('message.total') Products: {{ $products->total() }}</p>
-            <form method="GET" action="{{ route('products.index') }}" class="flex w-full sm:w-auto">
+            <form method="GET" action="{{ route('products.index') }}" class="flex flex-col sm:flex-row w-full sm:w-auto">
                 <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}"
-                    class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2 sm:mb-0">
+
+                <select name="category"
+                    class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ml-2 mb-2 sm:mb-0">
+                    <option value="">All Categories</option>
+                    <option value="Medications" {{ request('category') == 'Medications' ? 'selected' : '' }}>Medications
+                    </option>
+                    <option value="Supplements" {{ request('category') == 'Supplements' ? 'selected' : '' }}>Supplements
+                    </option>
+                    <option value="Personal Care" {{ request('category') == 'Personal Care' ? 'selected' : '' }}>
+                        Personal Care</option>
+                    <option value="First Aid" {{ request('category') == 'First Aid' ? 'selected' : '' }}>First Aid
+                    </option>
+                    <option value="Medical Equipment"
+                        {{ request('category') == 'Medical Equipment' ? 'selected' : '' }}>Medical Equipment</option>
+                    <option value="Baby Products" {{ request('category') == 'Baby Products' ? 'selected' : '' }}>Baby
+                        Products</option>
+                    <option value="Health Devices" {{ request('category') == 'Health Devices' ? 'selected' : '' }}>
+                        Health Devices</option>
+                    <option value="Homeopathic Remedies"
+                        {{ request('category') == 'Homeopathic Remedies' ? 'selected' : '' }}>Homeopathic Remedies
+                    </option>
+                    <option value="Herbal Products" {{ request('category') == 'Herbal Products' ? 'selected' : '' }}>
+                        Herbal Products</option>
+                    <option value="Skin Care" {{ request('category') == 'Skin Care' ? 'selected' : '' }}>Skin Care
+                    </option>
+                    <option value="Hair Care" {{ request('category') == 'Hair Care' ? 'selected' : '' }}>Hair Care
+                    </option>
+                    <option value="Oral Care" {{ request('category') == 'Oral Care' ? 'selected' : '' }}>Oral Care
+                    </option>
+                    <option value="Sexual Health" {{ request('category') == 'Sexual Health' ? 'selected' : '' }}>Sexual
+                        Health</option>
+                    <option value="Eye Care" {{ request('category') == 'Eye Care' ? 'selected' : '' }}>Eye Care
+                    </option>
+                    <option value="Ear Care" {{ request('category') == 'Ear Care' ? 'selected' : '' }}>Ear Care
+                    </option>
+                    <option value="Nutrition" {{ request('category') == 'Nutrition' ? 'selected' : '' }}>Nutrition
+                    </option>
+                    <option value="Wellness" {{ request('category') == 'Wellness' ? 'selected' : '' }}>Wellness
+                    </option>
+                </select>
+
                 <button type="submit"
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
@@ -37,7 +78,7 @@
                 </thead>
                 <tbody>
                     @foreach ($products as $product)
-                        <tr class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700 hover:bg-green-400 cursor-pointer transition duration-150 ease-in-out"
+                        <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
                             onclick="window.location='{{ route('products.show', $product->id) }}'">
                             <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $product->id }}</td>
                             <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">

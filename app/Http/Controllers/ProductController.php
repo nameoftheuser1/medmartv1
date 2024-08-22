@@ -12,19 +12,28 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $category = $request->input('category');
+
         $products = Product::query()
-            ->where('product_name', 'like', "%{$search}%")
-            ->orWhere('generic_name', 'like', "%{$search}%")
-            ->orWhere('category', 'like', "%{$search}%")
-            ->orWhere('product_description', 'like', "%{$search}%")
+            ->when($search, function ($query, $search) {
+                $query->where('product_name', 'like', "%{$search}%")
+                    ->orWhere('generic_name', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('product_description', 'like', "%{$search}%");
+            })
+            ->when($category, function ($query, $category) {
+                $query->where('category', $category);
+            })
             ->latest()
             ->paginate(10);
 
         return view('products.index', ['products' => $products]);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -65,7 +74,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        return view('products.edit', [ 'product' => $product]);
+        return view('products.edit', ['product' => $product]);
     }
 
     /**

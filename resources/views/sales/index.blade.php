@@ -17,7 +17,8 @@
                     <p><strong>ID:</strong> {{ $sale->id }}</p>
                     <p><strong>User:</strong> {{ $sale->user ? $sale->user->name : 'N/A' }}</p>
                     <p><strong>Total Amount:</strong> ₱{{ number_format($sale->total_amount, 2) }}</p>
-                    <p><strong>Discount:</strong> {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}</p>
+                    <p><strong>Discount:</strong>
+                        {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}</p>
                     <p><strong>Transaction Key:</strong> {{ $sale->transaction_key }}</p>
                     <p><strong>Sale Time:</strong> {{ $sale->created_at }}</p>
                 </div>
@@ -38,8 +39,8 @@
                 </thead>
                 <tbody>
                     @foreach ($sales as $sale)
-                        <tr
-                            class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
+                        <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
+                            onclick="window.location='{{ route('sales.show', $sale->id) }}'">
                             <td class="px-6 py-4">{{ $sale->id }}</td>
                             <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 {{ $sale->user ? $sale->user->name : 'N/A' }}</td>

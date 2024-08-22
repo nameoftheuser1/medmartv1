@@ -19,7 +19,7 @@ class SaleDetail extends Model
 
     public function sales(): BelongsTo
     {
-        return $this->belongsTo(Sale::class, 'sales_id');
+        return $this->belongsTo(Sale::class, 'sale_id');
     }
 
     public function product(): BelongsTo

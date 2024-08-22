@@ -22,8 +22,8 @@ class Sale extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function salesDetails(): HasMany
+    public function saleDetails(): HasMany
     {
-        return $this->hasMany(SaleDetail::class, 'sales_id');
+        return $this->hasMany(SaleDetail::class, 'sale_id');
     }
 }
