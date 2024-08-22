@@ -16,7 +16,8 @@
                 <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
             @else
                 @foreach ($sales as $sale)
-                    <div class="bg-white shadow-md rounded-lg mb-4 p-4">
+                    <a href="{{ route('sales.show', $sale->id) }}"
+                        class="block bg-white shadow-md rounded-lg mb-4 p-4 hover:bg-gray-100 transition duration-150 ease-in-out">
                         <p><strong>ID:</strong> {{ $sale->id }}</p>
                         <p><strong>User:</strong> {{ $sale->user ? $sale->user->name : 'N/A' }}</p>
                         <p><strong>Total Amount:</strong> ₱{{ number_format($sale->total_amount, 2) }}</p>
@@ -24,7 +25,7 @@
                             {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}</p>
                         <p><strong>Transaction Key:</strong> {{ $sale->transaction_key }}</p>
                         <p><strong>Sale Time:</strong> {{ $sale->created_at }}</p>
-                    </div>
+                    </a>
                 @endforeach
             @endif
         </div>

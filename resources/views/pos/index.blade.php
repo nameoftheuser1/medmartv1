@@ -9,7 +9,7 @@
         <p class="text-red-500">{{ session('error') }}</p>
     @endif
 
-    <div class="card mb-3">
+    <div class="card mb-3 rounded-lg">
         <h2>Select Product</h2>
 
         <div class="mb-4">
@@ -18,8 +18,9 @@
 
         <div class="product-container overflow-y-auto max-h-[1000px] flex flex-wrap">
             @foreach ($products as $product)
-                <div class="product-card card sm:w-60 w-full border p-4 m-2 cursor-pointer" data-id="{{ $product->id }}"
-                    data-name="{{ $product->product_name }}" data-price="{{ $product->price }}">
+                <div class="product-card card rounded-lg sm:w-60 w-full border p-4 m-2 cursor-pointer bg-slate-200"
+                    data-id="{{ $product->id }}" data-name="{{ $product->product_name }}"
+                    data-price="{{ $product->price }}">
                     <div class="divide-y grid grid-cols-1 gap-2">
                         <h3 class="font-bold">{{ $product->product_name }}</h3>
                         @if ($product->generic_name)
@@ -28,28 +29,34 @@
                             <p class="text-gray-500 italic">No generic name</p>
                         @endif
                     </div>
-                    <p>Available Inventory: {{ $product->total_inventory }}</p>
-                    <p>₱{{ $product->price }}</p>
+                    <div class="flex justify-between mb-3">
+                        <p>Available Inventory:</p>
+                        <p class="text-blue-500">{{ $product->total_inventory }}</p>
+                    </div>
+                    <p class="text-center">₱{{ $product->price }}</p>
                 </div>
             @endforeach
         </div>
     </div>
 
-    <form action="{{ route('pos.addItem') }}" method="POST" id="add-to-sale-form" class="hidden">
-        @csrf
-        <input type="hidden" name="product_id" id="selected-product-id">
-        <div>
-            <label for="quantity">Quantity:</label>
-            <input type="number" name="quantity" id="quantity" class="input">
-        </div>
 
-        <div class="flex justify-center mt-4">
-            <button type="submit" class="btn text-lg">Add to Cart</button>
-        </div>
-    </form>
 
-    <div class="card min-h-96">
+    <div class="card rounded-lg min-h-96">
         <h2>Cart Items</h2>
+
+        <form action="{{ route('pos.addItem') }}" method="POST" id="add-to-sale-form" class="hidden w-1/2 mx-auto">
+            @csrf
+            <input type="hidden" name="product_id" id="selected-product-id">
+            <div>
+                <label for="quantity">Quantity:</label>
+                <input type="number" name="quantity" id="quantity" class="input">
+            </div>
+
+            <div class="flex justify-center mt-4">
+                <button type="submit" class="btn text-lg">Add to Cart</button>
+            </div>
+        </form>
+
         @if (!empty($saleDetails))
             @php
                 $totalPrice = 0;
