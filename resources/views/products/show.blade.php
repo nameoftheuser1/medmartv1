@@ -1,7 +1,7 @@
 <x-layout>
     <div class="card">
         <div>
-            <div class="card-title">{{ $product->product_name }}</div>
+            <div class="card-title text-center m-5">{{ $product->product_name }}</div>
             <p>{{ $product->generic_name ? $product->generic_name : 'Generic Name is not available' }}</p>
         </div>
 

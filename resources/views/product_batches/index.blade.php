@@ -38,8 +38,8 @@
 
                 <tbody>
                     @foreach ($productBatches as $productBatch)
-                        <tr
-                            class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
+                        <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
+                            onclick="window.location='{{ route('product_batches.show', $productBatch->id) }}'">
                             <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $productBatch->id }}</td>
                             <td
                                 class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">

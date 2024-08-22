@@ -49,7 +49,6 @@
                     <option value="Ear Care" {{ $product->category == 'Ear Care' ? 'selected' : '' }}>Ear Care</option>
                     <option value="Nutrition" {{ $product->category == 'Nutrition' ? 'selected' : '' }}>Nutrition</option>
                     <option value="Wellness" {{ $product->category == 'Wellness' ? 'selected' : '' }}>Wellness</option>
-                    <!-- Add more categories as needed -->
                 </select>
                 @error('category')
                     <p class="error">{{ $message }}</p>
