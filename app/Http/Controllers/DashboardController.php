@@ -42,14 +42,12 @@ class DashboardController extends Controller
                 $displayFormat = 'D';
         }
 
-        $salesData = cache()->remember("sales_data_{$period}", now()->addMinutes(10), function () use ($groupBy, $startDate, $endDate) {
-            return Sale::select(DB::raw("$groupBy as date"), DB::raw('SUM(total_amount) as total'))
-                ->whereBetween('created_at', [$startDate, $endDate])
-                ->groupBy('date')
-                ->orderBy('date', 'asc')
-                ->get()
-                ->keyBy('date');
-        });
+        $salesData = Sale::select(DB::raw("$groupBy as date"), DB::raw('SUM(total_amount) as total'))
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->keyBy('date');
 
         $categories = [];
         $salesSeries = [];
@@ -72,63 +70,47 @@ class DashboardController extends Controller
             }
         }
 
-        $productCount = cache()->remember('product_count', now()->addMinutes(30), function () {
-            return Product::count();
-        });
-
-        $supplierCount = cache()->remember('supplier_count', now()->addMinutes(30), function () {
-            return Supplier::count();
-        });
-
-        $saleCount = cache()->remember('sale_count', now()->addMinutes(30), function(){
-            return Sale::count();
-        });
+        $productCount = Product::count();
+        $supplierCount = Supplier::count();
+        $saleCount = Sale::count();
 
         $thresholdDate = Carbon::now()->addDays(30);
 
-        $expiringBatches = cache()->remember('expiring_batches', now()->addMinutes(10), function () use ($thresholdDate) {
-            return ProductBatch::with(['product', 'inventories'])
-                ->where('expiration_date', '<=', $thresholdDate)
-                ->whereHas('inventories', function ($query) {
-                    $query->where('quantity', '>', 0);
-                })
-                ->orderBy('expiration_date', 'asc')
-                ->paginate(5);
-        });
+        $expiringBatches = ProductBatch::with(['product', 'inventories'])
+            ->where('expiration_date', '<=', $thresholdDate)
+            ->whereHas('inventories', function ($query) {
+                $query->where('quantity', '>', 0);
+            })
+            ->orderBy('expiration_date', 'asc')
+            ->paginate(5);
 
-        $totalSalesToday = cache()->remember('total_sales_today', now()->addMinutes(5), function () {
-            return Sale::whereDate('created_at', Carbon::today())
-                ->sum('total_amount');
-        });
+        $totalSalesToday = Sale::whereDate('created_at', Carbon::today())
+            ->sum('total_amount');
 
-        $cacheKey = "inventory_batches_{$inventoryType}";
-        $inventoryBatches = cache()->remember($cacheKey, now()->addMinutes(10), function () use ($inventoryType) {
-            if ($inventoryType === 'highest') {
-                $inventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
-                    ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
-                    ->where('quantity', '>', 0)
-                    ->groupBy('batch_id')
-                    ->orderBy('quantity', 'desc')
-                    ->limit(10)
-                    ->get();
-            } else {
-                $inventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
-                    ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
-                    ->where('quantity', '>', 0)
-                    ->groupBy('batch_id')
-                    ->orderBy('quantity', 'asc')
-                    ->limit(10)
-                    ->get();
-            }
+        if ($inventoryType === 'highest') {
+            $inventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
+                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                ->where('quantity', '>', 0)
+                ->groupBy('batch_id')
+                ->orderBy('quantity', 'desc')
+                ->limit(10)
+                ->get();
+        } else {
+            $inventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
+                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+                ->where('quantity', '>', 0)
+                ->groupBy('batch_id')
+                ->orderBy('quantity', 'asc')
+                ->limit(10)
+                ->get();
+        }
 
-            return ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
-                ->get()
-                ->map(function ($batch) use ($inventories) {
-                    $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
-                    return $batch;
-                });
-        });
-
+        $inventoryBatches = ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
+            ->get()
+            ->map(function ($batch) use ($inventories) {
+                $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
+                return $batch;
+            });
 
         if ($request->ajax()) {
             return response()->json([
