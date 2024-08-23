@@ -17,6 +17,7 @@ class AuthController extends Controller
             'name' => ['required', 'max:50', 'regex:/^[a-zA-Z\s]+$/'],
             'email' => ['required', 'max:255', 'email', 'unique:users'],
             'password' => ['required', 'min:8', 'confirmed'],
+            'captcha' => ['required', 'captcha']
         ]);
 
         //register

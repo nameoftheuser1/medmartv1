@@ -43,3 +43,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('locale/{lang}', [LocaleController::class, 'setLocale']);
+Route::get('/refresh-captcha', function () {
+    return response()->json(['captcha'=> captcha_img()]);
+});
