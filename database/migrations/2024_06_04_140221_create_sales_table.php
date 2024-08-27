@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -18,18 +18,30 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->decimal('total_amount', 10, 2);
             $table->decimal('discount_percentage', 5, 2)->default(0);
-            $table->string('transaction_key', 7)->unique();
+            $table->string('transaction_key', 7)->unique()->nullable();
             $table->timestamps();
         });
 
-        DB::statement('
-            CREATE TRIGGER before_insert_sales
-            BEFORE INSERT ON sales
-            FOR EACH ROW
-            BEGIN
-                SET NEW.transaction_key = (SELECT UPPER(SUBSTRING(MD5(RAND()), 1, 7)));
-            END
-        ');
+        if (DB::getDriverName() === 'mysql') {
+            DB::unprepared('
+                CREATE TRIGGER before_insert_sales
+                BEFORE INSERT ON sales
+                FOR EACH ROW
+                BEGIN
+                    IF NEW.transaction_key IS NULL THEN
+                        SET NEW.transaction_key = UPPER(SUBSTRING(MD5(RAND()), 1, 7));
+                    END IF;
+                END
+            ');
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::unprepared('
+                CREATE TRIGGER set_transaction_key_insert AFTER INSERT ON sales
+                BEGIN
+                    UPDATE sales SET transaction_key = substr(hex(randomblob(4)), 1, 7)
+                    WHERE id = NEW.id AND transaction_key IS NULL;
+                END
+            ');
+        }
     }
 
     /**
@@ -37,12 +49,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('sales', function (Blueprint $table) {
-            $table->dropColumn('transaction_key');
-        });
+        if (DB::getDriverName() === 'mysql') {
+            DB::unprepared('DROP TRIGGER IF EXISTS before_insert_sales');
+        } elseif (DB::getDriverName() === 'sqlite') {
+            DB::unprepared('DROP TRIGGER IF EXISTS set_transaction_key_insert');
+        }
 
-        DB::statement('DROP TRIGGER IF EXISTS before_insert_sale_details');
-
-        Schema::dropIfExists('sale_details');
+        Schema::dropIfExists('sales');
     }
 };
