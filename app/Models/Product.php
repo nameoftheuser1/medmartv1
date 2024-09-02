@@ -15,6 +15,7 @@ class Product extends Model
         'generic_name',
         'category',
         'product_description',
+        'barcode',
         'price',
         'old_price'
     ];

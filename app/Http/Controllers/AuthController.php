@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
@@ -16,7 +17,7 @@ class AuthController extends Controller
         $fields = $request->validate([
             'name' => ['required', 'max:50', 'regex:/^[a-zA-Z\s]+$/'],
             'email' => ['required', 'max:255', 'email', 'unique:users'],
-            'password' => ['required', 'min:8', 'confirmed'],
+            'password' => ['required', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/'],
             'captcha' => ['required', 'captcha']
         ]);
 
@@ -40,6 +41,11 @@ class AuthController extends Controller
         if ($request->email !== 'admin') {
             $rules['email'][] = 'email';
         }
+
+        if (RateLimiter::tooManyAttempts('login:' . $request->ip(), 5)) {
+            return back()->withErrors(['email' => 'Too many login attempts. Please try again later.']);
+        }
+        RateLimiter::hit('login:' . $request->ip());
 
         $fields = $request->validate($rules);
 

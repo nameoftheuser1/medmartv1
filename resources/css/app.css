@@ -3,17 +3,17 @@
 @tailwind utilities;
 
 body {
-    @apply bg-gray-200 text-base font-sans p-0 m-0 text-slate-700;
+    @apply p-0 m-0 font-sans text-base bg-gray-200 text-slate-700;
 }
 @layer components {
     .sidebar-text{
         @apply flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white;
     }
     h1 {
-        @apply font-bold text-stone-700 text-4xl font-mono;
+        @apply font-mono text-4xl font-bold text-stone-700;
     }
     nav {
-        @apply bg-slate-500 p-4 max-w-full mx-auto flex items-center justify-between;
+        @apply flex items-center justify-between max-w-full p-4 mx-auto bg-slate-500;
     }
     .card {
         @apply block p-6 bg-white border border-gray-200 ;
@@ -25,12 +25,24 @@ body {
         @apply font-normal text-gray-700 dark:text-gray-400;
     }
     .input {
-        @apply block w-full p-2 rounded-md ring-1 ring-gray-400 focus:ring-slate-900 focus:ring-2 outline-0 border-0 mt-1;
+        @apply block w-full p-2 mt-1 border-0 rounded-md ring-1 ring-gray-400 focus:ring-slate-900 focus:ring-2 outline-0;
     }
     .btn {
         @apply focus:outline-none text-white  bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 font-mono text-2xl;
     }
     .error {
-        @apply text-red-500 text-sm;
+        @apply text-sm text-red-500;
     }
+}
+
+@layer utilities {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+   /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+  }
 }

@@ -9,41 +9,33 @@
         <p class="text-red-500">{{ session('error') }}</p>
     @endif
 
-    <div class="card mb-3 rounded-lg">
+    <div class="mb-3 rounded-lg card">
         <h2>Select Product</h2>
 
         <div class="mb-4">
-            <input type="text" id="search-input" placeholder="Search products..." class="input w-full m-1">
+            <input type="text" id="search-input" placeholder="Search products..." class="w-full m-1 input">
         </div>
 
         <div class="product-container overflow-y-auto max-h-[1000px] flex flex-wrap">
             @foreach ($products as $product)
-                <div class="product-card card rounded-lg sm:w-60 w-full border p-4 m-2 cursor-pointer bg-slate-200"
+                <div class="w-full p-4 m-2 border rounded-lg cursor-pointer product-card card sm:w-60 bg-slate-100"
                     data-id="{{ $product->id }}" data-name="{{ $product->product_name }}"
                     data-price="{{ $product->price }}">
-                    <div class="divide-y grid grid-cols-1 gap-2">
-                        <h3 class="font-bold">{{ $product->product_name }}</h3>
+                    <div class="grid grid-cols-1 gap-2 divide-y">
+                        <h3 class="text-xl font-bold">{{ strtoupper($product->product_name) }}</h3>
                         @if ($product->generic_name)
-                            <p>Generic Name: {{ $product->generic_name }}</p>
+                            <p class="text-sm text-gray-500">{{ $product->generic_name }}</p>
                         @else
-                            <p class="text-gray-500 italic">No generic name</p>
+                            <p class="italic text-gray-500">No generic name</p>
                         @endif
                     </div>
                     <div class="flex justify-between mb-3">
-                        <p>Available Inventory:</p>
-                        <p class="text-blue-500">{{ $product->total_inventory }}</p>
+                        <p class="text-sm">Available Inventory: {{ $product->total_inventory }}</p>
                     </div>
-                    <p class="text-center">₱{{ $product->price }}</p>
+                    <p class="text-center">₱{{ number_format($product->price, 2) }}</p>
                 </div>
             @endforeach
         </div>
-    </div>
-
-
-
-    <div class="card rounded-lg min-h-96">
-        <h2>Cart Items</h2>
-
         <form action="{{ route('pos.addItem') }}" method="POST" id="add-to-sale-form" class="hidden w-1/2 mx-auto">
             @csrf
             <input type="hidden" name="product_id" id="selected-product-id">
@@ -53,10 +45,13 @@
             </div>
 
             <div class="flex justify-center mt-4">
-                <button type="submit" class="btn text-lg">Add to Cart</button>
+                <button type="submit" class="text-lg btn">Add to Cart</button>
             </div>
         </form>
+    </div>
 
+    <div class="rounded-lg card min-h-96">
+        <h2>Cart Items</h2>
         @if (!empty($saleDetails))
             @php
                 $totalPrice = 0;
@@ -68,11 +63,11 @@
                             <th scope="col" class="px-2 py-3">Product Details</th>
                         </tr>
                         <tr class="hidden sm:table-row">
-                            <th scope="col" class="px-2 sm:px-4 py-3">Product</th>
-                            <th scope="col" class="px-2 sm:px-4 py-3">Qty</th>
-                            <th scope="col" class="px-2 sm:px-4 py-3">Price</th>
-                            <th scope="col" class="px-2 sm:px-4 py-3">Total</th>
-                            <th scope="col" class="px-2 sm:px-4 py-3">Actions</th>
+                            <th scope="col" class="px-2 py-3 sm:px-4">Product</th>
+                            <th scope="col" class="px-2 py-3 sm:px-4">Qty</th>
+                            <th scope="col" class="px-2 py-3 sm:px-4">Price</th>
+                            <th scope="col" class="px-2 py-3 sm:px-4">Total</th>
+                            <th scope="col" class="px-2 py-3 sm:px-4">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -82,37 +77,51 @@
                                 $totalPrice += $detail['quantity'] * $detail['price'];
                             @endphp
                             <tr
-                                class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700 block sm:table-row mb-4 sm:mb-0">
-                                <td class="px-2 sm:px-4 py-2 sm:py-4 flex flex-col sm:table-cell">
+                                class="block mb-4 even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700 sm:table-row sm:mb-0">
+                                <td class="flex flex-col px-2 py-2 sm:px-4 sm:py-4 sm:table-cell">
                                     <span class="font-bold sm:hidden">Product:</span>
                                     {{ $product->product_name }}
-                                    <div class="sm:hidden mt-2">
+                                    <div class="mt-2 sm:hidden">
                                         <span class="font-bold">Quantity:</span> {{ $detail['quantity'] }}<br>
-                                        <span class="font-bold">Price:</span> ₱{{ $detail['price'] }}<br>
+                                        <span class="font-bold">Price:</span>
+                                        ₱{{ number_format($detail['price']) }}<br>
                                         <span class="font-bold">Total:</span>
                                         ₱{{ $detail['quantity'] * $detail['price'] }}
                                     </div>
                                 </td>
-                                <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">{{ $detail['quantity'] }}
+                                <td class="hidden px-2 py-2 sm:px-4 sm:py-4 sm:table-cell">{{ $detail['quantity'] }}
                                 </td>
-                                <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">₱{{ $detail['price'] }}</td>
-                                <td class="px-2 sm:px-4 py-2 sm:py-4 hidden sm:table-cell">
-                                    ₱{{ $detail['quantity'] * $detail['price'] }}</td>
-                                <td class="px-2 sm:px-4 py-2 sm:py-4 flex flex-col sm:flex-row gap-3">
+                                <td class="hidden px-2 py-2 sm:px-4 sm:py-4 sm:table-cell">
+                                    ₱{{ number_format($detail['price'], 2) }}</td>
+                                <td class="hidden px-2 py-2 sm:px-4 sm:py-4 sm:table-cell">
+                                    ₱{{ number_format($detail['quantity'] * $detail['price'], 2) }}</td>
+                                <td class="flex flex-col gap-3 px-2 py-2 sm:px-4 sm:py-4 sm:flex-row">
                                     <form action="{{ route('pos.removeItem') }}" method="POST" class="inline">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $detail['product_id'] }}">
                                         <button type="submit"
-                                            class="font-medium text-white hover:underline bg-red-700 rounded-lg p-2">Remove</button>
+                                            class="p-2 font-medium text-white bg-red-700 rounded-lg hover:underline"><svg
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                        </button>
                                     </form>
                                     <form action="{{ route('pos.updateItem') }}" method="POST"
-                                        class="inline flex-col sm:flex-row items-start sm:items-center gap-2">
+                                        class="flex-col items-start inline gap-2 sm:flex-row sm:items-center">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $detail['product_id'] }}">
                                         <input type="number" name="quantity" value="{{ $detail['quantity'] }}"
-                                            min="1" class="px-2 py-1 border rounded w-20">
+                                            min="1" class="w-20 px-2 py-1 border rounded">
                                         <button type="submit"
-                                            class="font-medium text-white hover:underline bg-green-600 rounded-lg p-2">Update</button>
+                                            class="p-2 font-medium text-white bg-green-600 rounded-lg hover:underline"><svg
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                stroke-width="1.5" stroke="currentColor" class="size-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                            </svg>
+                                        </button>
                                     </form>
                                 </td>
                             </tr>
@@ -125,23 +134,23 @@
                 @csrf
                 <div>
                     <label for="discount_percentage">Discount (%):</label>
-                    <input type="number" name="discount_percentage" id="discount_percentage" class="input m-2"
+                    <input type="number" name="discount_percentage" id="discount_percentage" class="m-2 input"
                         value="{{ $discountPercentage }}" min="0" max="100">
                 </div>
                 <div class="flex justify-center mt-4">
-                    <button type="submit" class="btn text-lg">Apply Discount</button>
+                    <button type="submit" class="text-lg btn">Apply Discount</button>
                 </div>
             </form>
 
             <div class="mt-4">
-                <h3>Total Price: ₱{{ $totalPrice }}</h3>
+                <h3>Total Price: ₱{{ number_format($totalPrice, 2) }}</h3>
                 <h3>Discount: {{ $discountPercentage }}%</h3>
-                <h3>Final Price: ₱{{ $totalPrice * (1 - $discountPercentage / 100) }}</h3>
+                <h3>Final Price: ₱{{ number_format($totalPrice * (1 - $discountPercentage / 100), 2) }}</h3>
             </div>
 
             <form action="{{ route('pos.checkout') }}" method="POST">
                 @csrf
-                <button type="submit" class="px-6 py-2 mt-4 bg-blue-600 text-white rounded">Checkout</button>
+                <button type="submit" class="w-full px-6 py-2 mt-4 text-white bg-blue-600 rounded">Checkout</button>
             </form>
         @endif
     </div>
@@ -153,7 +162,6 @@
             const selectedProductIdInput = document.getElementById('selected-product-id');
             const searchInput = document.getElementById('search-input');
 
-            // Search functionality
             searchInput.addEventListener('input', function() {
                 const query = this.value.toLowerCase();
                 productCards.forEach(card => {

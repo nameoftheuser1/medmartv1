@@ -10,8 +10,16 @@
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('hidden');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('sidebar-overlay');
+            overlay.addEventListener('click', toggleSidebar);
+        });
     </script>
 </head>
 
@@ -19,13 +27,15 @@
     @auth
         <nav class="bg-white p-4 flex justify-between fixed w-full z-50">
             <div class="flex items-center">
-                <button class="flex mr-2" onclick="toggleSidebar()">
-                    <span class="sm:hidden h-4 flex justify-center items-center gap-3"><svg
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="size-4">
+                <button class="flex mr-2 md:hidden" onclick="toggleSidebar()">
+                    <span class="flex justify-center items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
-                        </svg>Menu</span>
+                        </svg>
+                        Menu
+                    </span>
                 </button>
                 <p class="mx-5 hidden sm:block">Hello, {{ auth()->user()->name }}</p>
                 <a href="{{ route('dashboard') }}">
@@ -34,17 +44,17 @@
             </div>
         </nav>
         <div class="flex -z-50 overflow-x-scroll:h">
+            <div id="sidebar-overlay" class="fixed inset-0 bg-black opacity-50 z-40 hidden md:hidden"></div>
             <div id="sidebar"
-                class="hidden md:flex flex-col justify-between fixed top-14 left-0 bottom-0 w-64 bg-inherit pt-2 px-3 bg-white z-50">
+                class="transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out md:flex flex-col justify-between fixed top-14 left-0 bottom-0 w-64 bg-white pt-2 px-3 z-50">
                 <div>
-                    <h2 class="text-lg font-semibold mb-4"></h2>
                     <ul>
                         @if (Auth::check() && Auth::user()->role === 'admin')
                             <li class="mb-2 flex items-center">
                                 <a href="{{ route('dashboard') }}"
                                     class="hover:text-slate-700 w-full hover:bg-gray-300 h-[40px] px-2 flex items-center gap-2 rounded-md {{ Route::currentRouteName() == 'dashboard' ? 'bg-gray-300 text-slate-700' : '' }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="size-6">
+                                        stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z" />
                                     </svg>

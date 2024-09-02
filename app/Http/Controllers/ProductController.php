@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -54,6 +52,7 @@ class ProductController extends Controller
             'category' => ['required'],
             'product_description' => ['required'],
             'price' => ['required', 'numeric'],
+            'barcode' => ['nullable', 'string', 'unique:products,barcode'],
         ]);
 
         Product::create($validatedData);
