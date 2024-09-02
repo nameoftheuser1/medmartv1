@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'auth.login')->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
     Route::view('/register', 'auth.register')->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:3,1');
 });
 
 Route::middleware('auth')->group(function () {
@@ -44,5 +44,5 @@ Route::middleware('auth')->group(function () {
 
 Route::get('locale/{lang}', [LocaleController::class, 'setLocale']);
 Route::get('/refresh-captcha', function () {
-    return response()->json(['captcha'=> captcha_img()]);
+    return response()->json(['captcha' => captcha_img()]);
 });

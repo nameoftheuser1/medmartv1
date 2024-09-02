@@ -1,14 +1,14 @@
 <x-layout>
-    <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
-            <h1 class="text-2xl font-bold mb-2 sm:mb-0">Product List</h1>
-            <p class="mb-2 sm:mb-0">@lang('message.total') Products: {{ $products->total() }}</p>
-            <form method="GET" action="{{ route('products.index') }}" class="flex flex-col sm:flex-row w-full sm:w-auto">
+    <div class="w-full p-5 px-4 bg-white rounded-lg shadow-lg sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center justify-between mb-5 sm:flex-row">
+            <h1 class="mb-2 text-2xl font-bold sm:mb-0">Product List</h1>
+            <p class="mb-2 text-sm sm:mb-0">@lang('message.total') Products: {{ $products->total() }}</p>
+            <form method="GET" action="{{ route('products.index') }}" class="flex flex-col w-full sm:flex-row sm:w-auto">
                 <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}"
-                    class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2 sm:mb-0">
+                    class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
 
                 <select name="category"
-                    class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ml-2 mb-2 sm:mb-0">
+                    class="w-full px-4 py-2 mb-2 ml-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
                     <option value="">All Categories</option>
                     <option value="Medications" {{ request('category') == 'Medications' ? 'selected' : '' }}>Medications
                     </option>
@@ -48,11 +48,59 @@
                 </select>
 
                 <button type="submit"
-                    class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
+                    class="px-4 py-2 ml-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
         </div>
+        <div class="mb-2">
+            This page provides a comprehensive overview of the products available in our system. It is designed to help
+            you easily navigate and manage the product inventory.
+            <!-- See More Button -->
+            <button data-modal-target="info-modal" data-modal-toggle="info-modal"
+                class="mt-2 text-blue-600 hover:underline">
+                See More
+            </button>
+        </div>
+
+        <div id="info-modal" tabindex="-1" aria-hidden="true"
+            class="fixed inset-0 z-50 flex items-center justify-center hidden overflow-auto bg-gray-800 bg-opacity-50">
+            <div class="relative w-full max-w-md p-4 bg-white rounded-lg shadow-lg mw">
+                <div class="flex items-center justify-between p-4 border-b">
+                    <h3 class="text-lg font-semibold text-gray-900">Products View Usage</h3>
+                    <button type="button"
+                        class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900"
+                        data-modal-hide="info-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <div class="p-4 space-y-4">
+                    <p class="text-base leading-relaxed text-gray-500">
+                        <span class="font-bold">Search and Filter Options:</span></br>
+                        At the top, you can search for products by name and filter them by category. This helps you
+                        quickly find specific products or narrow down your list based on product types like Medications,
+                        Supplements, or Personal Care items.
+                    </p>
+                    <p class="text-base leading-relaxed text-gray-500">
+                        <span class="font-bold">Product Overview:</span></br>
+                        The main section of the page displays a table listing all the products. Each product entry shows
+                        key details including the product name, category, description, and price.</br>
+                        The table is interactive. Clicking on a product row will take you to a detailed view of that
+                        product. You can also edit or delete products directly from this table.
+                    </p>
+                </div>
+                <!-- Modal Footer -->
+                <div class="flex justify-end p-4 border-t">
+                    <button type="button" data-modal-hide="info-modal"
+                        class="px-4 py-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800">Okay</button>
+                </div>
+            </div>
+        </div>
         <div class="flex mb-5">
-            <a href="{{ route('products.create') }}" class="btn text-lg w-full sm:w-auto text-center">@lang('message.add', ['item' => 'Product'])
+            <a href="{{ route('products.create') }}" class="w-full text-lg text-center btn sm:w-auto">@lang('message.add', ['item' => 'Product'])
             </a>
         </div>
         <div>
@@ -65,36 +113,36 @@
 
         <div class="relative overflow-x-auto sm:rounded-lg">
             @if ($products->isEmpty())
-                <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
+                <p class="py-5 text-center text-gray-500">Wow, this table is empty.</p>
             @else
                 <table class="w-full text-left rtl:text-right">
                     <thead class="uppercase">
                         <tr>
-                            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
+                            <th scope="col" class="hidden px-4 py-3 sm:px-6 md:table-cell">ID</th>
                             <th scope="col" class="px-4 py-3 sm:px-6">Product Name</th>
-                            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Generic</th>
-                            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Category</th>
-                            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Description</th>
+                            <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Generic</th>
+                            <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Category</th>
+                            <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Description</th>
                             <th scope="col" class="px-4 py-3 sm:px-6">Price</th>
                             <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($products as $product)
-                            <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
+                            <tr class="transition duration-150 ease-in-out cursor-pointer hover:bg-green-300"
                                 onclick="window.location='{{ route('products.show', $product->id) }}'">
-                                <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $product->id }}</td>
-                                <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
+                                <td class="hidden px-4 py-4 sm:px-6 md:table-cell">{{ $product->id }}</td>
+                                <td class="px-4 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap">
                                     {{ Str::limit($product->product_name, 15) }}
                                 </td>
-                                <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
+                                <td class="hidden px-4 py-4 sm:px-6 sm:table-cell">
                                     {{ Str::limit($product->generic_name, 15) }}</td>
-                                <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
+                                <td class="hidden px-4 py-4 sm:px-6 sm:table-cell">
                                     {{ Str::limit($product->category, 15) }}</td>
-                                <td class="px-4 py-4 sm:px-6 hidden sm:table-cell">
+                                <td class="hidden px-4 py-4 sm:px-6 sm:table-cell">
                                     {{ Str::limit($product->product_description, 20) }}
                                 </td>
-                                <td class="px-4 py-4 sm:px-6 flex">
+                                <td class="flex px-4 py-4 sm:px-6">
                                     ₱{{ number_format($product->price, 2) }}
 
                                     @if (!is_null($product->old_price))
@@ -102,7 +150,7 @@
                                             <x-tooltip message="₱{{ number_format($product->old_price, 2) }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="size-6 text-red-500 inline">
+                                                    class="inline text-red-500 size-6">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
                                                 </svg>
@@ -111,7 +159,7 @@
                                             <x-tooltip message="₱{{ number_format($product->old_price, 2) }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                     viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="size-6 text-green-500 inline">
+                                                    class="inline text-green-500 size-6">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         d="M2.25 6 9 12.75l4.286-4.286a11.948 11.948 0 0 1 4.306 6.43l.776 2.898m0 0 3.182-5.511m-3.182 5.51-5.511-3.181" />
                                                 </svg>
@@ -121,10 +169,8 @@
 
                                 </td>
 
-
-
                                 <td class="px-4 py-4 sm:px-6">
-                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                    <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
                                         <x-tooltip message="Click to view the full details of the product">
                                             <a href="{{ route('products.show', $product->id) }}"
                                                 class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
@@ -152,4 +198,26 @@
             {{ $products->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('info-modal');
+            const toggleButton = document.querySelector('[data-modal-toggle="info-modal"]');
+            const closeButton = document.querySelector('[data-modal-hide="info-modal"]');
+
+            toggleButton.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+            });
+
+            closeButton.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </x-layout>

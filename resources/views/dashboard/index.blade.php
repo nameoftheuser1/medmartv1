@@ -5,23 +5,23 @@
 
 <x-layout>
     <h1 class="mb-4 text-5xl font-bold">Dashboard</h1>
-    <div class="w-full bg-white rounded-lg p-4 md:p-6 mb-3">
+    <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
         <div class="flex justify-between mb-5">
-            <div class="grid gap-4 grid-cols-2">
+            <div class="grid grid-cols-2 gap-4">
                 <div class="flex gap-4">
                     <div>
-                        <h5 class="inline-flex items-center text-gray-500 leading-none font-normal mb-2">
+                        <h5 class="inline-flex items-center mb-2 font-normal leading-none text-gray-500">
                             Total Sales
                         </h5>
-                        <p class="text-gray-900 text-2xl leading-none font-bold">
-                            {{ is_numeric($totalSales) ? $totalSales : 0 }}</p>
+                        <p class="text-2xl font-bold leading-none text-gray-900">
+                            {{ is_numeric($totalSales) ? number_format($totalSales) : 0 }}</p>
                     </div>
                     <div>
-                        <h5 class="inline-flex items-center text-gray-500 leading-none font-normal mb-2">
+                        <h5 class="inline-flex items-center mb-2 font-normal leading-none text-gray-500">
                             Total Sales Today
                         </h5>
-                        <p class="text-gray-900 text-2xl leading-none font-bold">
-                            {{ is_numeric($totalSalesToday) ? $totalSalesToday : 0 }}</p>
+                        <p class="text-2xl font-bold leading-none text-gray-900">
+                            {{ is_numeric($totalSalesToday) ? number_format($totalSalesToday) : 0 }}</p>
                     </div>
                 </div>
             </div>
@@ -29,7 +29,7 @@
                 <div class="mb-4">
                     <label for="period" class="block text-sm font-medium text-gray-700">Select Period:</label>
                     <select id="period" name="period"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        class="block w-full py-2 pl-3 pr-10 mt-1 text-base border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                         <option value="weekly" {{ e($currentPeriod) == 'weekly' ? 'selected' : '' }}>Weekly</option>
                         <option value="monthly" {{ e($currentPeriod) == 'monthly' ? 'selected' : '' }}>Monthly</option>
                         <option value="yearly" {{ e($currentPeriod) == 'yearly' ? 'selected' : '' }}>Yearly</option>
@@ -39,10 +39,10 @@
         </div>
         <div id="line-chart"></div>
     </div>
-    <div class="flex flex-col md:flex-row justify-between mb-4 gap-3">
-        <div class="card p-4 bg-white rounded-lg mx-auto md:mb-0 md:w-1/2 w-full">
+    <div class="flex flex-col justify-between gap-3 mb-4 md:flex-row">
+        <div class="w-full p-4 mx-auto bg-white rounded-lg card md:mb-0 md:w-1/2">
             <form id="inventory-form" method="GET" action="{{ e(route('dashboard')) }}">
-                <h2 class="text-xl font-bold mb-2 font-mono">Inventory Level</h2>
+                <h2 class="mb-2 font-mono text-xl font-bold">Inventory Level</h2>
                 <select id="inventory-type-selector" name="inventory-type" class="items-end">
                     <option value="highest" {{ e($currentInventoryType) == 'highest' ? 'selected' : '' }}>Highest
                         Inventory</option>
@@ -55,8 +55,8 @@
         </div>
 
         <div class="bg-white rounded-lg p-4 md:w-1/2 max-h-[430] min-h-[430] overflow-y-scroll">
-            <h2 class="text-xl font-bold mb-2 font-mono">Products About to Expire</h2>
-            <p class="mb-5 text-gray-500 text-sm">Here showing the products that are about to expire in 30 days</p>
+            <h2 class="mb-2 font-mono text-xl font-bold">Products About to Expire</h2>
+            <p class="mb-5 text-sm text-gray-500">Here showing the products that are about to expire in 30 days</p>
             @if ($expiringBatches->isEmpty())
                 <p class="text-gray-200">No products are about to expire within the next 30 days.</p>
             @else
@@ -74,11 +74,11 @@
                             @foreach ($expiringBatches as $batch)
                                 <tr>
                                     <td class="px-4 py-2 border">{{ e($batch->product->product_name) }}</td>
-                                    <td class="px-4 py-2 border text-center">{{ e($batch->batch_number) }}</td>
-                                    <td class="px-4 py-2 border text-center">
+                                    <td class="px-4 py-2 text-center border">{{ e($batch->batch_number) }}</td>
+                                    <td class="px-4 py-2 text-center border">
                                         {{ e($batch->expiration_date->format('Y-m-d')) }}
                                     </td>
-                                    <td class="px-4 py-2 border text-center">
+                                    <td class="px-4 py-2 text-center border">
                                         {{ e($batch->inventories->sum('quantity')) }}
                                     </td>
                                 </tr>
@@ -92,9 +92,9 @@
             @endif
         </div>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <div class="card p-6 bg-white rounded-lg flex items-center">
-            <div class="bg-green-500 p-3 rounded-lg flex items-center justify-center text-white w-14 h-14">
+    <div class="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="flex items-center p-6 bg-white rounded-lg card">
+            <div class="flex items-center justify-center p-3 text-white bg-green-500 rounded-lg w-14 h-14">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -107,8 +107,8 @@
                 <h1 class="text-3xl font-bold">{{ e($saleCount) }}</h1>
             </div>
         </div>
-        <div class="card p-6 bg-white rounded-lg flex items-center">
-            <div class="bg-green-500 p-3 rounded-lg flex items-center justify-center text-white w-14 h-14">
+        <div class="flex items-center p-6 bg-white rounded-lg card">
+            <div class="flex items-center justify-center p-3 text-white bg-green-500 rounded-lg w-14 h-14">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -120,8 +120,8 @@
                 <h1 class="text-3xl font-bold">{{ e($productCount) }}</h1>
             </div>
         </div>
-        <div class="card p-6 bg-white rounded-lg flex items-center">
-            <div class="bg-green-500 p-3 rounded-lg flex items-center justify-center text-white w-14 h-14">
+        <div class="flex items-center p-6 bg-white rounded-lg card">
+            <div class="flex items-center justify-center p-3 text-white bg-green-500 rounded-lg w-14 h-14">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="w-6 h-6">
                     <path stroke-linecap="round" stroke-linejoin="round"

@@ -1,7 +1,7 @@
 <x-layout>
     <a href="{{ route('products.index') }}" class="text-blue-500 underline">&larr; Go back to product list</a>
-    
-    <div class="card md:w-1/2 mx-auto mt-5">
+
+    <div class="mx-auto mt-5 card md:w-1/2">
         <h1 class="mb-5">Add Products</h1>
         <form action="{{ route('products.store') }}" method="post">
             @csrf
@@ -79,8 +79,8 @@
                     <p class="error">{{ $message }}</p>
                 @enderror
             </div>
-            <div class="flex justify-center items-center">
-                <button type="submit" class="btn text-lg">Create Product</button>
+            <div class="flex items-center justify-center">
+                <button type="submit" class="text-lg btn">Create Product</button>
             </div>
         </form>
     </div>
