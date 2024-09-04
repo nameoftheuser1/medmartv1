@@ -1,4 +1,4 @@
-# MedMart
+# MedMart V1
 
 MedMart is a web application built using Laravel, designed to manage products, suppliers, sales, and inventory. This project utilizes Vite for asset bundling and development.
 
