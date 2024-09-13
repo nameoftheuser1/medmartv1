@@ -6,7 +6,7 @@ return [
     //auth related translation
     'welcome_back' => 'Maligayang Pagbabalik',
     'authnote_one' => 'Para magamit ng empleyado ang point of sale, kailangan nilang gumawa ng hiwalay na account.',
-    'login' => 'Mag login bilang tauhan',
+    'login' => 'Mag login',
     'register' => 'Gumawa ng bagong Account',
     'fullname' => 'Ilagay ang buong pangalan',
     'email' => 'Dapat ay isang natatanging email.',

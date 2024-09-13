@@ -39,12 +39,12 @@
                     </form>
                     <div class="grid grid-cols-1 divide-y-[2px] divide-gray-300">
 
-                        <div class="w-full flex flex-col justify-center p-4">
+                        {{-- <div class="w-full flex flex-col justify-center p-4">
                             <a class="mx-auto" href="{{ route('register') }}">
                                 <button class="btn">@lang('message.register')</button>
                             </a>
                             <div class="text-gray-600 text-sm">@lang('message.authnote_one')</div>
-                        </div>
+                        </div> --}}
 
                         <div class="flex justify-center gap-1">
                             <a href="locale/en">English</a>| <a href="locale/fil">Filipino</a>

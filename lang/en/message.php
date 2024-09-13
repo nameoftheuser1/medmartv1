@@ -7,7 +7,7 @@ return [
     'welcome_back' => 'Welcome Back',
     'authnote_one' => 'In order to use the point of sale for the employee they
                                 should create an separate account.',
-    'login' => 'Login as Staff',
+    'login' => 'Login',
     'register' => 'Create new account',
     'fullname'=> 'Enter your full name.',
     'email' => 'Must be a unique email.',
