@@ -25,7 +25,6 @@
                 <table class="w-full text-left rtl:text-right">
                     <thead class="uppercase">
                         <tr>
-                            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Product Name</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 ">Batch Number</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Expiration Date</th>
@@ -39,7 +38,6 @@
                         @foreach ($inventories as $inventory)
                             <tr
                                 class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
-                                <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $inventory->id }}</td>
                                 <td
                                     class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
                                     {{ $inventory->productBatch->product->product_name }}</td>

@@ -10,27 +10,6 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
-    {
-
-        //validation
-        $fields = $request->validate([
-            'name' => ['required', 'max:50', 'regex:/^[a-zA-Z\s]+$/'],
-            'email' => ['required', 'max:255', 'email', 'unique:users'],
-            'password' => ['required', 'min:8', 'confirmed', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/'],
-            'captcha' => ['required', 'captcha']
-        ]);
-
-        //register
-        $user = User::create($fields);
-
-        //login
-        Auth::login($user);
-
-        //redirect
-        return redirect()->route('dashboard');
-    }
-
     public function login(Request $request)
     {
         $rules = [

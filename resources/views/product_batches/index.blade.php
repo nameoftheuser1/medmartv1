@@ -29,7 +29,6 @@
                 <table class="w-full text-left rtl:text-right">
                     <thead class="uppercase">
                         <tr>
-                            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">ID</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Product</th>
                             <th scope="col" class="px-4 py-3 sm:px-6">Batch Number</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Expiration Date</th>
@@ -43,7 +42,6 @@
                         @foreach ($productBatches as $productBatch)
                             <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
                                 onclick="window.location='{{ route('product_batches.show', $productBatch->id) }}'">
-                                <td class="px-4 py-4 sm:px-6 hidden md:table-cell">{{ $productBatch->id }}</td>
                                 <td
                                     class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
                                     {{ $productBatch->product->product_name }}

@@ -54,55 +54,13 @@
         <div class="mb-2">
             This page provides a comprehensive overview of the products available in our system. It is designed to help
             you easily navigate and manage the product inventory.
-            <!-- See More Button -->
-            <button data-modal-target="info-modal" data-modal-toggle="info-modal"
-                class="mt-2 text-blue-600 hover:underline">
-                See More
-            </button>
         </div>
 
-        <div id="info-modal" tabindex="-1" aria-hidden="true"
-            class="fixed inset-0 z-50 flex items-center justify-center hidden overflow-auto bg-gray-800 bg-opacity-50">
-            <div class="relative w-full max-w-md p-4 bg-white rounded-lg shadow-lg mw">
-                <div class="flex items-center justify-between p-4 border-b">
-                    <h3 class="text-lg font-semibold text-gray-900">Products View Usage</h3>
-                    <button type="button"
-                        class="inline-flex items-center justify-center w-8 h-8 text-sm text-gray-400 bg-transparent rounded-lg hover:bg-gray-200 hover:text-gray-900"
-                        data-modal-hide="info-modal">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                        </svg>
-                        <span class="sr-only">Close modal</span>
-                    </button>
-                </div>
-                <div class="p-4 space-y-4">
-                    <p class="text-base leading-relaxed text-gray-500">
-                        <span class="font-bold">Search and Filter Options:</span></br>
-                        At the top, you can search for products by name and filter them by category. This helps you
-                        quickly find specific products or narrow down your list based on product types like Medications,
-                        Supplements, or Personal Care items.
-                    </p>
-                    <p class="text-base leading-relaxed text-gray-500">
-                        <span class="font-bold">Product Overview:</span></br>
-                        The main section of the page displays a table listing all the products. Each product entry shows
-                        key details including the product name, category, description, and price.</br>
-                        The table is interactive. Clicking on a product row will take you to a detailed view of that
-                        product. You can also edit or delete products directly from this table.
-                    </p>
-                </div>
-                <!-- Modal Footer -->
-                <div class="flex justify-end p-4 border-t">
-                    <button type="button" data-modal-hide="info-modal"
-                        class="px-4 py-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800">Okay</button>
-                </div>
-            </div>
-        </div>
         <div class="flex mb-5">
             <a href="{{ route('products.create') }}" class="w-full text-lg text-center btn sm:w-auto">@lang('message.add', ['item' => 'Product'])
             </a>
         </div>
+
         <div>
             @if (session('success'))
                 <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
@@ -118,7 +76,6 @@
                 <table class="w-full text-left rtl:text-right">
                     <thead class="uppercase">
                         <tr>
-                            <th scope="col" class="hidden px-4 py-3 sm:px-6 md:table-cell">ID</th>
                             <th scope="col" class="px-4 py-3 sm:px-6">Product Name</th>
                             <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Generic</th>
                             <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Category</th>
@@ -131,7 +88,6 @@
                         @foreach ($products as $product)
                             <tr class="transition duration-150 ease-in-out cursor-pointer hover:bg-green-300"
                                 onclick="window.location='{{ route('products.show', $product->id) }}'">
-                                <td class="hidden px-4 py-4 sm:px-6 md:table-cell">{{ $product->id }}</td>
                                 <td class="px-4 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap">
                                     {{ Str::limit($product->product_name, 15) }}
                                 </td>

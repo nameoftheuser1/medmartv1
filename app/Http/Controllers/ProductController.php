@@ -87,6 +87,7 @@ class ProductController extends Controller
             'category' => ['required'],
             'product_description' => ['required'],
             'price' => ['required', 'numeric'],
+            'barcode' => ['nullable', 'string', 'unique:products,barcode'],
         ]);
 
         $product->update($validatedData);

@@ -1,7 +1,7 @@
 <x-layout>
     <div class="flex flex-col md:flex-row items-center justify-between lg:mt-44">
         <div class="w-full">
-            <img class="my-10 ms-5  md:mt-0 md:ms-0" src="{{ asset('img/alegre.png') }}" alt="">
+            <img class="my-10  md:mt-0 md:ms-0" src="{{ asset('img/alegre.png') }}" alt="">
         </div>
 
         <div class="w-full">
@@ -39,18 +39,11 @@
                     </form>
                     <div class="grid grid-cols-1 divide-y-[2px] divide-gray-300">
 
-                        {{-- <div class="w-full flex flex-col justify-center p-4">
-                            <a class="mx-auto" href="{{ route('register') }}">
-                                <button class="btn">@lang('message.register')</button>
-                            </a>
-                            <div class="text-gray-600 text-sm">@lang('message.authnote_one')</div>
-                        </div> --}}
-
                         <div class="flex justify-center gap-1">
                             <a href="locale/en">English</a>| <a href="locale/fil">Filipino</a>
                         </div>
                     </div>
-                    <p class="text-gray-400">BSU &#169; 2024</p>
+                    <p class="text-gray-400 text-[12px]">BSU &#169; 2024</p>
                 </div>
             </div>
         </div>

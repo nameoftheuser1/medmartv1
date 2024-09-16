@@ -38,7 +38,6 @@
                     <thead class="uppercase">
                         <tr>
                             <th scope="col" class="px-6 py-3">ID</th>
-                            <th scope="col" class="px-6 py-3">User</th>
                             <th scope="col" class="px-6 py-3">Total Amount</th>
                             <th scope="col" class="px-6 py-3">Discount</th>
                             <th scope="col" class="px-6 py-3">Transaction Key</th>
@@ -50,8 +49,6 @@
                             <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
                                 onclick="window.location='{{ route('sales.show', $sale->id) }}'">
                                 <td class="px-6 py-4">{{ $sale->id }}</td>
-                                <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                    {{ $sale->user ? $sale->user->name : 'N/A' }}</td>
                                 <td class="px-6 py-4">₱{{ number_format($sale->total_amount, 2) }}</td>
                                 <td class="px-6 py-4">
                                     {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}

@@ -73,6 +73,14 @@
             </div>
 
             <div class="mb-4">
+                <label for="barcode">Barcode: </label>
+                <input name="barcode" id="barcode" type="text" class="input" value="{{ old('barcode') }}">
+                @error('barcode')
+                    <p class="error">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-4">
                 <label for="product_description">Product Description: </label>
                 <textarea name="product_description" id="product_description" cols="20" rows="3" class="input">{{ old('product_description') }}</textarea>
                 @error('product_description')
