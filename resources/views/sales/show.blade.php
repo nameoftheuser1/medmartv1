@@ -8,6 +8,13 @@
         <div class="mt-5">
             <p>Total Amount: ₱{{ $sale->total_amount }}</p>
         </div>
+
+        @if ($sale->refunded != 0)
+            <div class="mt-5">
+                <p>Refunded Amount: ₱{{ $sale->refunded }}</p>
+            </div>
+        @endif
+
         <div class="mt-5">
             <p>Discount: {{ $sale->discount_percentage }}%</p>
         </div>
@@ -35,8 +42,8 @@
                     @foreach ($sale->saleDetails as $detail)
                         <tr>
                             <td>{{ $detail->product->product_name }}</td>
-                            <td>{{ $detail->quantity }}</td>
-                            <td>₱{{ $detail->price }}</td>
+                            <td class="text-center">{{ $detail->quantity }}</td>
+                            <td class="text-center">₱{{ $detail->price }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -46,9 +53,6 @@
         <div class="flex justify-between mt-5">
             <div class="mx-auto">
                 <a href="{{ route('sales.index') }}" class="btn text-lg">Go back</a>
-            </div>
-            <div class="mx-auto">
-                <a href="{{ route('sales.edit', $sale->id) }}" class="btn text-lg">Edit Sale</a>
             </div>
         </div>
     </div>

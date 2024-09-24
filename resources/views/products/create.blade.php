@@ -73,7 +73,7 @@
             </div>
 
             <div class="mb-4">
-                <label for="barcode">Barcode: </label>
+                <label for="barcode">(optional)Barcode: </label>
                 <input name="barcode" id="barcode" type="text" class="input" value="{{ old('barcode') }}">
                 @error('barcode')
                     <p class="error">{{ $message }}</p>

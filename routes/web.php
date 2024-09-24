@@ -27,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/inventory', [DashboardController::class, 'inventoryData'])->name('dashboard.inventory.data');
 
+    Route::post('/sales/{id}/refund', [SaleController::class, 'refund'])->name('sales.refund');
+
     Route::resource('products', ProductController::class);
     Route::resource('suppliers', SupplierController::class);
     Route::resource('product_batches', ProductBatchController::class);

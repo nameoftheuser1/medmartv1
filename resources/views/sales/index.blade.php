@@ -25,6 +25,15 @@
                             {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}</p>
                         <p><strong>Transaction Key:</strong> {{ $sale->transaction_key }}</p>
                         <p><strong>Sale Time:</strong> {{ $sale->created_at }}</p>
+                        <p><strong>Status:</strong> {{ $sale->status ?? 'Completed' }}</p>
+                        <div class="mt-2">
+                            @if ($sale->status !== 'refunded')
+                                <form action="{{ route('sales.refund', $sale->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-red-600 hover:underline">Refund</button>
+                                </form>
+                            @endif
+                        </div>
                     </a>
                 @endforeach
             @endif
@@ -42,6 +51,8 @@
                             <th scope="col" class="px-6 py-3">Discount</th>
                             <th scope="col" class="px-6 py-3">Transaction Key</th>
                             <th scope="col" class="px-6 py-3">Sale Time</th>
+                            <th scope="col" class="px-6 py-3">Status</th>
+                            <th scope="col" class="px-6 py-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,6 +66,16 @@
                                 </td>
                                 <td class="px-6 py-4">{{ $sale->transaction_key }}</td>
                                 <td class="px-6 py-4">{{ $sale->created_at->format('F j, Y h:i A') }}</td>
+                                <td class="px-6 py-4">{{ $sale->status ?? 'Completed' }}</td>
+                                <td class="px-6 py-4">
+                                    @if ($sale->status !== 'refunded')
+                                        <form action="{{ route('sales.refund', $sale->id) }}" method="POST"
+                                            class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-red-600 hover:underline">Refund</button>
+                                        </form>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

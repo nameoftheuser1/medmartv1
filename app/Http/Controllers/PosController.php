@@ -7,28 +7,42 @@ use App\Models\ProductBatch;
 use App\Models\Inventory;
 use App\Models\Sale;
 use App\Models\SaleDetail;
+use App\Models\TemporaryCartItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class POSController extends Controller
 {
+    private function getSessionId()
+    {
+        if (!session()->has('cart_session_id')) {
+            session()->put('cart_session_id', Str::uuid());
+        }
+        return session()->get('cart_session_id');
+    }
+
     public function index()
     {
         $products = Product::whereHas('productBatches.inventories', function ($query) {
             $query->where('quantity', '>', 0);
-        })->with(['productBatches.inventories'])->get();
+        })->with(['productBatches.inventories'])
+            ->paginate(10);
 
-        $products = $products->map(function ($product) {
+        $products->getCollection()->transform(function ($product) {
             $product->total_inventory = $product->productBatches->sum(function ($batch) {
                 return $batch->inventories->sum('quantity');
             });
             return $product;
         });
 
-        $saleDetails = session()->get('saleDetails', []);
+        $sessionId = $this->getSessionId();
+        $cartItems = TemporaryCartItem::where('session_id', $sessionId)->get();
         $discountPercentage = session()->get('discountPercentage', 0);
 
-        return view('pos.index', compact('products', 'saleDetails', 'discountPercentage'));
+        return view('pos.index', compact('products', 'cartItems', 'discountPercentage'));
     }
+
 
     public function addItem(Request $request)
     {
@@ -37,52 +51,44 @@ class POSController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        $product = Product::find($request->product_id);
+        $product = Product::findOrFail($request->product_id);
         $quantity = $request->quantity;
 
-        // Check total available inventory for the product
-        $totalAvailableInventory = $product->productBatches->sum(function ($batch) {
-            return $batch->inventories->sum('quantity');
-        });
+        $totalAvailableInventory = 0;
 
-        if ($quantity > $totalAvailableInventory) {
-            return redirect()->route('pos.index')->with('error', 'Not enough inventory for this product.');
-        }
-
-        $saleDetails = session()->get('saleDetails', []);
-
-        $existingIndex = null;
-        foreach ($saleDetails as $index => $saleDetail) {
-            if ($saleDetail['product_id'] == $product->id) {
-                $existingIndex = $index;
-                break;
+        foreach ($product->productBatches as $batch) {
+            foreach ($batch->inventories as $inventory) {
+                $totalAvailableInventory += $inventory->quantity;
             }
         }
 
-        if ($existingIndex !== null) {
-            $saleDetails[$existingIndex]['quantity'] += $quantity;
-        } else {
-            $saleDetails[] = [
-                'product_id' => $product->id,
-                'quantity' => $quantity,
-                'price' => $product->price,
-            ];
+        $sessionId = $this->getSessionId();
+        $currentCartItem = TemporaryCartItem::where('session_id', $sessionId)
+            ->where('product_id', $product->id)
+            ->first();
+
+        $currentQuantityInCart = $currentCartItem ? $currentCartItem->quantity : 0;
+
+        if (($currentQuantityInCart + $quantity) > $totalAvailableInventory) {
+            return redirect()->route('pos.index')->with('error', 'Not enough inventory for this product.');
         }
 
-        session()->put('saleDetails', $saleDetails);
+        TemporaryCartItem::updateOrCreate(
+            ['session_id' => $sessionId, 'product_id' => $product->id],
+            ['quantity' => DB::raw('quantity + ' . $quantity), 'price' => $product->price]
+        );
 
         return redirect()->route('pos.index');
     }
 
+
+
     public function removeItem(Request $request)
     {
-        $saleDetails = session()->get('saleDetails', []);
-
-        $saleDetails = array_filter($saleDetails, function ($saleDetail) use ($request) {
-            return $saleDetail['product_id'] != $request->product_id;
-        });
-
-        session()->put('saleDetails', $saleDetails);
+        $sessionId = $this->getSessionId();
+        TemporaryCartItem::where('session_id', $sessionId)
+            ->where('product_id', $request->product_id)
+            ->delete();
 
         return redirect()->route('pos.index');
     }
@@ -94,10 +100,9 @@ class POSController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $product = Product::find($request->product_id);
+        $product = Product::findOrFail($request->product_id);
         $quantity = $request->quantity;
 
-        // Check total available inventory for the product
         $totalAvailableInventory = $product->productBatches->sum(function ($batch) {
             return $batch->inventories->sum('quantity');
         });
@@ -106,16 +111,10 @@ class POSController extends Controller
             return redirect()->route('pos.index')->with('error', 'Not enough inventory for this product.');
         }
 
-        $saleDetails = session()->get('saleDetails', []);
-
-        foreach ($saleDetails as &$saleDetail) {
-            if ($saleDetail['product_id'] == $request->product_id) {
-                $saleDetail['quantity'] = $quantity;
-                break;
-            }
-        }
-
-        session()->put('saleDetails', $saleDetails);
+        $sessionId = $this->getSessionId();
+        TemporaryCartItem::where('session_id', $sessionId)
+            ->where('product_id', $request->product_id)
+            ->update(['quantity' => $quantity]);
 
         return redirect()->route('pos.index');
     }
@@ -133,17 +132,17 @@ class POSController extends Controller
 
     public function checkout(Request $request)
     {
-        $saleDetails = session()->get('saleDetails', []);
+        $sessionId = $this->getSessionId();
+        $cartItems = TemporaryCartItem::where('session_id', $sessionId)->get();
         $discountPercentage = session()->get('discountPercentage', 0);
 
-        if (empty($saleDetails)) {
-            return redirect()->route('pos.index')->with('error', 'No items in the sale.');
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('pos.index')->with('error', 'No items in the cart.');
         }
 
-        $totalAmount = 0;
-        foreach ($saleDetails as $saleDetail) {
-            $totalAmount += $saleDetail['quantity'] * $saleDetail['price'];
-        }
+        $totalAmount = $cartItems->sum(function ($item) {
+            return $item->quantity * $item->price;
+        });
 
         $totalAmount = $totalAmount * (1 - $discountPercentage / 100);
 
@@ -153,39 +152,43 @@ class POSController extends Controller
             'discount_percentage' => $discountPercentage,
         ]);
 
-        foreach ($saleDetails as $saleDetail) {
+        foreach ($cartItems as $cartItem) {
             SaleDetail::create([
                 'sale_id' => $sale->id,
-                'product_id' => $saleDetail['product_id'],
-                'quantity' => $saleDetail['quantity'],
-                'price' => $saleDetail['price'],
+                'product_id' => $cartItem->product_id,
+                'quantity' => $cartItem->quantity,
+                'price' => $cartItem->price,
             ]);
 
-            // Update product batch inventories
-            $quantityRemaining = $saleDetail['quantity'];
-            $batches = ProductBatch::where('product_id', $saleDetail['product_id'])->orderBy('id')->with('inventories')->get();
-
-            foreach ($batches as $batch) {
-                foreach ($batch->inventories as $inventory) {
-                    if ($quantityRemaining <= 0) break;
-
-                    if ($inventory->quantity >= $quantityRemaining) {
-                        $inventory->quantity -= $quantityRemaining;
-                        $inventory->save();
-                        $quantityRemaining = 0;
-                    } else {
-                        $quantityRemaining -= $inventory->quantity;
-                        $inventory->quantity = 0;
-                        $inventory->save();
-                    }
-                }
-                if ($quantityRemaining <= 0) break;
-            }
+            $this->updateInventory($cartItem->product_id, $cartItem->quantity);
         }
 
-        session()->forget('saleDetails');
+        TemporaryCartItem::where('session_id', $sessionId)->delete();
         session()->forget('discountPercentage');
 
         return redirect()->route('pos.index')->with('success', 'Sale completed successfully.');
+    }
+
+    private function updateInventory($productId, $quantityToReduce)
+    {
+        $quantityRemaining = $quantityToReduce;
+        $batches = ProductBatch::where('product_id', $productId)->orderBy('id')->with('inventories')->get();
+
+        foreach ($batches as $batch) {
+            foreach ($batch->inventories as $inventory) {
+                if ($quantityRemaining <= 0) break;
+
+                if ($inventory->quantity >= $quantityRemaining) {
+                    $inventory->quantity -= $quantityRemaining;
+                    $inventory->save();
+                    $quantityRemaining = 0;
+                } else {
+                    $quantityRemaining -= $inventory->quantity;
+                    $inventory->quantity = 0;
+                    $inventory->save();
+                }
+            }
+            if ($quantityRemaining <= 0) break;
+        }
     }
 }

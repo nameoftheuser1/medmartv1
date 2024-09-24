@@ -30,6 +30,20 @@ class SaleController extends Controller
         ]);
     }
 
+    public function refund($id)
+    {
+        $sale = Sale::findOrFail($id);
+
+        $sale->refunded += $sale->total_amount;
+        $sale->total_amount = 0;
+        $sale->status = 'refunded';
+
+        $sale->save();
+
+        return redirect()->route('sales.index')->with('success', 'Sale refunded successfully.');
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */
