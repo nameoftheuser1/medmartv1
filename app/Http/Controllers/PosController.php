@@ -29,7 +29,7 @@ class POSController extends Controller
         })->with(['productBatches.inventories'])
             ->paginate(10);
 
-        $products->getCollection()->transform(function ($product) {
+        $products->getCollection()->map(function ($product) {
             $product->total_inventory = $product->productBatches->sum(function ($batch) {
                 return $batch->inventories->sum('quantity');
             });
