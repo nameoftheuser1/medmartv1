@@ -8,73 +8,68 @@ use App\Models\ProductBatch;
 use App\Models\SaleDetail;
 use App\Models\Sale;
 use App\Models\Inventory;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    private function predictSales($salesData, $period)
+    private function predictSales($salesData)
     {
-        // Convert sales data to an array of values
+        $predictedSalesDay = Setting::where('key', 'predictedSalesDay')->value('value') ?? 1;
+        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 90;
         $dates = [];
         $sales = [];
-
+        $cutoffDate = strtotime("-{$historicalDataDays} days");
         foreach ($salesData as $data) {
-            $dates[] = strtotime($data->date);
-            $sales[] = $data->total;
+            $dataDate = strtotime($data->date);
+            if ($dataDate >= $cutoffDate) {
+                $dates[] = $dataDate;
+                $sales[] = $data->total;
+            }
         }
-
-        // Calculate the average of x and y
         $n = count($sales);
         if ($n == 0) {
-            return [[], []]; // No sales data, return empty arrays
+            return ['sales' => [], 'dates' => []];
         }
-
         $sumX = array_sum($dates);
         $sumY = array_sum($sales);
         $sumXY = 0;
         $sumX2 = 0;
-
         for ($i = 0; $i < $n; $i++) {
             $sumXY += $dates[$i] * $sales[$i];
             $sumX2 += $dates[$i] * $dates[$i];
         }
-
-        // Check for zero in the denominator to avoid division by zero
         $denominator = $n * $sumX2 - $sumX * $sumX;
         if ($denominator == 0) {
-            // If the denominator is zero, return a default prediction (e.g., previous sales total)
-            return [array_fill(0, 30, end($sales) ?? 0), []]; // Predict 30 days with last known sales or zero
+            $defaultValue = end($sales) ?? 0;
+            return [
+                'sales' => array_fill(0, 10, $defaultValue),
+                'dates' => array_map(function ($i) use ($predictedSalesDay) {
+                    return date('Y-m-d', strtotime("+{$i} days", strtotime('today')));
+                }, range(0, 9 * $predictedSalesDay, $predictedSalesDay))
+            ];
         }
-
-        // Calculate the slope (m) and intercept (b) for the line equation y = mx + b
         $slope = ($n * $sumXY - $sumX * $sumY) / $denominator;
         $intercept = ($sumY - $slope * $sumX) / $n;
-
-        // Predict future sales based on the calculated slope and intercept
         $predictedSales = [];
-        $predictedCategories = [];
-        $futureDays = 30; // Predict sales for the next 30 days
-        $currentDate = end($dates) + 86400; // Start predicting from the next day
-
-        for ($i = 0; $i < $futureDays; $i++) {
-            $predictedSales[] = round($slope * $currentDate + $intercept);
-            $predictedCategories[] = date('D', $currentDate); // Format for display
-            $currentDate += 86400; // Increment by 1 day
+        $predictedDates = [];
+        $currentDate = strtotime('today') + 86400 * $predictedSalesDay;
+        $maxPredictions = 10;
+        for ($i = 0; $i < $maxPredictions; $i++) {
+            $predictedSales[] = max(0, round($slope * $currentDate + $intercept));
+            $predictedDates[] = date('Y-m-d', $currentDate);
+            $currentDate += 86400 * $predictedSalesDay;
         }
-
-        return [$predictedSales, $predictedCategories];
+        return ['sales' => $predictedSales, 'dates' => $predictedDates];
     }
-
-
 
     public function index(Request $request)
     {
         $period = $request->input('period', 'weekly');
         $inventoryType = $request->input('inventory-type', 'highest');
 
-        // Handle period selection
         switch ($period) {
             case 'monthly':
                 $startDate = Carbon::now()->startOfMonth()->subMonths(11);
@@ -164,39 +159,37 @@ class DashboardController extends Controller
                 ];
             });
 
+        $inventoryQuery = Inventory::select('batch_id', DB::raw('SUM(quantity) as quantity'))
+            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+            ->where('quantity', '>', 0)
+            ->groupBy('batch_id');
+
         if ($inventoryType === 'highest') {
-            $inventories = Inventory::select('batch_id', DB::raw('MAX(quantity) as quantity'))
-                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
-                ->where('quantity', '>', 0)
-                ->groupBy('batch_id')
-                ->orderBy('quantity', 'desc')
-                ->limit(10)
-                ->get();
+            $inventoryQuery->orderBy('quantity', 'desc');
         } else {
-            $inventories = Inventory::select('batch_id', DB::raw('MIN(quantity) as quantity'))
-                ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
-                ->where('quantity', '>', 0)
-                ->groupBy('batch_id')
-                ->orderBy('quantity', 'asc')
-                ->limit(10)
-                ->get();
+            $inventoryQuery->orderBy('quantity', 'asc');
         }
 
+        $inventories = $inventoryQuery->limit(10)->get();
+
         $inventoryBatches = ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
+            ->with('product')
             ->get()
             ->map(function ($batch) use ($inventories) {
                 $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
                 return $batch;
             });
 
-        list($predictedSales, $predictedCategories) = $this->predictSales($salesData, $period);
+        $prediction = $this->predictSales($salesData);
+        $predictedSales = $prediction['sales'];
+        $predictedDates = $prediction['dates'];
 
         if ($request->ajax()) {
             return response()->json([
                 'categories' => $categories,
                 'salesSeries' => $salesSeries,
                 'predictedSales' => $predictedSales,
-                'predictedCategories' => $predictedCategories,
+                'predictedDates' => $predictedDates,
                 'inventoryBatches' => $inventoryBatches,
             ]);
         }
@@ -210,7 +203,7 @@ class DashboardController extends Controller
             'categories' => $categories,
             'salesSeries' => $salesSeries,
             'predictedSales' => $predictedSales,
-            'predictedCategories' => $predictedCategories,
+            'predictedDates' => $predictedDates,
             'totalSales' => $totalSales,
             'currentPeriod' => $period,
             'currentInventoryType' => $inventoryType,

@@ -40,6 +40,11 @@
         </div>
         <div id="line-chart"></div>
     </div>
+
+    <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
+        <div id="sales-prediction-chart"></div>
+    </div>
+
     <div class="flex flex-col justify-between gap-3 mb-4 md:flex-row">
         <div class="w-full p-4 mx-auto bg-white rounded-lg card md:mb-0 md:w-1/2">
             <form id="inventory-form" method="GET" action="{{ e(route('dashboard')) }}">
@@ -160,9 +165,6 @@
         <div id="fast-moving-products-chart"></div>
     </div>
 
-    <script src="{{ asset('tailwindcharts/js/apexcharts.js') }}"></script>
-
-
     <script>
         var salesSeries = @json($salesSeries);
         var categories = @json($categories);
@@ -209,6 +211,56 @@
             };
 
             var chart = new ApexCharts(document.querySelector("#fast-moving-products-chart"), options);
+            chart.render();
+        });
+    </script>
+
+
+    <script>
+        var predictedSales = @json($predictedSales);
+        var predictedDates = @json($predictedDates);
+        console.log(predictedSales);
+        console.log(predictedDates);
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var options = {
+                chart: {
+                    type: 'line',
+                    height: 350,
+                    zoom: {
+                        enabled: false
+                    },
+                    toolbar: {
+                        show: false
+                    },
+                },
+                series: [{
+                    name: 'Predicted Sales',
+                    data: predictedSales,
+                }],
+                xaxis: {
+                    categories: predictedDates,
+                    title: {
+                        text: 'Date',
+                    },
+                },
+                yaxis: {
+                    title: {
+                        text: 'Sales Amount',
+                    },
+                },
+                title: {
+                    text: 'Sales Prediction',
+                    align: 'left',
+                },
+                grid: {
+                    borderColor: '#f1f1f1',
+                    strokeDashArray: 4,
+                },
+                colors: ['#008FFB'],
+            };
+
+            var chart = new ApexCharts(document.querySelector("#sales-prediction-chart"), options);
             chart.render();
         });
     </script>

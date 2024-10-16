@@ -10,6 +10,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductBatchController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SaleDetailController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -23,6 +24,12 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::redirect('/', 'dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings');
+    Route::get('/settings/password', [SettingController::class, 'editPassword'])->name('settings.edit.password');
+    Route::put('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.update.password');
+    Route::get('/settings/days-prediction', [SettingController::class, 'editPredictDay'])->name('settings.edit.prediction');
+    Route::put('/settings/days-prediction', [SettingController::class, 'updatePrediction'])->name('settings.update.prediction');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/inventory', [DashboardController::class, 'inventoryData'])->name('dashboard.inventory.data');

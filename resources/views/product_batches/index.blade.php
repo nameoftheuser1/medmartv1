@@ -33,6 +33,7 @@
                             <th scope="col" class="px-4 py-3 sm:px-6">Batch Number</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Expiration Date</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Supplier Price</th>
+                            <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Product Price</th>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Received Date</th>
                             <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
                         </tr>
@@ -54,6 +55,9 @@
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
                                     ₱{{ number_format($productBatch->supplier_price, 2) }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
+                                    ₱{{ number_format($productBatch->product->price, 2) }}
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
                                     {{ $productBatch->received_date->format('Y-m-d') }}

@@ -2,12 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const periodSelector = document.getElementById("period");
     let chart;
 
-    function initChart(
-        salesSeries,
-        categories,
-        predictedSales,
-        predictedCategories
-    ) {
+    function initChart(salesSeries, categories) {
         const options = {
             chart: {
                 height: "100%",
@@ -31,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 enabled: false,
             },
             stroke: {
-                width: [6, 4], // Change width for predicted series
+                width: 6, // Change width for actual series
                 curve: "smooth",
             },
             grid: {
@@ -48,18 +43,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     name: "Sales",
                     data: salesSeries,
                     color: "#009933",
-                },
-                {
-                    name: "Predicted Sales",
-                    data: predictedSales,
-                    color: "#ff9800", // Different color for predicted
-                },
+                }
             ],
             legend: {
                 show: true, // Enable legend
             },
             xaxis: {
-                categories: [...categories, ...predictedCategories], // Merge categories
+                categories: categories, // Only use categories
                 labels: {
                     show: true,
                     style: {
@@ -117,12 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 period: selectedPeriod,
             },
             success: function (response) {
-                initChart(
-                    response.salesSeries,
-                    response.categories,
-                    response.predictedSales,
-                    response.predictedCategories
-                );
+                initChart(response.salesSeries, response.categories);
             },
             error: function () {
                 alert("An error occurred while fetching the data.");
