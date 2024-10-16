@@ -17,51 +17,93 @@ class DashboardController extends Controller
 {
     private function predictSales($salesData)
     {
+        // Convert collection to array if needed
+        if ($salesData instanceof \Illuminate\Support\Collection) {
+            $salesData = $salesData->toArray();
+        }
+
+        // Retrieve settings for predicted sales day and historical data days
         $predictedSalesDay = Setting::where('key', 'predictedSalesDay')->value('value') ?? 1;
         $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 90;
+
+        // Initialize arrays for dates and sales
         $dates = [];
         $sales = [];
         $cutoffDate = strtotime("-{$historicalDataDays} days");
+
+        // Filter sales data based on the cutoff date
         foreach ($salesData as $data) {
-            $dataDate = strtotime($data->date);
+            if (!isset($data['date'], $data['total_amount'])) {
+                continue;
+            }
+
+            $totalAmount = (float) $data['total_amount'];
+            $dataDate = strtotime($data['date']);
+
+            // Only include sales data that is after the cutoff date
             if ($dataDate >= $cutoffDate) {
                 $dates[] = $dataDate;
-                $sales[] = $data->total;
+                $sales[] = $totalAmount;
             }
         }
+
         $n = count($sales);
-        if ($n == 0) {
-            return ['sales' => [], 'dates' => []];
+
+        // Handle cases with insufficient sales data
+        if ($n < 2) {
+            $defaultSalesValue = !empty($sales) ? end($sales) : 0;
+
+            return [
+                'sales' => array_fill(0, 10, max(0, $defaultSalesValue)),
+                'dates' => array_map(function ($i) use ($predictedSalesDay) {
+                    return date('Y-m-d', strtotime("+{$i} days"));
+                }, range(0, 9 * $predictedSalesDay, $predictedSalesDay))
+            ];
         }
+
+        // Calculate sums needed for linear regression
         $sumX = array_sum($dates);
         $sumY = array_sum($sales);
         $sumXY = 0;
         $sumX2 = 0;
+
         for ($i = 0; $i < $n; $i++) {
             $sumXY += $dates[$i] * $sales[$i];
             $sumX2 += $dates[$i] * $dates[$i];
         }
+
         $denominator = $n * $sumX2 - $sumX * $sumX;
+
+        // Handle case where denominator is zero
         if ($denominator == 0) {
             $defaultValue = end($sales) ?? 0;
+
             return [
                 'sales' => array_fill(0, 10, $defaultValue),
                 'dates' => array_map(function ($i) use ($predictedSalesDay) {
-                    return date('Y-m-d', strtotime("+{$i} days", strtotime('today')));
+                    return date('Y-m-d', strtotime("+{$i} days"));
                 }, range(0, 9 * $predictedSalesDay, $predictedSalesDay))
             ];
         }
+
+        // Calculate slope and intercept for linear regression
         $slope = ($n * $sumXY - $sumX * $sumY) / $denominator;
         $intercept = ($sumY - $slope * $sumX) / $n;
+
+        // Prepare arrays for predicted sales and dates
         $predictedSales = [];
         $predictedDates = [];
         $currentDate = strtotime('today') + 86400 * $predictedSalesDay;
         $maxPredictions = 10;
+
+        // Generate predicted sales for the next days
         for ($i = 0; $i < $maxPredictions; $i++) {
-            $predictedSales[] = max(0, round($slope * $currentDate + $intercept));
+            $predictedValue = max(0, round($slope * $currentDate + $intercept));
+            $predictedSales[] = $predictedValue;
             $predictedDates[] = date('Y-m-d', $currentDate);
             $currentDate += 86400 * $predictedSalesDay;
         }
+
         return ['sales' => $predictedSales, 'dates' => $predictedDates];
     }
 
@@ -120,6 +162,27 @@ class DashboardController extends Controller
                 $currentDate->addYear();
             }
         }
+
+        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 90;
+        $historicalEndDate = Carbon::now();
+        $historicalStartDate = Carbon::now()->subDays($historicalDataDays);
+
+        $historicalSalesData = Sale::select(
+            DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as date"),
+            DB::raw('SUM(total_amount) as total')
+        )
+            ->whereBetween(DB::raw('DATE(created_at)'), [$historicalStartDate->format('Y-m-d'), $historicalEndDate->format('Y-m-d')])
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get()
+            ->map(function ($data) {
+                return [
+                    'date' => $data->date,
+                    'total_amount' => $data->total
+                ];
+            })
+            ->keyBy('date');
+
 
         $productCount = Product::count();
         $supplierCount = Supplier::count();
@@ -180,7 +243,7 @@ class DashboardController extends Controller
                 return $batch;
             });
 
-        $prediction = $this->predictSales($salesData);
+        $prediction = $this->predictSales($historicalSalesData);
         $predictedSales = $prediction['sales'];
         $predictedDates = $prediction['dates'];
 
