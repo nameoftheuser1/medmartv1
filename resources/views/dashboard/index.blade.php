@@ -3,6 +3,7 @@
 //
 --}}
 
+{{--  dd($fastMovingProducts); --}}
 <x-layout>
     <h1 class="mb-4 text-5xl font-bold">Dashboard</h1>
     <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
@@ -153,5 +154,63 @@
 
     <script src="{{ asset('js/inventoryChart.js') }}"></script>
     <script src="{{ asset('jquery/jquery-3.7.1.min.js') }}"></script>
+
+    <div class="w-full p-4 mb-3 bg-white rounded-lg">
+        <h2 class="mb-2 font-mono text-xl font-bold">Fast Moving Products</h2>
+        <div id="fast-moving-products-chart"></div>
+    </div>
+
+    <script src="{{ asset('tailwindcharts/js/apexcharts.js') }}"></script>
+
+
+    <script>
+        var salesSeries = @json($salesSeries);
+        var categories = @json($categories);
+        var fastMovingProducts = @json($fastMovingProducts);
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var fastMovingProductNames = fastMovingProducts.map(function(product) {
+                return product.product_name;
+            });
+            var fastMovingProductQuantities = fastMovingProducts.map(function(product) {
+                return product.total_quantity;
+            });
+
+            var options = {
+                series: [{
+                    name: 'Quantity Sold',
+                    data: fastMovingProductQuantities
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '55%',
+                        endingShape: 'rounded'
+                    },
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: fastMovingProductNames,
+                },
+                yaxis: {
+                    title: {
+                        text: 'Quantity Sold'
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+            };
+
+            var chart = new ApexCharts(document.querySelector("#fast-moving-products-chart"), options);
+            chart.render();
+        });
+    </script>
 
 </x-layout>

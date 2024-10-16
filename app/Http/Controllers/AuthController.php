@@ -17,9 +17,6 @@ class AuthController extends Controller
             'password' => ['required'],
         ];
 
-        if ($request->email !== 'admin') {
-            $rules['email'][] = 'email';
-        }
 
         if (RateLimiter::tooManyAttempts('login:' . $request->ip(), 5)) {
             return back()->withErrors(['email' => 'Too many login attempts. Please try again later.']);

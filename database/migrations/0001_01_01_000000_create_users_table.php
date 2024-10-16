@@ -47,6 +47,15 @@ return new class extends Migration
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        DB::table('users')->insert([
+            'name' => 'staff',
+            'email' => 'staff',
+            'password' => Hash::make('admin'),
+            'role' => 'admin',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**
