@@ -30,7 +30,7 @@
                 <tbody>
                     @foreach ($saleDetails as $detail)
                         <tr>
-                            <td class="border-b py-2 px-4">{{ $detail->product->name }}</td>
+                            <td class="border-b py-2 px-4">{{ $detail->product->product_name }}</td>
                             <td class="border-b py-2 px-4">{{ $detail->quantity }}</td>
                             <td class="border-b py-2 px-4">{{ number_format($detail->price, 2) }}</td>
                             <td class="border-b py-2 px-4">{{ number_format($detail->quantity * $detail->price, 2) }}
