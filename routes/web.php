@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('sale_details', SaleDetailController::class);
 
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
+    Route::get('/receipt/{sale_id}', [POSController::class, 'receipt'])->name('pos.receipt');
     Route::post('/pos/add-item', [POSController::class, 'addItem'])->name('pos.addItem');
     Route::post('/pos/remove-item', [POSController::class, 'removeItem'])->name('pos.removeItem');
     Route::post('/pos/update-item', [POSController::class, 'updateItem'])->name('pos.updateItem');

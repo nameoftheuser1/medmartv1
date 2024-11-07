@@ -39,9 +39,9 @@
                     </form>
                     <div class="grid grid-cols-1 divide-y-[2px] divide-gray-300">
 
-                        <div class="flex justify-center gap-1">
+                        {{-- <div class="flex justify-center gap-1">
                             <a href="locale/en">English</a>| <a href="locale/fil">Filipino</a>
-                        </div>
+                        </div> --}}
                     </div>
                     <p class="text-gray-400 text-[12px]">BSU &#169; 2024</p>
                 </div>

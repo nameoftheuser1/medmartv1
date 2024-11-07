@@ -164,8 +164,8 @@
                             <span>Logout</span>
                         </button>
                     </form>
-                    <div class="flex w-full justify-center gap-2"><a href="locale/en">English</a>|<a
-                            href="locale/fil">Filipino</a></div>
+                    {{-- <div class="flex w-full justify-center gap-2"><a href="locale/en">English</a>|<a
+                            href="locale/fil">Filipino</a></div> --}}
                     <p class="text-center text-sm text-gray-400">BSU 2024</p>
                 </div>
             </div>

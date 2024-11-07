@@ -12,18 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('settings', function (Blueprint $table) {
+        Schema::create('sales_data', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique();
-            $table->integer('value');
+            $table->decimal('value', 15, 2);
+            $table->string('month');
             $table->timestamps();
         });
-
-        DB::table('settings')->insert([
-            ['key' => 'predictedSalesDay', 'value' => 1],
-            ['key' => 'historicalDataDays', 'value' => 90],
-            ['key' => 'predictedSalesMonth', 'value' => 1],
-        ]);
     }
 
     /**
@@ -31,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('settings');
+        Schema::dropIfExists('sales_data');
     }
 };

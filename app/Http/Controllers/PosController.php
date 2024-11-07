@@ -135,6 +135,7 @@ class POSController extends Controller
         $sessionId = $this->getSessionId();
         $cartItems = TemporaryCartItem::where('session_id', $sessionId)->get();
         $discountPercentage = session()->get('discountPercentage', 0);
+        $exchange = $request->input('exchange', 0);
 
         if ($cartItems->isEmpty()) {
             return redirect()->route('pos.index')->with('error', 'No items in the cart.');
@@ -146,10 +147,17 @@ class POSController extends Controller
 
         $totalAmount = $totalAmount * (1 - $discountPercentage / 100);
 
+        $changeAmount = $exchange - $totalAmount;
+
+        if ($changeAmount < 0) {
+            return redirect()->route('pos.index')->with('error', 'Insufficient funds.');
+        }
+
         $sale = Sale::create([
             'user_id' => auth()->user()->id,
             'total_amount' => $totalAmount,
             'discount_percentage' => $discountPercentage,
+            'exchange' => $exchange,
         ]);
 
         foreach ($cartItems as $cartItem) {
@@ -166,7 +174,15 @@ class POSController extends Controller
         TemporaryCartItem::where('session_id', $sessionId)->delete();
         session()->forget('discountPercentage');
 
-        return redirect()->route('pos.index')->with('success', 'Sale completed successfully.');
+        return redirect()->route('pos.receipt', ['sale_id' => $sale->id])->with('success', 'Sale completed successfully. Change: ₱' . number_format($changeAmount, 2));
+    }
+
+    public function receipt($saleId)
+    {
+        $sale = Sale::findOrFail($saleId); // Find the sale by its ID
+        $saleDetails = SaleDetail::where('sale_id', $sale->id)->get(); // Get all sale details for the sale
+
+        return view('pos.receipt', compact('sale', 'saleDetails'));
     }
 
     private function updateInventory($productId, $quantityToReduce)

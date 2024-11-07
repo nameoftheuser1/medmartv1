@@ -27,6 +27,8 @@
                         <p><strong>Sale Time:</strong> {{ $sale->created_at }}</p>
                         <p><strong>Status:</strong> {{ $sale->status ?? 'Completed' }}</p>
                         <div class="mt-2">
+                            <a href="{{ route('pos.receipt', $sale->id) }}"
+                                class="text-blue-600 hover:underline">View Receipt</a>
                             @if ($sale->status !== 'refunded')
                                 <form action="{{ route('sales.refund', $sale->id) }}" method="POST" class="inline">
                                     @csrf
@@ -68,6 +70,8 @@
                                 <td class="px-6 py-4">{{ $sale->created_at->format('F j, Y h:i A') }}</td>
                                 <td class="px-6 py-4">{{ $sale->status ?? 'Completed' }}</td>
                                 <td class="px-6 py-4">
+                                    <a href="{{ route('pos.receipt', $sale->id) }}"
+                                        class="text-blue-600 hover:underline">View Receipt</a>
                                     @if ($sale->status !== 'refunded')
                                         <form action="{{ route('sales.refund', $sale->id) }}" method="POST"
                                             class="inline">

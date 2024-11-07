@@ -9,7 +9,7 @@
         <p class="text-red-500">{{ session('error') }}</p>
     @endif
 
-    <div class="flex flex-col sm:flex-row  w-full gap-2">
+    <div class="flex flex-col sm:flex-row w-full gap-2">
         <div class="rounded-lg card w-full ">
             <h2>Select Product</h2>
             <div class="mb-4">
@@ -122,11 +122,21 @@
             <div class="mt-4 flex flex-col gap-3">
                 <h3>Total Price: ₱{{ number_format($totalPrice, 2) }}</h3>
                 <h3>Discount: {{ $discountPercentage }}%</h3>
-                <h3>Final Price: ₱{{ number_format($totalPrice * (1 - $discountPercentage / 100), 2) }}</h3>
+                <h3>Final Price: ₱<span
+                        id="final-price">{{ number_format($totalPrice * (1 - $discountPercentage / 100), 2) }}</span>
+                </h3>
+            </div>
+
+            <!-- Exchange Section -->
+            <div class="mt-4 flex flex-col gap-3">
+                <label for="exchange">Enter Amount:</label>
+                <input type="number" id="exchange-input" class="input" min="0">
+                <h3>Change: ₱<span id="change-amount">0.00</span></h3>
             </div>
 
             <form action="{{ route('pos.checkout') }}" method="POST">
                 @csrf
+                <input type="hidden" name="exchange" id="exchange-hidden-input">
                 <button type="submit" class="w-full px-6 py-2 mt-4 text-white bg-blue-600 rounded">Checkout</button>
             </form>
         </div>
@@ -138,6 +148,10 @@
             const addToSaleForm = document.getElementById('add-to-sale-form');
             const selectedProductIdInput = document.getElementById('selected-product-id');
             const searchInput = document.getElementById('search-input');
+            const exchangeInput = document.getElementById('exchange-input');
+            const exchangeHiddenInput = document.getElementById('exchange-hidden-input');
+            const changeAmountElement = document.getElementById('change-amount');
+            const finalPriceElement = document.getElementById('final-price');
 
             searchInput.addEventListener('input', function() {
                 const query = this.value.toLowerCase();
@@ -156,6 +170,14 @@
                     selectedProductIdInput.value = this.getAttribute('data-id');
                     addToSaleForm.classList.remove('hidden');
                 });
+            });
+
+            exchangeInput.addEventListener('input', function() {
+                const finalPrice = parseFloat(finalPriceElement.textContent.replace(/[^0-9.-]+/g, ""));
+                const exchangeAmount = parseFloat(this.value) || 0;
+                const changeAmount = exchangeAmount - finalPrice;
+                changeAmountElement.textContent = changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00";
+                exchangeHiddenInput.value = this.value;
             });
         });
     </script>

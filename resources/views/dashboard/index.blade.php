@@ -219,8 +219,6 @@
     <script>
         var predictedSales = @json($predictedSales);
         var predictedDates = @json($predictedDates);
-        console.log(predictedSales);
-        console.log(predictedDates);
 
         document.addEventListener("DOMContentLoaded", function() {
             var options = {

@@ -12,128 +12,21 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Phpml\Regression\LeastSquares;
 
 class DashboardController extends Controller
 {
-    private function predictSales($salesData)
-    {
-        // Convert collection to array if needed
-        if ($salesData instanceof \Illuminate\Support\Collection) {
-            $salesData = $salesData->toArray();
-        }
-
-        // Retrieve settings for predicted sales day and historical data days
-        $predictedSalesDay = Setting::where('key', 'predictedSalesDay')->value('value') ?? 1;
-        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 90;
-
-        // Initialize arrays for dates and sales
-        $dates = [];
-        $sales = [];
-        $cutoffDate = strtotime("-{$historicalDataDays} days");
-
-        // Filter sales data based on the cutoff date
-        foreach ($salesData as $data) {
-            if (!isset($data['date'], $data['total_amount'])) {
-                continue;
-            }
-
-            $totalAmount = (float) $data['total_amount'];
-            $dataDate = strtotime($data['date']);
-
-            // Only include sales data that is after the cutoff date
-            if ($dataDate >= $cutoffDate) {
-                $dates[] = $dataDate;
-                $sales[] = $totalAmount;
-            }
-        }
-
-        $n = count($sales);
-
-        // Handle cases with insufficient sales data
-        if ($n < 2) {
-            $defaultSalesValue = !empty($sales) ? end($sales) : 0;
-
-            return [
-                'sales' => array_fill(0, 10, max(0, $defaultSalesValue)),
-                'dates' => array_map(function ($i) use ($predictedSalesDay) {
-                    return date('Y-m-d', strtotime("+{$i} days"));
-                }, range(0, 9 * $predictedSalesDay, $predictedSalesDay))
-            ];
-        }
-
-        // Calculate sums needed for linear regression
-        $sumX = array_sum($dates);
-        $sumY = array_sum($sales);
-        $sumXY = 0;
-        $sumX2 = 0;
-
-        for ($i = 0; $i < $n; $i++) {
-            $sumXY += $dates[$i] * $sales[$i];
-            $sumX2 += $dates[$i] * $dates[$i];
-        }
-
-        $denominator = $n * $sumX2 - $sumX * $sumX;
-
-        // Handle case where denominator is zero
-        if ($denominator == 0) {
-            $defaultValue = end($sales) ?? 0;
-
-            return [
-                'sales' => array_fill(0, 10, $defaultValue),
-                'dates' => array_map(function ($i) use ($predictedSalesDay) {
-                    return date('Y-m-d', strtotime("+{$i} days"));
-                }, range(0, 9 * $predictedSalesDay, $predictedSalesDay))
-            ];
-        }
-
-        // Calculate slope and intercept for linear regression
-        $slope = ($n * $sumXY - $sumX * $sumY) / $denominator;
-        $intercept = ($sumY - $slope * $sumX) / $n;
-
-        // Prepare arrays for predicted sales and dates
-        $predictedSales = [];
-        $predictedDates = [];
-        $currentDate = strtotime('today') + 86400 * $predictedSalesDay;
-        $maxPredictions = 10;
-
-        // Generate predicted sales for the next days
-        for ($i = 0; $i < $maxPredictions; $i++) {
-            $predictedValue = max(0, round($slope * $currentDate + $intercept));
-            $predictedSales[] = $predictedValue;
-            $predictedDates[] = date('Y-m-d', $currentDate);
-            $currentDate += 86400 * $predictedSalesDay;
-        }
-
-        return ['sales' => $predictedSales, 'dates' => $predictedDates];
-    }
-
     public function index(Request $request)
     {
         $period = $request->input('period', 'weekly');
         $inventoryType = $request->input('inventory-type', 'highest');
 
-        switch ($period) {
-            case 'monthly':
-                $startDate = Carbon::now()->startOfMonth()->subMonths(11);
-                $endDate = Carbon::now()->endOfMonth();
-                $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")';
-                $dateFormat = 'Y-m';
-                $displayFormat = 'M Y';
-                break;
-            case 'yearly':
-                $startDate = Carbon::now()->startOfYear()->subYears(4);
-                $endDate = Carbon::now()->endOfYear();
-                $groupBy = 'YEAR(created_at)';
-                $dateFormat = 'Y';
-                $displayFormat = 'Y';
-                break;
-            default:
-                $startDate = Carbon::now()->subDays(6);
-                $endDate = Carbon::now();
-                $groupBy = 'DATE(created_at)';
-                $dateFormat = 'Y-m-d';
-                $displayFormat = 'D';
-        }
+        $dateSettings = $this->getDateRangeAndFormats($period);
+        $startDate = $dateSettings['startDate'];
+        $endDate = $dateSettings['endDate'];
+        $groupBy = $dateSettings['groupBy'];
+        $dateFormat = $dateSettings['dateFormat'];
+        $displayFormat = $dateSettings['displayFormat'];
 
         $salesData = Sale::select(DB::raw("$groupBy as date"), DB::raw('SUM(total_amount) as total'))
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -144,7 +37,10 @@ class DashboardController extends Controller
 
         $categories = [];
         $salesSeries = [];
-        $totalSales = 0;
+
+        $totalSales = DB::table('sales')
+            ->where('status', 'complete')
+            ->sum('total_amount');
 
         $currentDate = $startDate->copy();
         while ($currentDate <= $endDate) {
@@ -152,7 +48,6 @@ class DashboardController extends Controller
             $categories[] = $currentDate->format($displayFormat);
             $dailySales = $salesData->get($formattedDate)->total ?? 0;
             $salesSeries[] = $dailySales;
-            $totalSales += $dailySales;
 
             if ($period === 'weekly') {
                 $currentDate->addDay();
@@ -162,27 +57,6 @@ class DashboardController extends Controller
                 $currentDate->addYear();
             }
         }
-
-        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 90;
-        $historicalEndDate = Carbon::now();
-        $historicalStartDate = Carbon::now()->subDays($historicalDataDays);
-
-        $historicalSalesData = Sale::select(
-            DB::raw("DATE_FORMAT(created_at, '%Y-%m-%d') as date"),
-            DB::raw('SUM(total_amount) as total')
-        )
-            ->whereBetween(DB::raw('DATE(created_at)'), [$historicalStartDate->format('Y-m-d'), $historicalEndDate->format('Y-m-d')])
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get()
-            ->map(function ($data) {
-                return [
-                    'date' => $data->date,
-                    'total_amount' => $data->total
-                ];
-            })
-            ->keyBy('date');
-
 
         $productCount = Product::count();
         $supplierCount = Supplier::count();
@@ -243,7 +117,7 @@ class DashboardController extends Controller
                 return $batch;
             });
 
-        $prediction = $this->predictSales($historicalSalesData);
+        $prediction = $this->predictSales();
         $predictedSales = $prediction['sales'];
         $predictedDates = $prediction['dates'];
 
@@ -273,5 +147,130 @@ class DashboardController extends Controller
             'inventoryBatches' => $inventoryBatches,
             'fastMovingProducts' => $fastMovingProducts,
         ]);
+    }
+
+    private function getDateRangeAndFormats($period)
+    {
+        switch ($period) {
+            case 'monthly':
+                $startDate = Carbon::now()->startOfMonth()->subMonths(11);
+                $endDate = Carbon::now()->endOfMonth();
+                $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")';
+                $dateFormat = 'Y-m';
+                $displayFormat = 'M Y';
+                break;
+            case 'yearly':
+                $startDate = Carbon::now()->startOfYear()->subYears(4);
+                $endDate = Carbon::now()->endOfYear();
+                $groupBy = 'YEAR(created_at)';
+                $dateFormat = 'Y';
+                $displayFormat = 'Y';
+                break;
+            default:
+                $startDate = Carbon::now()->subDays(6);
+                $endDate = Carbon::now();
+                $groupBy = 'DATE(created_at)';
+                $dateFormat = 'Y-m-d';
+                $displayFormat = 'D';
+        }
+
+        return [
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'groupBy' => $groupBy,
+            'dateFormat' => $dateFormat,
+            'displayFormat' => $displayFormat,
+        ];
+    }
+
+    private function predictSales()
+    {
+        // Define the default months for prediction if not set in settings
+        $predictedSalesMonth = Setting::where('key', 'predictedSalesMonth')->value('value') ?? 1;
+
+        // Retrieve historical sales data
+        $salesData = $this->getHistoricalData();
+
+        $samples = [];
+        $targets = [];
+
+        foreach ($salesData as $data) {
+            if (!isset($data->date, $data->total_amount)) {
+                continue;
+            }
+
+            $totalAmount = (float) $data->total_amount;
+            $dataDate = strtotime($data->date);
+
+            $samples[] = [$dataDate];
+            $targets[] = $totalAmount;
+        }
+
+        // Handle cases with insufficient data for predictions
+        if (count($samples) < 2) {
+            // If there's insufficient data, predict using a simple trend or default value
+            $defaultSalesValue = !empty($targets) ? end($targets) : 0;
+            $predictedSales = array_fill(0, 10, max(0, $defaultSalesValue));
+            $predictedDates = array_map(function ($i) use ($predictedSalesMonth) {
+                return date('F Y', strtotime("+{$i} months"));
+            }, range(0, 9 * $predictedSalesMonth, $predictedSalesMonth));
+
+            return ['sales' => $predictedSales, 'dates' => $predictedDates];
+        }
+
+        // Perform linear regression
+        $regression = new LeastSquares();
+        $regression->train($samples, $targets);
+
+        // Generate predictions for the next 10 months
+        $predictedSales = [];
+        $predictedDates = [];
+        $currentDate = strtotime('first day of next month');
+        $now = strtotime('first day of this month');
+
+        for ($i = 0; $i < 10; $i++) {
+            $predictedValue = max(0, round($regression->predict([$currentDate])));
+            $predictedDate = date('F Y', $currentDate);
+
+            // Store the prediction in the database if the month is in the past
+            if ($currentDate < $now) {
+                DB::table('sales_data')->updateOrInsert(
+                    ['key' => 'predicted_sales_' . date('Ym', $currentDate)],
+                    [
+                        'value' => $predictedValue,
+                        'month' => $predictedDate,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                );
+            }
+
+            // Store prediction for return
+            $predictedSales[] = $predictedValue;
+            $predictedDates[] = $predictedDate;
+
+            // Move to the next prediction month
+            $currentDate = strtotime("+{$predictedSalesMonth} months", $currentDate);
+        }
+
+        return ['sales' => $predictedSales, 'dates' => $predictedDates];
+    }
+
+    private function getHistoricalData()
+    {
+        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 90;
+
+        $cutoffDate = now()->subDays($historicalDataDays);
+
+        $salesData = DB::table('sales')
+            ->whereDate('created_at', '>=', $cutoffDate)
+            ->select('created_at as date', 'total_amount')
+            ->get()
+            ->map(function ($record) {
+                $record->date = Carbon::parse($record->date)->format('Y-m-d');
+                return $record;
+            });
+
+        return $salesData;
     }
 }
