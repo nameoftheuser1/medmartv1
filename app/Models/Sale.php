@@ -14,7 +14,8 @@ class Sale extends Model
     protected $fillable = [
         'user_id',
         'total_amount',
-        'discount_percentage'
+        'discount_percentage',
+        'exchange'
     ];
 
     public function user(): BelongsTo
