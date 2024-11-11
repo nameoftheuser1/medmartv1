@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventory;
-use App\Http\Requests\StoreInventoryRequest;
-use App\Http\Requests\UpdateInventoryRequest;
 use App\Models\ProductBatch;
 use Illuminate\Http\Request;
 
@@ -62,13 +60,6 @@ class InventoryController extends Controller
         return redirect()->route('inventories.index')->with('success', 'Product batch created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Inventory $inventory)
-    {
-        //
-    }
 
     /**
      * Show the form for editing the specified resource.
@@ -105,5 +96,16 @@ class InventoryController extends Controller
         $inventory->delete();
 
         return back()->with('deleted', 'The product was deleted');
+    }
+
+    /**
+     * Set the quantity of an inventory item to zero if the product is expired.
+     */
+    public function emptyQuantity(Inventory $inventory)
+    {
+        // Update the quantity to zero
+        $inventory->update(['quantity' => 0]);
+
+        return redirect()->back()->with('success', 'Product quantity set to zero successfully.');
     }
 }

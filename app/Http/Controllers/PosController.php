@@ -81,7 +81,13 @@ class POSController extends Controller
         return redirect()->route('pos.index');
     }
 
+    public function removeAllItems()
+    {
+        $sessionId = $this->getSessionId();
+        TemporaryCartItem::where('session_id', $sessionId)->delete();
 
+        return redirect()->route('pos.index')->with('success', 'All items removed from the cart.');
+    }
 
     public function removeItem(Request $request)
     {

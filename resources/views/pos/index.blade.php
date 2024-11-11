@@ -77,7 +77,7 @@
                                     <p><span class="font-bold">Total:</span>
                                         ₱{{ number_format($item->quantity * $item->price, 2) }}</p>
                                 </div>
-                                <div class="mt-4 flex gap-2">
+                                <div class="mt-4 flex gap-2 justify-center">
                                     <!-- Remove button -->
                                     <form action="{{ route('pos.removeItem') }}" method="POST" class="inline">
                                         @csrf
@@ -101,6 +101,13 @@
                                     </form>
                                 </div>
                             </div>
+                            <div class="mt-4">
+                                <form action="{{ route('pos.removeAllItems') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="px-6 py-2 text-white bg-red-600 rounded w-full">Remove All
+                                        Items</button>
+                                </form>
+                            </div>
                         @endforeach
                     </div>
                 </div>
@@ -112,7 +119,7 @@
         <div class="flex bg-white w-full p-2 gap-5 rounded-lg me-5 mt-2">
             <form action="{{ route('pos.applyDiscount') }}" method="POST">
                 @csrf
-                <label for="discount_percentage">Discount (%):</label>
+                <label for="discount_percentage">Discount (1-100%):</label>
                 <input type="number" name="discount_percentage" id="discount_percentage" class="m-2 input"
                     value="{{ $discountPercentage }}" min="0" max="100">
                 <div class="flex justify-center mt-4">
@@ -129,8 +136,21 @@
 
             <!-- Exchange Section -->
             <div class="mt-4 flex flex-col gap-3">
-                <label for="exchange">Enter Amount:</label>
-                <input type="number" id="exchange-input" class="input" min="0">
+                <label for="exchange-input">Enter Amount:</label>
+                <input type="number" id="exchange-input" class="input" min="0" value="{{ $totalPrice }}">
+
+                <!-- Amount Selection Cards -->
+                <div class="flex gap-2 mt-2">
+                    <!-- Clickable cards for amounts -->
+                    @foreach ([20, 50, 100, 200, 500, 1000] as $amount)
+                        <button type="button"
+                            class="amount-card w-16 h-16 flex items-center justify-center bg-gray-200 text-lg font-bold rounded-lg hover:bg-gray-300"
+                            data-amount="{{ $amount }}">
+                            ₱{{ $amount }}
+                        </button>
+                    @endforeach
+                </div>
+
                 <h3>Change: ₱<span id="change-amount">0.00</span></h3>
             </div>
 
@@ -142,43 +162,5 @@
         </div>
     @endif
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const productCards = document.querySelectorAll('.product-card');
-            const addToSaleForm = document.getElementById('add-to-sale-form');
-            const selectedProductIdInput = document.getElementById('selected-product-id');
-            const searchInput = document.getElementById('search-input');
-            const exchangeInput = document.getElementById('exchange-input');
-            const exchangeHiddenInput = document.getElementById('exchange-hidden-input');
-            const changeAmountElement = document.getElementById('change-amount');
-            const finalPriceElement = document.getElementById('final-price');
-
-            searchInput.addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                productCards.forEach(card => {
-                    const productName = card.getAttribute('data-name').toLowerCase();
-                    card.classList.toggle('hidden', !productName.includes(query));
-                });
-            });
-
-            productCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    productCards.forEach(card => card.classList.remove('ring', 'ring-green-500',
-                        'bg-green-50'));
-                    this.classList.add('ring', 'ring-green-500', 'bg-green-50');
-
-                    selectedProductIdInput.value = this.getAttribute('data-id');
-                    addToSaleForm.classList.remove('hidden');
-                });
-            });
-
-            exchangeInput.addEventListener('input', function() {
-                const finalPrice = parseFloat(finalPriceElement.textContent.replace(/[^0-9.-]+/g, ""));
-                const exchangeAmount = parseFloat(this.value) || 0;
-                const changeAmount = exchangeAmount - finalPrice;
-                changeAmountElement.textContent = changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00";
-                exchangeHiddenInput.value = this.value;
-            });
-        });
-    </script>
+    <script src="{{ asset('js/posScript.js') }}"></script>
 </x-layout>

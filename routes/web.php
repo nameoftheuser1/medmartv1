@@ -50,6 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/pos/update-item', [POSController::class, 'updateItem'])->name('pos.updateItem');
     Route::post('/pos/checkout', [POSController::class, 'checkout'])->name('pos.checkout');
     Route::post('/pos/apply-discount', [POSController::class, 'applyDiscount'])->name('pos.applyDiscount');
+    Route::post('/pos/remove-all-items', [POSController::class, 'removeAllItems'])->name('pos.removeAllItems');
+
+    Route::patch('/inventories/{inventory}/empty-quantity', [InventoryController::class, 'emptyQuantity'])->name('inventories.emptyQuantity');
 });
 
 Route::get('locale/{lang}', [LocaleController::class, 'setLocale']);

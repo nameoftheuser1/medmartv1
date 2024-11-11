@@ -40,15 +40,20 @@
                                 class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
                                 <td
                                     class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
-                                    {{ $inventory->productBatch->product->product_name }}</td>
+                                    {{ $inventory->productBatch->product->product_name }}
+                                </td>
                                 <td class="px-4 py-4 sm:px-6 ">
-                                    {{ $inventory->productBatch->batch_number }}</td>
+                                    {{ $inventory->productBatch->batch_number }}
+                                </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                    {{ $inventory->productBatch->expiration_date->format('Y-m-d') }}</td>
+                                    {{ $inventory->productBatch->expiration_date->format('Y-m-d') }}
+                                </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                    ₱{{ number_format($inventory->productBatch->supplier_price, 2) }}</td>
+                                    ₱{{ number_format($inventory->productBatch->supplier_price, 2) }}
+                                </td>
                                 <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
-                                    {{ $inventory->productBatch->received_date->format('Y-m-d') }}</td>
+                                    {{ $inventory->productBatch->received_date->format('Y-m-d') }}
+                                </td>
                                 <td class="px-4 py-4 sm:px-6">{{ $inventory->quantity }}</td>
                                 <td class="px-4 py-4 sm:px-6">
                                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -60,6 +65,17 @@
                                             <button type="submit"
                                                 class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
                                         </form>
+
+                                        @if ($inventory->quantity > 0)
+                                            <form action="{{ route('inventories.emptyQuantity', $inventory) }}"
+                                                method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="font-medium text-yellow-600 dark:text-yellow-500 hover:underline">Empty
+                                                    Quantity</button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
