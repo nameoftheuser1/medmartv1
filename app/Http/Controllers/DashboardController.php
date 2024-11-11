@@ -58,10 +58,14 @@ class DashboardController extends Controller
             }
         }
 
-        $productCount = Product::count();
-        $supplierCount = Supplier::count();
-        $saleCount = Sale::count();
+        //for the counts
+        $counts = $this->getCounts();
 
+        $productCount = $counts['productCount'];
+        $supplierCount = $counts['supplierCount'];
+        $saleCount = $counts['saleCount'];
+
+        // This code retrieves product batches that are expiring within the next 30 days
         $thresholdDate = Carbon::now()->addDays(30);
 
         $expiringBatches = ProductBatch::with(['product', 'inventories'])
@@ -72,29 +76,13 @@ class DashboardController extends Controller
             ->orderBy('expiration_date', 'asc')
             ->paginate(5);
 
+        //this get the sales today
         $totalSalesToday = Sale::whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
-        $fastMovingProducts = SaleDetail::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
-            ->whereHas('sales', function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            })
-            ->groupBy('product_id')
-            ->orderBy('total_quantity', 'desc')
-            ->limit(10)
-            ->with('product')
-            ->get()
-            ->map(function ($saleDetail) {
-                $product = $saleDetail->product;
-                return [
-                    'product_id' => $product->id,
-                    'product_name' => $product->product_name,
-                    'generic_name' => $product->generic_name,
-                    'category' => $product->category,
-                    'total_quantity' => $saleDetail->total_quantity,
-                    'price' => $product->price,
-                ];
-            });
+        //this is for the fast moving product
+        $fastMovingProducts = $this->getFastMovingProducts($startDate, $endDate);
+
 
         $inventoryQuery = Inventory::select('batch_id', DB::raw('SUM(quantity) as quantity'))
             ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
@@ -148,6 +136,20 @@ class DashboardController extends Controller
             'fastMovingProducts' => $fastMovingProducts,
         ]);
     }
+
+    private function getCounts()
+    {
+        $productCount = Product::count();
+        $supplierCount = Supplier::count();
+        $saleCount = Sale::count();
+
+        return [
+            'productCount' => $productCount,
+            'supplierCount' => $supplierCount,
+            'saleCount' => $saleCount,
+        ];
+    }
+
 
     private function getDateRangeAndFormats($period)
     {
@@ -272,5 +274,30 @@ class DashboardController extends Controller
             });
 
         return $salesData;
+    }
+
+    private function getFastMovingProducts($startDate, $endDate)
+    {
+        return SaleDetail::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
+            ->whereHas('sales', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->groupBy('product_id')
+            ->orderBy('total_quantity', 'desc')
+            ->limit(10)
+            ->with('product')
+            ->get()
+            ->map(function ($saleDetail) {
+
+                $product = $saleDetail->product;
+                return [
+                    'product_id' => $product->id,
+                    'product_name' => $product->product_name,
+                    'generic_name' => $product->generic_name,
+                    'category' => $product->category,
+                    'total_quantity' => $saleDetail->total_quantity,
+                    'price' => $product->price,
+                ];
+            });
     }
 }
