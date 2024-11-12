@@ -101,14 +101,14 @@
                                     </form>
                                 </div>
                             </div>
-                            <div class="mt-4">
-                                <form action="{{ route('pos.removeAllItems') }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit" class="px-6 py-2 text-white bg-red-600 rounded w-full">Remove All
-                                        Items</button>
-                                </form>
-                            </div>
                         @endforeach
+                        <div class="mt-4">
+                            <form action="{{ route('pos.removeAllItems') }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="px-6 py-2 text-white bg-red-600 rounded w-full">Remove All
+                                    Items</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             @endif
