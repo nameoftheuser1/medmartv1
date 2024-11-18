@@ -11,7 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     const changeAmountElement = document.getElementById("change-amount");
     const finalPriceElement = document.getElementById("final-price");
-    const amountCards = document.querySelectorAll(".amount-card"); // New line for amount selection cards
+    const amountCards = document.querySelectorAll(".amount-card");
+    const discountCards = document.querySelectorAll(".discount-card"); // New line for discount selection cards
+    const discountInput = document.getElementById("discount_percentage"); // Discount input element
+    const resetExchangeButton = document.getElementById(
+        "reset-exchange-button"
+    );
 
     // Search functionality for products
     searchInput.addEventListener("input", function () {
@@ -65,5 +70,39 @@ document.addEventListener("DOMContentLoaded", function () {
             changeAmountElement.textContent =
                 changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00";
         });
+    });
+
+    // Discount selection cards functionality
+    discountCards.forEach((card) => {
+        card.addEventListener("click", function () {
+            const discount = parseFloat(this.getAttribute("data-discount"));
+
+            // Update the discount input with the selected value
+            discountInput.value = discount;
+
+            // Update the final price based on the selected discount
+            const totalPrice = parseFloat(
+                finalPriceElement.textContent.replace(/[^0-9.-]+/g, "")
+            );
+            finalPriceElement.textContent = (
+                totalPrice *
+                (1 - discount / 100)
+            ).toFixed(2);
+        });
+    });
+
+    // Reset button functionality
+    resetExchangeButton.addEventListener("click", function () {
+        // Set the exchange input to 0
+        exchangeInput.value = 0;
+        exchangeHiddenInput.value = 0;
+
+        // Recalculate the change amount
+        const finalPrice = parseFloat(
+            finalPriceElement.textContent.replace(/[^0-9.-]+/g, "")
+        );
+        const changeAmount = 0 - finalPrice;
+        changeAmountElement.textContent =
+            changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00";
     });
 });

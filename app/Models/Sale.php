@@ -15,7 +15,8 @@ class Sale extends Model
         'user_id',
         'total_amount',
         'discount_percentage',
-        'exchange'
+        'exchange',
+        'created_at'
     ];
 
     public function user(): BelongsTo

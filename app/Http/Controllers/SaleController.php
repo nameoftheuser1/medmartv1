@@ -47,12 +47,34 @@ class SaleController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create() {}
+    public function create()
+    {
+        return view('sales.create');
+    }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'created_at' => 'required|date',
+            'total_amount' => 'required|numeric|min:0',
+        ]);
+
+        // Create a new Sale record
+        Sale::create([
+            'user_id' => auth()->id(),
+            'created_at' => $request->input('created_at'),
+            'total_amount' => $request->input('total_amount'),
+            'discount_percentage' => 0,
+            'exchange' => 0,
+        ]);
+
+        return redirect()->route('sales.index')->with('success', 'Sale created successfully.');
+    }
+
 
     /**
      * Display the specified resource.

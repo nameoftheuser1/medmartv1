@@ -10,6 +10,10 @@
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
         </div>
+        <div class="flex mb-5">
+            <a href="{{ route('sales.create') }}" class="w-full text-lg text-center btn sm:w-auto">Add Sales
+            </a>
+        </div>
 
         <div class="sm:hidden">
             @if ($sales->isEmpty())
@@ -27,8 +31,8 @@
                         <p><strong>Sale Time:</strong> {{ $sale->created_at }}</p>
                         <p><strong>Status:</strong> {{ $sale->status ?? 'Completed' }}</p>
                         <div class="mt-2">
-                            <a href="{{ route('pos.receipt', $sale->id) }}"
-                                class="text-blue-600 hover:underline">View Receipt</a>
+                            <a href="{{ route('pos.receipt', $sale->id) }}" class="text-blue-600 hover:underline">View
+                                Receipt</a>
                             @if ($sale->status !== 'refunded')
                                 <form action="{{ route('sales.refund', $sale->id) }}" method="POST" class="inline">
                                     @csrf
