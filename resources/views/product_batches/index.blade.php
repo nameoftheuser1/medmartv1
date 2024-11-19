@@ -1,3 +1,6 @@
+@php
+    use Carbon\Carbon;
+@endphp
 <x-layout>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
@@ -41,6 +44,11 @@
 
                     <tbody>
                         @foreach ($productBatches as $productBatch)
+                            @php
+                                $expirationDate = $productBatch->expiration_date;
+                                $isExpired = $expirationDate->isPast();
+                                $isNearExpiry = !$isExpired && $expirationDate->diffInDays(Carbon::today()) <= 30;
+                            @endphp
                             <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
                                 onclick="window.location='{{ route('product_batches.show', $productBatch->id) }}'">
                                 <td
@@ -51,7 +59,10 @@
                                     {{ $productBatch->batch_number }}
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                    {{ $productBatch->expiration_date->format('Y-m-d') }}
+                                    <span
+                                        class="{{ $isExpired ? 'text-red-500' : ($isNearExpiry ? 'text-yellow-500' : '') }}">
+                                        {{ $expirationDate->format('Y-m-d') }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
                                     ₱{{ number_format($productBatch->supplier_price, 2) }}

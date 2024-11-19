@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Inventory;
 use App\Models\ProductBatch;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -18,7 +19,7 @@ class InventoryController extends Controller
         $inventories = Inventory::query()
             ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
             ->join('products', 'product_batches.product_id', '=', 'products.id')
-            ->select('inventories.*')
+            ->select('inventories.*', 'product_batches.expiration_date', 'product_batches.supplier_price', 'product_batches.received_date', 'product_batches.batch_number', 'products.product_name')
             ->where(function ($query) use ($search) {
                 $query->where('product_batches.batch_number', 'like', "%{$search}%")
                     ->orWhere('product_batches.expiration_date', 'like', "%{$search}%")
@@ -30,10 +31,27 @@ class InventoryController extends Controller
             ->latest()
             ->paginate(10);
 
+        // Calculate expiration status and quantity status
+        $inventories->getCollection()->transform(function ($inventory) {
+            $expirationDate = $inventory->productBatch->expiration_date;
+            $quantity = $inventory->quantity;
+
+            // Expiration logic
+            $inventory->isExpired = $expirationDate->isPast();
+            $inventory->isNearExpiry = $expirationDate->diffInDays(Carbon::today()) <= 30;
+
+            // Quantity logic
+            $inventory->isLowStock = $quantity <= 30;
+            $inventory->isOutOfStock = $quantity == 0;
+
+            return $inventory;
+        });
+
         return view('inventories.index', [
             'inventories' => $inventories,
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.

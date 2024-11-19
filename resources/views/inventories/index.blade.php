@@ -10,6 +10,7 @@
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
         </div>
+
         <div>
             @if (session('success'))
                 <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
@@ -42,11 +43,14 @@
                                     class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
                                     {{ $inventory->productBatch->product->product_name }}
                                 </td>
-                                <td class="px-4 py-4 sm:px-6 ">
+                                <td class="px-4 py-4 sm:px-6">
                                     {{ $inventory->productBatch->batch_number }}
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                    {{ $inventory->productBatch->expiration_date->format('Y-m-d') }}
+                                    <span
+                                        class="{{ $inventory->isExpired ? 'text-red-500' : ($inventory->isNearExpiry ? 'text-yellow-500' : '') }}">
+                                        {{ $inventory->productBatch->expiration_date->format('Y-m-d') }}
+                                    </span>
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
                                     ₱{{ number_format($inventory->productBatch->supplier_price, 2) }}
@@ -54,7 +58,12 @@
                                 <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
                                     {{ $inventory->productBatch->received_date->format('Y-m-d') }}
                                 </td>
-                                <td class="px-4 py-4 sm:px-6">{{ $inventory->quantity }}</td>
+                                <td class="px-4 py-4 sm:px-6">
+                                    <span
+                                        class="{{ $inventory->isOutOfStock ? 'text-red-500' : ($inventory->isLowStock ? 'text-yellow-500' : '') }}">
+                                        {{ $inventory->quantity }}
+                                    </span>
+                                </td>
                                 <td class="px-4 py-4 sm:px-6">
                                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                                         <a href="{{ route('inventories.edit', $inventory->id) }}"
@@ -84,6 +93,7 @@
                 </table>
             @endif
         </div>
+
         <div class="mt-4">
             {{ $inventories->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
