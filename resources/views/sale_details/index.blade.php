@@ -12,6 +12,15 @@
             </form>
         </div>
 
+        <div class="mb-2">
+            This page provides a detailed list of all sale details associated with the transactions in the system. You
+            can search for specific sale entries, view essential information such as the sale ID, product details,
+            quantity bought, and the price of each item. The table is designed for easy navigation and management,
+            allowing for sorting and quick access to data. Additionally, the sales chart visually displays the
+            top-selling products today, based on total sales amount, helping you track performance. Use the search bar
+            and available tools to efficiently manage and analyze sale details for improved sales strategies.
+        </div>
+
         <!-- Flash Messages -->
         <div>
             @if (session('success'))

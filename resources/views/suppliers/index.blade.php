@@ -11,6 +11,13 @@
             </form>
         </div>
 
+        <div class="mb-2">
+            This page lists all suppliers along with their essential details such as contact information. Users can
+            search for specific suppliers, add new ones, or manage existing records with options to view, edit, or
+            delete. The tools provided ensure efficient supplier management for maintaining accurate and up-to-date
+            supplier information.
+        </div>
+
         <div class="flex mb-5">
             <a href="{{ route('suppliers.create') }}" class="btn text-lg w-full sm:w-auto text-center">Add Supplier</a>
         </div>

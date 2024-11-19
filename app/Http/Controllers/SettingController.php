@@ -45,13 +45,13 @@ class SettingController extends Controller
     public function updatePrediction(Request $request)
     {
         $request->validate([
-            'predictedSalesDay' => 'required|integer|min:1',
+            // 'predictedSalesDay' => 'required|integer|min:1',
             'historicalDataDays' => 'required|integer|min:1',
         ]);
 
-        Setting::where('key', 'predictedSalesDay')->update(['value' => $request->predictedSalesDay]);
+        // Setting::where('key', 'predictedSalesDay')->update(['value' => $request->predictedSalesDay]);
         Setting::where('key', 'historicalDataDays')->update(['value' => $request->historicalDataDays]);
 
-        return redirect()->route('settings.edit.prediction')->with('success', 'Settings updated successfully.');
+        return redirect()->route('settings')->with('success', 'Settings updated successfully.');
     }
 }

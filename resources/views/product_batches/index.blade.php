@@ -26,6 +26,15 @@
                 </button>
             </form>
         </div>
+
+        <div class="mb-2">
+            This page displays a comprehensive list of all product batches in the inventory. You can search for specific
+            batches, sort them by their expiration dates, and view essential details such as batch number, expiration
+            date, supplier price, and product price. Additionally, you can manage product batches by viewing, editing,
+            or deleting entries. Use the provided form to quickly locate and sort the data, ensuring efficient inventory
+            management.
+        </div>
+
         <div class="flex mb-5">
             <a href="{{ route('product_batches.create') }}" class="btn text-lg w-full sm:w-auto text-center">Add Product
                 Batch</a>

@@ -1,10 +1,19 @@
 <x-layout>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
 
-        <div class="my-5">
+        <div class="my-5 flex justify-center gap-4">
             <a href="{{ route('inventories.product') }}"
-                class=" px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Overall
-                Product Quantity</a>
+                class="px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50">
+                Overall Product Quantity
+            </a>
+            <a href="{{ route('inventories.index') }}"
+                class="px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50">
+                Show All Products
+            </a>
+            <a href="{{ route('inventories.index', ['expired' => 'true']) }}"
+                class="px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50">
+                Show Expired Products
+            </a>
         </div>
 
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
@@ -16,6 +25,13 @@
                 <button type="submit"
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
+        </div>
+
+        <div class="mb-2">
+            This page provides a detailed overview of the current inventory, including product quantities, batch
+            information, and expiration details. Users can search for specific items, view expired or low-stock
+            products, and take actions such as editing, deleting, or emptying product quantities. The tools available
+            ensure efficient inventory tracking and management for maintaining optimal stock levels.
         </div>
 
         <div>

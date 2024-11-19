@@ -25,13 +25,13 @@
             @csrf
             @method('PUT')
 
-            <div class="mb-6">
+            {{-- <div class="mb-6">
                 <label for="predictedSalesDay" class="block text-gray-700 font-medium">Predicted Sales Day:</label>
                 <input type="number" name="predictedSalesDay" id="predictedSalesDay"
                     value="{{ $settings['predictedSalesDay'] }}"
                     class="mt-2 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 transition duration-200"
                     required min="1">
-            </div>
+            </div> --}}
 
             <div class="mb-6">
                 <label for="historicalDataDays" class="block text-gray-700 font-medium">Historical Data Days:</label>

@@ -1,4 +1,11 @@
 <x-layout>
+    <div>
+        @if (session('success'))
+            <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
+        @elseif (session('deleted'))
+            <x-flashMsg msg="{{ session('deleted') }}" bg="bg-red-500" />
+        @endif
+    </div>
     <div class="container mx-auto p-4">
         <!-- Breadcrumbs -->
         <nav class="bg-white shadow-md rounded mb-4 p-3" aria-label="Breadcrumb">
@@ -20,7 +27,8 @@
             <h2 class="text-xl font-semibold mb-4">Account Settings</h2>
             <ul class="space-y-2">
                 <li>
-                    <a href="{{ route('settings.edit.password') }}" class="text-blue-600 hover:underline">Edit Password</a>
+                    <a href="{{ route('settings.edit.password') }}" class="text-blue-600 hover:underline">Edit
+                        Password</a>
                 </li>
                 <li>
                     <a href="{{ route('settings.edit.prediction') }}" class="text-blue-600 hover:underline">Days

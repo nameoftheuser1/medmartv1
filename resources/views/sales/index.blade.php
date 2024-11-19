@@ -14,12 +14,20 @@
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
         </div>
+
+        <div class="mb-2">
+            This page provides a comprehensive overview of all sales transactions in the system. You can search for
+            specific sales records, view detailed information such as total amount, discount applied, transaction key,
+            sale time, and status. The table allows for sorting and quick access to actions like viewing receipts or
+            processing refunds. Additionally, the sales chart visualizes trends over the past 30 days, helping you track
+            performance and identify patterns. Use the search bar and available tools to efficiently manage and analyze
+            sales data, ensuring smooth operations and better decision-making.
+        </div>
+
         <div class="flex mb-5">
             <a href="{{ route('sales.create') }}" class="w-full text-lg text-center btn sm:w-auto">Add Sales
             </a>
         </div>
-
-
 
         <div class="sm:hidden">
             @if ($sales->isEmpty())
@@ -108,10 +116,10 @@
     <script>
         // Pass chart data from the controller to JavaScript
         var chartData = @json($chartData);
-        var dates = chartData.map(function (sale) {
+        var dates = chartData.map(function(sale) {
             return sale.date;
         });
-        var totalAmounts = chartData.map(function (sale) {
+        var totalAmounts = chartData.map(function(sale) {
             return sale.total_amount;
         });
 

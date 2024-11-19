@@ -1,7 +1,14 @@
 <x-layout>
     <div class="w-full p-5 px-4 bg-white rounded-lg shadow-lg sm:px-6 lg:px-8">
         <div class="flex flex-col items-center justify-between mb-5 sm:flex-row">
-            <h1 class="mb-2 text-2xl font-bold sm:mb-0">Product Inventory</h1>
+            <div class="flex items-center space-x-4">
+                <!-- Back Button -->
+                <a href="{{ route('inventories.index') }}"
+                    class="px-4 py-2 text-sm text-white bg-gray-700 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                    ← Back
+                </a>
+                <h1 class="mb-2 text-2xl font-bold sm:mb-0">Product Inventory</h1>
+            </div>
             <p class="mb-2 text-sm text-gray-600 sm:mb-0">Total Products: {{ $inventories->total() }}</p>
             <form method="GET" action="{{ route('inventories.product') }}"
                 class="flex flex-col w-full sm:flex-row sm:w-auto">
@@ -21,9 +28,6 @@
                 </button>
             </form>
         </div>
-
-
-
 
         <div class="mb-2">
             This page allows you to view and manage the product inventory effectively. Use the search and sorting

@@ -16,11 +16,15 @@ class InventoryController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $showExpired = $request->input('expired') === 'true';
 
         $inventories = Inventory::query()
             ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
             ->join('products', 'product_batches.product_id', '=', 'products.id')
             ->select('inventories.*', 'product_batches.expiration_date', 'product_batches.supplier_price', 'product_batches.received_date', 'product_batches.batch_number', 'products.product_name')
+            ->when($showExpired, function ($query) {
+                $query->whereDate('product_batches.expiration_date', '<', now());
+            })
             ->where(function ($query) use ($search) {
                 $query->where('product_batches.batch_number', 'like', "%{$search}%")
                     ->orWhere('product_batches.expiration_date', 'like', "%{$search}%")
