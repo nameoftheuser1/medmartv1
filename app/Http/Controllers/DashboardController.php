@@ -112,7 +112,6 @@ class DashboardController extends Controller
         ]);
     }
 
-
     private function getInventoryBatches($inventoryType)
     {
         $inventoryQuery = Inventory::select('product_batches.id as batch_id', 'products.product_name', DB::raw('SUM(inventories.quantity) as quantity'))
@@ -133,8 +132,10 @@ class DashboardController extends Controller
             ->with('product')
             ->get()
             ->map(function ($batch) use ($inventories) {
-                $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
-                $batch->product_name = $batch->product->name;
+                $inventory = $inventories->firstWhere('batch_id', $batch->id);
+                $batch->quantity = $inventory->quantity;
+                $batch->product_name = $inventory->product_name;
+                $batch->batch_id = $inventory->batch_id;  // Add batch_id here
                 return $batch;
             });
     }

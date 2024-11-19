@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     name: chartTitle,
                     color: "#1A56DB",
                     data: inventoryBatches.map((batch) => ({
-                        x: batch.batch_number,
+                        x: `${batch.product_name} (${batch.batch_number})`, // Display product name along with batch number
                         y: batch.quantity,
                         id: batch.batch_id, // Store the batch_id for later use
                     })),
@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
                 }
-
             },
             plotOptions: {
                 bar: {
@@ -61,6 +60,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 intersect: false,
                 style: {
                     fontFamily: "Inter, sans-serif",
+                },
+                x: {
+                    formatter: function(val) {
+                        return val; // Display product name and batch number on hover
+                    }
+                },
+                y: {
+                    formatter: function(val) {
+                        return `Quantity: ${Math.round(val)}`;
+                    }
                 },
             },
             states: {
