@@ -93,18 +93,53 @@
                 xaxis: {
                     categories: productNames,
                     title: {
-                        text: 'Product Name'
+                        text: 'Product Name',
+                        style: {
+                            color: '#000', // Black text for x-axis title
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            colors: '#000', // Black text for x-axis labels
+                            fontSize: '12px'
+                        }
                     }
                 },
                 yaxis: {
                     title: {
-                        text: 'Total Sales Amount (₱)'
+                        text: 'Total Sales Amount (₱)',
+                        style: {
+                            color: '#000', // Black text for y-axis title
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labels: {
+                        style: {
+                            colors: '#000', // Black text for y-axis labels
+                            fontSize: '12px'
+                        }
                     }
                 },
                 title: {
                     text: 'Top Selling Products Today',
-                    align: 'center'
+                    align: 'center',
+                    style: {
+                        color: '#000', // Black text for chart title
+                        fontSize: '16px',
+                        fontWeight: 'bold'
+                    }
                 },
+                tooltip: {
+                    theme: 'light',
+                },
+                dataLabels: {
+                    style: {
+                        colors: ['#000'] // Black text for data labels
+                    }
+                }
             };
 
             var chart = new ApexCharts(document.querySelector("#sales-chart"), options);

@@ -12,9 +12,12 @@
                     class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
 
                 <select name="sort"
-                    class="px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
-                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Ascending Expiration Date</option>
-                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Descending Expiration Date</option>
+                    class="px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0"
+                    onchange="this.form.submit()">
+                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Ascending Expiration Date
+                    </option>
+                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Descending Expiration Date
+                    </option>
                 </select>
 
                 <button type="submit"
@@ -61,14 +64,16 @@
                             @endphp
                             <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
                                 onclick="window.location='{{ route('product_batches.show', $productBatch->id) }}'">
-                                <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
+                                <td
+                                    class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
                                     {{ $productBatch->product->product_name }}
                                 </td>
                                 <td class="px-4 py-4 sm:px-6">
                                     {{ $productBatch->batch_number }}
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                    <span class="{{ $isExpired ? 'text-red-500' : ($isNearExpiry ? 'text-yellow-500' : '') }}">
+                                    <span
+                                        class="{{ $isExpired ? 'text-red-500' : ($isNearExpiry ? 'text-yellow-500' : '') }}">
                                         {{ $expirationDate->format('Y-m-d') }}
                                     </span>
                                 </td>
@@ -87,7 +92,8 @@
                                             class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
                                         <a href="{{ route('product_batches.edit', $productBatch->id) }}"
                                             class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                        <form action="{{ route('product_batches.destroy', $productBatch) }}" method="post">
+                                        <form action="{{ route('product_batches.destroy', $productBatch) }}"
+                                            method="post">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"

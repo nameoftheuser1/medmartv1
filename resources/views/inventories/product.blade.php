@@ -9,7 +9,8 @@
                     class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
 
                 <select name="sort"
-                    class="px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
+                    class="px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0"
+                    onchange="this.form.submit()">
                     <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Ascending</option>
                     <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Descending</option>
                 </select>

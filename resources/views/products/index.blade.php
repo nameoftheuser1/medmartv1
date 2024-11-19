@@ -8,7 +8,8 @@
                     class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
 
                 <select name="category"
-                    class="w-full px-4 py-2 mb-2 ml-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
+                    class="w-full px-4 py-2 mb-2 ml-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0"
+                    onchange="this.form.submit()">
                     <option value="">All Categories</option>
                     <option value="Medications" {{ request('category') == 'Medications' ? 'selected' : '' }}>Medications
                     </option>
