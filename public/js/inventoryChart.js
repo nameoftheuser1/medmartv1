@@ -1,12 +1,14 @@
 document.addEventListener("DOMContentLoaded", function () {
     let chart;
 
+    // This function initializes the chart
     function initChart(inventoryBatches, currentInventoryType) {
         const chartTitle =
             currentInventoryType === "highest"
                 ? "Highest Inventory"
                 : "Lowest Inventory";
 
+        // Sort batches based on quantity
         if (currentInventoryType === "highest") {
             inventoryBatches.sort((a, b) => b.quantity - a.quantity);
         } else {
@@ -135,6 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         };
 
+        // Check if ApexCharts is defined and render chart
         if (
             document.getElementById("column-chart") &&
             typeof ApexCharts !== "undefined"
@@ -151,8 +154,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Initialize chart with dummy data (replace with actual data from PHP)
     initChart(inventoryBatches, currentInventoryType);
 
+    // Handle changes in inventory type
     const inventoryTypeSelector = document.querySelector(
         'select[name="inventory-type"]'
     );
@@ -161,6 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const newInventoryType = this.value;
             const currentPeriod = document.getElementById("period").value;
 
+            // Fetch data based on selected inventory type
             $.ajax({
                 url: dashboardRoute,
                 method: "GET",
