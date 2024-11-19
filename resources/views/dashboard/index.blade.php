@@ -66,7 +66,7 @@
             @if ($expiringBatches->isEmpty())
                 <p class="text-gray-200">No products are about to expire within the next 30 days.</p>
             @else
-                <div class="overflow-x-auto ">
+                <div class="overflow-x-auto">
                     <table class="min-w-full">
                         <thead>
                             <tr>
@@ -78,7 +78,16 @@
                         </thead>
                         <tbody>
                             @foreach ($expiringBatches as $batch)
-                                <tr>
+                                @php
+                                    $warningClass = '';
+                                    $daysToExpire = $batch->expiration_date->diffInDays(now());
+
+                                    // Apply warning class if expiration is within 7 days
+                                    if ($daysToExpire <= 7) {
+                                        $warningClass = 'bg-red-200'; // Red background warning
+                                    }
+                                @endphp
+                                <tr class="{{ $warningClass }}">
                                     <td class="px-4 py-2 border">{{ e($batch->product->product_name) }}</td>
                                     <td class="px-4 py-2 text-center border">{{ e($batch->batch_number) }}</td>
                                     <td class="px-4 py-2 text-center border">

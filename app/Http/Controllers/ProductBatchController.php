@@ -29,6 +29,8 @@ class ProductBatchController extends Controller
                     ->orWhere('product_batches.received_date', 'like', "%{$search}%")
                     ->orWhere('products.product_name', 'like', "%{$search}%");
             })
+            // Exclude expired product batches
+            ->where('product_batches.expiration_date', '>', now())
             ->latest()
             ->paginate(10);
 
@@ -36,6 +38,7 @@ class ProductBatchController extends Controller
             'productBatches' => $productBatches,
         ]);
     }
+
 
     /**
      * Show the form for creating a new resource.

@@ -69,7 +69,7 @@ class DashboardController extends Controller
         $thresholdDate = Carbon::now()->addDays(30);
 
         $expiringBatches = ProductBatch::with(['product', 'inventories'])
-            ->where('expiration_date', '<=', $thresholdDate)
+            ->where('expiration_date', '>', now()) // Exclude expired batches
             ->whereHas('inventories', function ($query) {
                 $query->where('quantity', '>', 0);
             })
