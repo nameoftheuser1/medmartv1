@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\SaleDetail;
 use App\Models\Sale;
 use App\Models\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SaleDetailController extends Controller
 {
@@ -29,51 +31,38 @@ class SaleDetailController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('sale_details.index', [
-            'saleDetails' => $saleDetails,
-        ]);
+         // Get today's sales details
+         $salesPerDay = $this->getSalesDetailsToday();
+
+         // Prepare data for ApexChart (Product Names and Total Amounts)
+         $chartData = $salesPerDay->map(function ($sale) {
+             return [
+                 'product_name' => $sale->product_name,
+                 'total_amount' => (float) $sale->total_amount,
+             ];
+         });
+
+         // Pass data to the view
+         return view('sale_details.index', [
+             'saleDetails' => $saleDetails,
+             'chartData' => $chartData,
+         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    private function getSalesDetailsToday()
     {
-    }
+        $today = Carbon::today();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-    }
+        $saleDetails = SaleDetail::query()
+            ->join('sales', 'sale_details.sale_id', '=', 'sales.id')
+            ->join('products', 'sale_details.product_id', '=', 'products.id')
+            ->select('products.product_name', DB::raw('SUM(sale_details.quantity * sale_details.price) as total_amount'))
+            ->whereDate('sales.created_at', $today)  // Filter by today's date
+            ->groupBy('sale_details.product_id', 'products.product_name')  // Group by product to get total sales per product
+            ->orderByDesc('total_amount')  // Order by total amount
+            ->limit(50)  // Get top 50 products
+            ->get();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(SaleDetail $saleDetail)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SaleDetail $saleDetail)
-    {
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, SaleDetail $saleDetail)
-    {
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SaleDetail $saleDetail)
-    {
+        return $saleDetails;
     }
 }

@@ -1,5 +1,6 @@
 <x-layout>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
+        <!-- Sale Details and Search Form -->
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
             <h1 class="text-2xl font-bold mb-2 sm:mb-0">Sale Details List</h1>
             <p class="mb-2 sm:mb-0">Total Sale Details: {{ $saleDetails->total() }}</p>
@@ -11,6 +12,7 @@
             </form>
         </div>
 
+        <!-- Flash Messages -->
         <div>
             @if (session('success'))
                 <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
@@ -19,6 +21,12 @@
             @endif
         </div>
 
+        <!-- Sales Chart -->
+        <div class="mt-6">
+            <div id="sales-chart"></div>
+        </div>
+
+        <!-- Table Display -->
         <div class="relative overflow-x-auto sm:overflow-x-visible sm:rounded-lg">
             @if ($saleDetails->isEmpty())
                 <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
@@ -53,8 +61,54 @@
             @endif
         </div>
 
+        <!-- Pagination -->
         <div class="mt-4">
             {{ $saleDetails->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
     </div>
+
+    <!-- ApexCharts Script -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var chartData = @json($chartData);
+
+            var productNames = chartData.map(function(item) {
+                return item.product_name;
+            });
+
+            var totalAmounts = chartData.map(function(item) {
+                return item.total_amount;
+            });
+
+            var options = {
+                chart: {
+                    type: 'bar',
+                    height: 350
+                },
+                series: [{
+                    name: 'Total Amount',
+                    data: totalAmounts
+                }],
+                xaxis: {
+                    categories: productNames,
+                    title: {
+                        text: 'Product Name'
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Total Sales Amount (₱)'
+                    }
+                },
+                title: {
+                    text: 'Top Selling Products Today',
+                    align: 'center'
+                },
+            };
+
+            var chart = new ApexCharts(document.querySelector("#sales-chart"), options);
+            chart.render();
+        });
+    </script>
 </x-layout>
