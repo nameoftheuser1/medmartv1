@@ -6,6 +6,7 @@ use App\Models\Inventory;
 use App\Models\ProductBatch;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InventoryController extends Controller
 {
@@ -125,5 +126,27 @@ class InventoryController extends Controller
         $inventory->update(['quantity' => 0]);
 
         return redirect()->back()->with('success', 'Product quantity set to zero successfully.');
+    }
+
+    public function productInventory(Request $request)
+    {
+        $search = $request->input('search');
+        $sort = $request->input('sort', 'asc');
+        $sortBy = 'quantity'; // Fixed to always sort by quantity
+
+        $inventories = Inventory::query()
+            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+            ->join('products', 'product_batches.product_id', '=', 'products.id')
+            ->select('products.product_name', DB::raw('SUM(inventories.quantity) as total_quantity'))
+            ->where('products.product_name', 'like', "%{$search}%")
+            ->groupBy('products.product_name')
+            ->orderBy('total_quantity', $sort) // Only sort by quantity
+            ->paginate(10);
+
+        return view('inventories.product', [
+            'inventories' => $inventories,
+            'sort' => $sort,
+            'sortBy' => $sortBy, // Always 'quantity'
+        ]);
     }
 }

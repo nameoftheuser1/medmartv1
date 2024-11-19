@@ -25,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::redirect('/', 'dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::get('/inventories/product', [InventoryController::class, 'productInventory'])->name('inventories.product');
+
     Route::get('/settings', [SettingController::class, 'index'])->name('settings');
     Route::get('/settings/password', [SettingController::class, 'editPassword'])->name('settings.edit.password');
     Route::put('/settings/password', [SettingController::class, 'updatePassword'])->name('settings.update.password');
