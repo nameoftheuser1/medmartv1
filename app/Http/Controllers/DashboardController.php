@@ -185,16 +185,19 @@ class DashboardController extends Controller
         ];
     }
 
-    private function predictSales()
+
+    public function predictSales()
     {
-        // Define the default months for prediction if not set in settings
-        $predictedSalesMonth = Setting::where('key', 'predictedSalesMonth')->value('value') ?? 1;
+
 
         // Retrieve historical sales data
         $salesData = $this->getHistoricalData();
 
         $samples = [];
         $targets = [];
+
+        // Base date for normalizing
+        $baseDate = null;
 
         foreach ($salesData as $data) {
             if (!isset($data->date, $data->total_amount)) {
@@ -204,59 +207,87 @@ class DashboardController extends Controller
             $totalAmount = (float) $data->total_amount;
             $dataDate = strtotime($data->date);
 
-            $samples[] = [$dataDate];
+            // Initialize base date for normalization
+            if ($baseDate === null) {
+                $baseDate = $dataDate;
+            }
+
+            // Normalize date as months offset
+            $monthsOffset = ($dataDate - $baseDate) / (30 * 24 * 60 * 60);
+
+            $samples[] = [$monthsOffset];
             $targets[] = $totalAmount;
         }
 
-        // Handle cases with insufficient data for predictions
-        if (count($samples) < 2) {
-            // If there's insufficient data, predict using a simple trend or default value
+        // Handle cases with insufficient unique data for predictions
+        $uniqueSamples = array_unique(array_map('serialize', $samples));
+        if (count($uniqueSamples) < 2) {
+            // Fallback to default prediction
             $defaultSalesValue = !empty($targets) ? end($targets) : 0;
+
             $predictedSales = array_fill(0, 10, max(0, $defaultSalesValue));
-            $predictedDates = array_map(function ($i) use ($predictedSalesMonth) {
-                return date('F Y', strtotime("+{$i} months"));
-            }, range(0, 9 * $predictedSalesMonth, $predictedSalesMonth));
+            $predictedDates = array_map(
+                fn($i) => date('F Y', strtotime("+{$i} months")),
+                range(0, 9)
+            );
 
             return ['sales' => $predictedSales, 'dates' => $predictedDates];
         }
 
-        // Perform linear regression
-        $regression = new LeastSquares();
-        $regression->train($samples, $targets);
+        // Perform linear regression with Phpml
+        try {
+            $regression = new LeastSquares();
+            $regression->train($samples, $targets);
 
-        // Generate predictions for the next 10 months
-        $predictedSales = [];
-        $predictedDates = [];
-        $currentDate = strtotime('first day of next month');
-        $now = strtotime('first day of this month');
+            // Generate predictions for the next 10 months
+            $predictedSales = [];
+            $predictedDates = [];
+            $currentDate = strtotime('first day of next month');
+            $now = strtotime('first day of this month');
 
-        for ($i = 0; $i < 10; $i++) {
-            $predictedValue = max(0, round($regression->predict([$currentDate])));
-            $predictedDate = date('F Y', $currentDate);
+            for ($i = 0; $i < 10; $i++) {
+                // Normalize current date as months offset from base date
+                $currentOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60);
 
-            // Store the prediction in the database if the month is in the past
-            if ($currentDate < $now) {
-                DB::table('sales_data')->updateOrInsert(
-                    ['key' => 'predicted_sales_' . date('Ym', $currentDate)],
-                    [
-                        'value' => $predictedValue,
-                        'month' => $predictedDate,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]
-                );
+                $predictedValue = max(0, round($regression->predict([$currentOffset])));
+                $predictedDate = date('F Y', $currentDate);
+
+                // Store the prediction in the database if the month is in the past
+                if ($currentDate < $now) {
+                    DB::table('sales_data')->updateOrInsert(
+                        ['key' => 'predicted_sales_' . date('Ym', $currentDate)],
+                        [
+                            'value' => $predictedValue,
+                            'month' => $predictedDate,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]
+                    );
+                }
+
+                // Store prediction for return
+                $predictedSales[] = $predictedValue;
+                $predictedDates[] = $predictedDate;
+
+                // Move to the next prediction month
+                $currentDate = strtotime("+1 month", $currentDate);
             }
 
-            // Store prediction for return
-            $predictedSales[] = $predictedValue;
-            $predictedDates[] = $predictedDate;
+            return ['sales' => $predictedSales, 'dates' => $predictedDates];
+        } catch (\Phpml\Exception\MatrixException $e) {
+            // Handle regression failure with a fallback
+            $defaultSalesValue = !empty($targets) ? end($targets) : 0;
 
-            // Move to the next prediction month
-            $currentDate = strtotime("+{$predictedSalesMonth} months", $currentDate);
+            $predictedSales = array_fill(0, 10, max(0, $defaultSalesValue));
+            $predictedDates = array_map(
+                fn($i) => date('F Y', strtotime("+{$i} months")),
+                range(0, 9)
+            );
+
+            return ['sales' => $predictedSales, 'dates' => $predictedDates];
         }
-
-        return ['sales' => $predictedSales, 'dates' => $predictedDates];
     }
+
 
     private function getHistoricalData()
     {
