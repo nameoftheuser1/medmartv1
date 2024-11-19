@@ -25,9 +25,36 @@ class SaleController extends Controller
             ->latest()
             ->paginate(10);
 
+        // Get sales from the last 30 days
+        $salesLast30Days = $this->getSalesLast30Days();
+
+        // Prepare data for ApexChart (Dates and Total Amounts)
+        $chartData = $salesLast30Days->map(function ($sale) {
+            return [
+                'date' => $sale->created_at->format('Y-m-d'),
+                'total_amount' => $sale->total_amount,
+            ];
+        });
+
+        // Pass data to the view
         return view('sales.index', [
             'sales' => $sales,
+            'salesLast30Days' => $salesLast30Days,
+            'chartData' => $chartData,
         ]);
+    }
+
+
+    /**
+     * Get sales data from the past 30 days.
+     */
+    private function getSalesLast30Days()
+    {
+        return Sale::query()
+            ->join('users', 'sales.user_id', '=', 'users.id')
+            ->select('sales.*')
+            ->where('sales.created_at', '>=', now()->subDays(30))
+            ->get();
     }
 
     public function refund($id)

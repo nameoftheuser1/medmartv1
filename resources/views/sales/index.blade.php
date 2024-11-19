@@ -1,4 +1,8 @@
 <x-layout>
+    <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
+        <h2 class="mb-2 font-mono text-xl font-bold">Sales for the Last 30 Days</h2>
+        <div id="sales-chart"></div>
+    </div>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
             <h1 class="text-2xl font-bold mb-2 sm:mb-0">Sales List</h1>
@@ -14,6 +18,8 @@
             <a href="{{ route('sales.create') }}" class="w-full text-lg text-center btn sm:w-auto">Add Sales
             </a>
         </div>
+
+
 
         <div class="sm:hidden">
             @if ($sales->isEmpty())
@@ -95,4 +101,61 @@
             {{ $sales->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
     </div>
+
+    <script src="{{ asset('tailwindcharts\js\apexcharts.js') }}"></script>
+
+
+    <script>
+        // Pass chart data from the controller to JavaScript
+        var chartData = @json($chartData);
+        var dates = chartData.map(function (sale) {
+            return sale.date;
+        });
+        var totalAmounts = chartData.map(function (sale) {
+            return sale.total_amount;
+        });
+
+        // ApexCharts configuration
+        document.addEventListener("DOMContentLoaded", function() {
+            var options = {
+                chart: {
+                    type: 'line',
+                    height: 350,
+                    zoom: {
+                        enabled: false
+                    },
+                    toolbar: {
+                        show: false
+                    },
+                },
+                series: [{
+                    name: 'Total Sales',
+                    data: totalAmounts,
+                }],
+                xaxis: {
+                    categories: dates,
+                    title: {
+                        text: 'Date',
+                    },
+                },
+                yaxis: {
+                    title: {
+                        text: 'Total Amount',
+                    },
+                },
+                title: {
+                    text: 'Sales for the Last 30 Days',
+                    align: 'left',
+                },
+                grid: {
+                    borderColor: '#f1f1f1',
+                    strokeDashArray: 4,
+                },
+                colors: ['#00E396'],
+            };
+
+            var chart = new ApexCharts(document.querySelector("#sales-chart"), options);
+            chart.render();
+        });
+    </script>
 </x-layout>
