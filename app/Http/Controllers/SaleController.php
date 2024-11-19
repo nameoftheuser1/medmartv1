@@ -14,6 +14,7 @@ class SaleController extends Controller
     {
         $search = $request->input('search');
 
+        // Get the sales with applied search filter
         $sales = Sale::query()
             ->join('users', 'sales.user_id', '=', 'users.id')
             ->select('sales.*')
@@ -25,13 +26,13 @@ class SaleController extends Controller
             ->latest()
             ->paginate(10);
 
-        // Get sales from the last 30 days
-        $salesLast30Days = $this->getSalesLast30Days();
+        // Get combined sales per day for the last 30 days
+        $salesPerDay = $this->getSalesPerDay();
 
         // Prepare data for ApexChart (Dates and Total Amounts)
-        $chartData = $salesLast30Days->map(function ($sale) {
+        $chartData = $salesPerDay->map(function ($sale) {
             return [
-                'date' => $sale->created_at->format('Y-m-d'),
+                'date' => $sale->date,
                 'total_amount' => $sale->total_amount,
             ];
         });
@@ -39,23 +40,24 @@ class SaleController extends Controller
         // Pass data to the view
         return view('sales.index', [
             'sales' => $sales,
-            'salesLast30Days' => $salesLast30Days,
+            'salesPerDay' => $salesPerDay,
             'chartData' => $chartData,
         ]);
     }
 
-
     /**
-     * Get sales data from the past 30 days.
+     * Get combined sales data per day for the past 30 days.
      */
-    private function getSalesLast30Days()
+    private function getSalesPerDay()
     {
         return Sale::query()
-            ->join('users', 'sales.user_id', '=', 'users.id')
-            ->select('sales.*')
-            ->where('sales.created_at', '>=', now()->subDays(30))
+            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total_amount')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupByRaw('DATE(created_at)')
+            ->orderBy('date', 'asc')
             ->get();
     }
+
 
     public function refund($id)
     {

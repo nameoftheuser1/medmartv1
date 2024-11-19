@@ -1,6 +1,6 @@
 <x-layout>
     <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
-        <h2 class="mb-2 font-mono text-xl font-bold">Sales for the Last 30 Days</h2>
+        <h2 class="mb-2 font-mono text-xl font-bold"></h2>
         <div id="sales-chart"></div>
     </div>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
