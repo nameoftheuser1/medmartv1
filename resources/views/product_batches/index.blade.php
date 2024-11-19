@@ -2,15 +2,25 @@
     use Carbon\Carbon;
 @endphp
 <x-layout>
-    <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
-            <h1 class="text-2xl font-bold mb-2 sm:mb-0">Product Batch List</h1>
-            <p class="mb-2 sm:mb-0">Total Product Batches: {{ $productBatches->total() }}</p>
-            <form method="GET" action="{{ route('product_batches.index') }}" class="flex w-full sm:w-auto">
+    <div class="w-full p-5 px-4 bg-white rounded-lg shadow-lg sm:px-6 lg:px-8">
+        <div class="flex flex-col items-center justify-between mb-5 sm:flex-row">
+            <h1 class="mb-2 text-2xl font-bold sm:mb-0">Product Batch List</h1>
+            <p class="mb-2 text-sm text-gray-600 sm:mb-0">Total Product Batches: {{ $productBatches->total() }}</p>
+            <form method="GET" action="{{ route('product_batches.index') }}"
+                class="flex flex-col w-full sm:flex-row sm:w-auto">
                 <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}"
-                    class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
+
+                <select name="sort"
+                    class="px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
+                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Ascending Expiration Date</option>
+                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Descending Expiration Date</option>
+                </select>
+
                 <button type="submit"
-                    class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
+                    class="px-4 py-2 ml-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                    Search
+                </button>
             </form>
         </div>
         <div class="flex mb-5">
@@ -27,10 +37,10 @@
 
         <div class="relative overflow-x-auto sm:rounded-lg">
             @if ($productBatches->isEmpty())
-                <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
+                <p class="py-5 text-center text-gray-500">No product batches found.</p>
             @else
                 <table class="w-full text-left rtl:text-right">
-                    <thead class="uppercase">
+                    <thead class="bg-gray-100 uppercase">
                         <tr>
                             <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Product</th>
                             <th scope="col" class="px-4 py-3 sm:px-6">Batch Number</th>
@@ -51,16 +61,14 @@
                             @endphp
                             <tr class="hover:bg-green-300 cursor-pointer transition duration-150 ease-in-out"
                                 onclick="window.location='{{ route('product_batches.show', $productBatch->id) }}'">
-                                <td
-                                    class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
+                                <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
                                     {{ $productBatch->product->product_name }}
                                 </td>
                                 <td class="px-4 py-4 sm:px-6">
                                     {{ $productBatch->batch_number }}
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                                    <span
-                                        class="{{ $isExpired ? 'text-red-500' : ($isNearExpiry ? 'text-yellow-500' : '') }}">
+                                    <span class="{{ $isExpired ? 'text-red-500' : ($isNearExpiry ? 'text-yellow-500' : '') }}">
                                         {{ $expirationDate->format('Y-m-d') }}
                                     </span>
                                 </td>
@@ -79,8 +87,7 @@
                                             class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
                                         <a href="{{ route('product_batches.edit', $productBatch->id) }}"
                                             class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                        <form action="{{ route('product_batches.destroy', $productBatch) }}"
-                                            method="post">
+                                        <form action="{{ route('product_batches.destroy', $productBatch) }}" method="post">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -94,8 +101,12 @@
                 </table>
             @endif
         </div>
-        <div class="mt-4">
-            {{ $productBatches->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
+
+        <div class="mt-6">
+            {{ $productBatches->appends([
+                    'search' => request('search'),
+                    'sort' => request('sort', 'asc'),
+                ])->links('vendor.pagination.tailwind') }}
         </div>
     </div>
 </x-layout>

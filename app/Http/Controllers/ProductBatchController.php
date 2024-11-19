@@ -18,6 +18,7 @@ class ProductBatchController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $sort = $request->input('sort', 'asc'); // Default sorting to ascending if not specified
 
         $productBatches = ProductBatch::query()
             ->join('products', 'product_batches.product_id', '=', 'products.id')
@@ -31,6 +32,7 @@ class ProductBatchController extends Controller
             })
             // Exclude expired product batches
             ->where('product_batches.expiration_date', '>', now())
+            ->orderBy('product_batches.expiration_date', $sort)
             ->latest()
             ->paginate(10);
 
@@ -38,6 +40,7 @@ class ProductBatchController extends Controller
             'productBatches' => $productBatches,
         ]);
     }
+
 
 
     /**

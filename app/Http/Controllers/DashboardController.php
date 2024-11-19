@@ -58,52 +58,27 @@ class DashboardController extends Controller
             }
         }
 
-        //for the counts
         $counts = $this->getCounts();
-
         $productCount = $counts['productCount'];
         $supplierCount = $counts['supplierCount'];
         $saleCount = $counts['saleCount'];
 
-        // This code retrieves product batches that are expiring within the next 30 days
         $thresholdDate = Carbon::now()->addDays(30);
-
         $expiringBatches = ProductBatch::with(['product', 'inventories'])
-            ->where('expiration_date', '>', now()) // Exclude expired batches
+            ->where('expiration_date', '>', now())
             ->whereHas('inventories', function ($query) {
                 $query->where('quantity', '>', 0);
             })
             ->orderBy('expiration_date', 'asc')
-            ->paginate(5);
+            ->paginate(30);
 
-        //this get the sales today
         $totalSalesToday = Sale::whereDate('created_at', Carbon::today())
             ->sum('total_amount');
 
-        //this is for the fast moving product
         $fastMovingProducts = $this->getFastMovingProducts($startDate, $endDate);
 
-
-        $inventoryQuery = Inventory::select('batch_id', DB::raw('SUM(quantity) as quantity'))
-            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
-            ->where('quantity', '>', 0)
-            ->groupBy('batch_id');
-
-        if ($inventoryType === 'highest') {
-            $inventoryQuery->orderBy('quantity', 'desc');
-        } else {
-            $inventoryQuery->orderBy('quantity', 'asc');
-        }
-
-        $inventories = $inventoryQuery->limit(10)->get();
-
-        $inventoryBatches = ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
-            ->with('product')
-            ->get()
-            ->map(function ($batch) use ($inventories) {
-                $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
-                return $batch;
-            });
+        // Get inventory batches
+        $inventoryBatches = $this->getInventoryBatches($inventoryType);
 
         $prediction = $this->predictSales();
         $predictedSales = $prediction['sales'];
@@ -136,6 +111,34 @@ class DashboardController extends Controller
             'fastMovingProducts' => $fastMovingProducts,
         ]);
     }
+
+
+    private function getInventoryBatches($inventoryType)
+    {
+        $inventoryQuery = Inventory::select('product_batches.id as batch_id', 'products.product_name', DB::raw('SUM(inventories.quantity) as quantity'))
+            ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
+            ->join('products', 'product_batches.product_id', '=', 'products.id')
+            ->where('inventories.quantity', '>', 0)
+            ->groupBy('product_batches.id', 'products.product_name');
+
+        if ($inventoryType === 'highest') {
+            $inventoryQuery->orderBy('quantity', 'desc');
+        } else {
+            $inventoryQuery->orderBy('quantity', 'asc');
+        }
+
+        $inventories = $inventoryQuery->limit(10)->get();
+
+        return ProductBatch::whereIn('id', $inventories->pluck('batch_id'))
+            ->with('product')
+            ->get()
+            ->map(function ($batch) use ($inventories) {
+                $batch->quantity = $inventories->firstWhere('batch_id', $batch->id)->quantity;
+                $batch->product_name = $batch->product->name;
+                return $batch;
+            });
+    }
+
 
     private function getCounts()
     {
@@ -306,7 +309,6 @@ class DashboardController extends Controller
 
         return $salesData;
     }
-
     private function getFastMovingProducts($startDate, $endDate)
     {
         return SaleDetail::select('product_id', DB::raw('SUM(quantity) as total_quantity'))
@@ -319,8 +321,9 @@ class DashboardController extends Controller
             ->with('product')
             ->get()
             ->map(function ($saleDetail) {
-
                 $product = $saleDetail->product;
+                $totalSales = $saleDetail->total_quantity * $product->price; // Calculating the total sales amount
+
                 return [
                     'product_id' => $product->id,
                     'product_name' => $product->product_name,
@@ -328,6 +331,7 @@ class DashboardController extends Controller
                     'category' => $product->category,
                     'total_quantity' => $saleDetail->total_quantity,
                     'price' => $product->price,
+                    'total_sales' => $totalSales, // Added total sales
                 ];
             });
     }

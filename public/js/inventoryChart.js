@@ -2,7 +2,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let chart;
 
     function initChart(inventoryBatches, currentInventoryType) {
-        const chartTitle = currentInventoryType === 'highest' ? 'Highest Inventory' : 'Lowest Inventory';
+        const chartTitle =
+            currentInventoryType === "highest"
+                ? "Highest Inventory"
+                : "Lowest Inventory";
 
         if (currentInventoryType === "highest") {
             inventoryBatches.sort((a, b) => b.quantity - a.quantity);
@@ -12,14 +15,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const options = {
             colors: ["#1A56DB", "#FDBA8C"],
-            series: [{
-                name: chartTitle,
-                color: "#1A56DB",
-                data: inventoryBatches.map(batch => ({
-                    x: batch.batch_number,
-                    y: batch.quantity
-                })),
-            }],
+            series: [
+                {
+                    name: chartTitle,
+                    color: "#1A56DB",
+                    data: inventoryBatches.map((batch) => ({
+                        x: batch.batch_number,
+                        y: batch.quantity,
+                        id: batch.batch_id, // Store the batch_id for later use
+                    })),
+                },
+            ],
             chart: {
                 type: "bar",
                 height: "320px",
@@ -27,6 +33,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 toolbar: {
                     show: false,
                 },
+                events: {
+                    dataPointSelection: function(event, chartContext, config) {
+                        // Get the batch_id of the clicked bar
+                        const batchId = config.w.config.series[config.seriesIndex].data[config.dataPointIndex].id;
+
+                        if (batchId) {
+                            const url = `/product_batches/${batchId}`; // Use the batchId to redirect
+                            window.location.href = url;
+                        } else {
+                            console.error("Batch ID is undefined");
+                        }
+                    }
+                }
+
             },
             plotOptions: {
                 bar: {
@@ -62,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 padding: {
                     left: 2,
                     right: 2,
-                    top: -14
+                    top: -14,
                 },
             },
             dataLabels: {
@@ -77,8 +97,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     show: true,
                     style: {
                         fontFamily: "Inter, sans-serif",
-                        cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
-                    }
+                        cssClass:
+                            "text-xs font-normal fill-gray-500 dark:fill-gray-400",
+                    },
                 },
                 axisBorder: {
                     show: false,
@@ -92,23 +113,30 @@ document.addEventListener("DOMContentLoaded", function () {
                 labels: {
                     style: {
                         fontFamily: "Inter, sans-serif",
-                        cssClass: 'text-xs font-normal fill-gray-500 dark:fill-gray-400'
+                        cssClass:
+                            "text-xs font-normal fill-gray-500 dark:fill-gray-400",
                     },
                     formatter: function (val) {
                         return Math.round(val);
-                    }
-                }
+                    },
+                },
             },
             fill: {
                 opacity: 1,
             },
         };
 
-        if (document.getElementById("column-chart") && typeof ApexCharts !== 'undefined') {
+        if (
+            document.getElementById("column-chart") &&
+            typeof ApexCharts !== "undefined"
+        ) {
             if (chart) {
                 chart.updateOptions(options);
             } else {
-                chart = new ApexCharts(document.getElementById("column-chart"), options);
+                chart = new ApexCharts(
+                    document.getElementById("column-chart"),
+                    options
+                );
                 chart.render();
             }
         }
@@ -116,28 +144,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     initChart(inventoryBatches, currentInventoryType);
 
-    const inventoryTypeSelector = document.querySelector('select[name="inventory-type"]');
+    const inventoryTypeSelector = document.querySelector(
+        'select[name="inventory-type"]'
+    );
     if (inventoryTypeSelector) {
-        inventoryTypeSelector.addEventListener('change', function () {
+        inventoryTypeSelector.addEventListener("change", function () {
             const newInventoryType = this.value;
-            const currentPeriod = document.getElementById('period').value;
+            const currentPeriod = document.getElementById("period").value;
 
             $.ajax({
                 url: dashboardRoute,
-                method: 'GET',
+                method: "GET",
                 data: {
-                    'inventory-type': newInventoryType,
-                    'period': currentPeriod
+                    "inventory-type": newInventoryType,
+                    period: currentPeriod,
                 },
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    "X-Requested-With": "XMLHttpRequest",
                 },
-                success: function(response) {
+                success: function (response) {
                     initChart(response.inventoryBatches, newInventoryType);
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error("Error fetching data:", error);
-                }
+                },
             });
         });
     }

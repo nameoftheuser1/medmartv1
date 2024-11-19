@@ -66,7 +66,7 @@
             @if ($expiringBatches->isEmpty())
                 <p class="text-gray-200">No products are about to expire within the next 30 days.</p>
             @else
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto ">
                     <table class="min-w-full">
                         <thead>
                             <tr>
@@ -78,16 +78,7 @@
                         </thead>
                         <tbody>
                             @foreach ($expiringBatches as $batch)
-                                @php
-                                    $warningClass = '';
-                                    $daysToExpire = $batch->expiration_date->diffInDays(now());
-
-                                    // Apply warning class if expiration is within 7 days
-                                    if ($daysToExpire <= 7) {
-                                        $warningClass = 'bg-red-200'; // Red background warning
-                                    }
-                                @endphp
-                                <tr class="{{ $warningClass }}">
+                                <tr>
                                     <td class="px-4 py-2 border">{{ e($batch->product->product_name) }}</td>
                                     <td class="px-4 py-2 text-center border">{{ e($batch->batch_number) }}</td>
                                     <td class="px-4 py-2 text-center border">
@@ -171,6 +162,7 @@
 
     <div class="w-full p-4 mb-3 bg-white rounded-lg">
         <h2 class="mb-2 font-mono text-xl font-bold">Fast Moving Products</h2>
+        <div id="total-sales-info"></div>
         <div id="fast-moving-products-chart"></div>
     </div>
 
@@ -180,13 +172,23 @@
         var fastMovingProducts = @json($fastMovingProducts);
 
         document.addEventListener("DOMContentLoaded", function() {
+            // Extract product names, quantities, and prices
             var fastMovingProductNames = fastMovingProducts.map(function(product) {
                 return product.product_name;
             });
             var fastMovingProductQuantities = fastMovingProducts.map(function(product) {
                 return product.total_quantity;
             });
+            var fastMovingProductPrices = fastMovingProducts.map(function(product) {
+                return product.price;
+            });
 
+            // Calculate total sales for each product
+            var productSales = fastMovingProducts.map(function(product) {
+                return product.total_quantity * product.price;
+            });
+
+            // Chart options
             var options = {
                 series: [{
                     name: 'Quantity Sold',
@@ -204,7 +206,19 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false
+                    enabled: true,
+                    formatter: function(val, opts) {
+                        // Get the index of the current product
+                        var productIndex = opts.dataPointIndex;
+                        // Calculate total sales for that product
+                        var totalSalesForProduct = productSales[productIndex];
+                        // Format and return total sales with currency symbol
+                        return '₱' + totalSalesForProduct.toFixed(2);
+                    },
+                    style: {
+                        fontSize: '12px',
+                        colors: ['#000']
+                    }
                 },
                 xaxis: {
                     categories: fastMovingProductNames,
@@ -219,6 +233,7 @@
                 },
             };
 
+            // Render the chart
             var chart = new ApexCharts(document.querySelector("#fast-moving-products-chart"), options);
             chart.render();
         });
