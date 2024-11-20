@@ -82,7 +82,7 @@
                                 </td>
                                 <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
                                     <span
-                                        class="{{ $isExpired ? 'text-red-500' : ($isNearExpiry ? 'text-yellow-500' : '') }}">
+                                        class="{{ $isExpired ? 'text-red-500' : ($isNearExpiry ? 'text-black-500' : '') }}">
                                         {{ $expirationDate->format('Y-m-d') }}
                                     </span>
                                 </td>
