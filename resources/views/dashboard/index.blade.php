@@ -26,24 +26,27 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <div class="mb-4">
-                    <label for="period" class="block text-sm font-medium text-gray-700">Select Period:</label>
-                    <select id="period" name="period"
-                        class="block w-full py-2 pl-3 pr-10 mt-1 text-base border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="weekly" {{ e($currentPeriod) == 'weekly' ? 'selected' : '' }}>Weekly</option>
-                        <option value="monthly" {{ e($currentPeriod) == 'monthly' ? 'selected' : '' }}>Monthly</option>
-                        <option value="yearly" {{ e($currentPeriod) == 'yearly' ? 'selected' : '' }}>Yearly</option>
-                    </select>
-                </div>
-            </div>
         </div>
         <div id="line-chart"></div>
     </div>
 
-    <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
-        <div id="sales-prediction-chart"></div>
+    <div class="w-full p-6 mb-6 bg-white rounded-lg shadow-md">
+        <div class="flex justify-between gap-6">
+
+            <div id="sales-chart" class="flex-1 p-4 bg-gray-50 rounded-lg shadow-sm">
+                <h5 class="inline-flex items-center mb-2 font-normal leading-none text-gray-500">
+                    Sales
+                </h5>
+                <!-- Sales chart will be rendered here -->
+            </div>
+            <div id="predicted-sales-chart" class="flex-1 p-4 bg-gray-50 rounded-lg shadow-sm">
+                <h5 class="inline-flex items-center mb-2 font-normal leading-none text-gray-500">
+                    Predicted Sales
+                </h5> <!-- Predicted sales chart will be rendered here -->
+            </div>
+        </div>
     </div>
+
 
     <div class="flex flex-col justify-between gap-3 mb-4 md:flex-row">
         <div class="w-full p-4 mx-auto bg-white rounded-lg card md:mb-0 md:w-1/2">

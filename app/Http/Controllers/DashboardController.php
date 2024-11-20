@@ -18,9 +18,11 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $period = $request->input('period', 'weekly');
+        // Set period to 'monthly' by default, and ignore user input for periods
+        $period = 'monthly';
         $inventoryType = $request->input('inventory-type', 'highest');
 
+        // Get date range and formats based on the monthly period
         $dateSettings = $this->getDateRangeAndFormats($period);
         $startDate = $dateSettings['startDate'];
         $endDate = $dateSettings['endDate'];
@@ -28,6 +30,7 @@ class DashboardController extends Controller
         $dateFormat = $dateSettings['dateFormat'];
         $displayFormat = $dateSettings['displayFormat'];
 
+        // Get sales data grouped by month
         $salesData = Sale::select(DB::raw("$groupBy as date"), DB::raw('SUM(total_amount) as total'))
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('date')
@@ -38,26 +41,24 @@ class DashboardController extends Controller
         $categories = [];
         $salesSeries = [];
 
+        // Get total sales for the period
         $totalSales = DB::table('sales')
             ->where('status', 'complete')
             ->sum('total_amount');
 
+        // Loop through each month between startDate and endDate
         $currentDate = $startDate->copy();
         while ($currentDate <= $endDate) {
             $formattedDate = $currentDate->format($dateFormat);
             $categories[] = $currentDate->format($displayFormat);
-            $dailySales = $salesData->get($formattedDate)->total ?? 0;
-            $salesSeries[] = $dailySales;
+            $monthlySales = $salesData->get($formattedDate)->total ?? 0;
+            $salesSeries[] = $monthlySales;
 
-            if ($period === 'weekly') {
-                $currentDate->addDay();
-            } elseif ($period === 'monthly') {
-                $currentDate->addMonth();
-            } else {
-                $currentDate->addYear();
-            }
+            // Move to the next month
+            $currentDate->addMonth();
         }
 
+        // Additional data
         $counts = $this->getCounts();
         $productCount = $counts['productCount'];
         $supplierCount = $counts['supplierCount'];
@@ -80,10 +81,12 @@ class DashboardController extends Controller
         // Get inventory batches
         $inventoryBatches = $this->getInventoryBatches($inventoryType);
 
+        // Get predicted sales data
         $prediction = $this->predictSales();
         $predictedSales = $prediction['sales'];
         $predictedDates = $prediction['dates'];
 
+        // Return JSON response if AJAX request
         if ($request->ajax()) {
             return response()->json([
                 'categories' => $categories,
@@ -94,6 +97,7 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Return the dashboard view with the required data
         return view('dashboard.index', [
             'productCount' => $productCount,
             'supplierCount' => $supplierCount,
@@ -105,12 +109,13 @@ class DashboardController extends Controller
             'predictedSales' => $predictedSales,
             'predictedDates' => $predictedDates,
             'totalSales' => $totalSales,
-            'currentPeriod' => $period,
+            'currentPeriod' => $period, // Always 'monthly'
             'currentInventoryType' => $inventoryType,
             'inventoryBatches' => $inventoryBatches,
             'fastMovingProducts' => $fastMovingProducts,
         ]);
     }
+
 
     private function getInventoryBatches($inventoryType)
     {
@@ -157,27 +162,20 @@ class DashboardController extends Controller
 
     private function getDateRangeAndFormats($period)
     {
-        switch ($period) {
-            case 'monthly':
-                $startDate = Carbon::now()->startOfMonth()->subMonths(11);
-                $endDate = Carbon::now()->endOfMonth();
-                $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")';
-                $dateFormat = 'Y-m';
-                $displayFormat = 'M Y';
-                break;
-            case 'yearly':
-                $startDate = Carbon::now()->startOfYear()->subYears(4);
-                $endDate = Carbon::now()->endOfYear();
-                $groupBy = 'YEAR(created_at)';
-                $dateFormat = 'Y';
-                $displayFormat = 'Y';
-                break;
-            default:
-                $startDate = Carbon::now()->subDays(6);
-                $endDate = Carbon::now();
-                $groupBy = 'DATE(created_at)';
-                $dateFormat = 'Y-m-d';
-                $displayFormat = 'D';
+        // Assuming the only valid period is 'monthly'
+        if ($period === 'monthly') {
+            $startDate = Carbon::now()->startOfMonth()->subMonths(11); // Start from 11 months ago
+            $endDate = Carbon::now()->endOfMonth(); // End at the current month's end
+            $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")'; // Group by year and month
+            $dateFormat = 'Y-m'; // Date format for grouping
+            $displayFormat = 'M Y'; // Display format for presentation
+        } else {
+            // Optionally handle invalid periods or default behavior
+            $startDate = Carbon::now()->startOfMonth()->subMonths(11);
+            $endDate = Carbon::now()->endOfMonth();
+            $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")';
+            $dateFormat = 'Y-m';
+            $displayFormat = 'M Y';
         }
 
         return [
@@ -190,10 +188,9 @@ class DashboardController extends Controller
     }
 
 
+
     public function predictSales()
     {
-
-
         // Retrieve historical sales data
         $salesData = $this->getHistoricalData();
 
@@ -229,10 +226,10 @@ class DashboardController extends Controller
             // Fallback to default prediction
             $defaultSalesValue = !empty($targets) ? end($targets) : 0;
 
-            $predictedSales = array_fill(0, 10, max(0, $defaultSalesValue));
+            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // Change to 3 months
             $predictedDates = array_map(
                 fn($i) => date('F Y', strtotime("+{$i} months")),
-                range(0, 9)
+                range(0, 2) // Change to 3 months (i.e., range 0 to 2)
             );
 
             return ['sales' => $predictedSales, 'dates' => $predictedDates];
@@ -243,13 +240,13 @@ class DashboardController extends Controller
             $regression = new LeastSquares();
             $regression->train($samples, $targets);
 
-            // Generate predictions for the next 10 months
+            // Generate predictions for the next 3 months (change from 10 to 3)
             $predictedSales = [];
             $predictedDates = [];
             $currentDate = strtotime('first day of next month');
             $now = strtotime('first day of this month');
 
-            for ($i = 0; $i < 10; $i++) {
+            for ($i = 0; $i < 3; $i++) { // Change the loop to iterate 3 times
                 // Normalize current date as months offset from base date
                 $currentOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60);
 
@@ -282,16 +279,15 @@ class DashboardController extends Controller
             // Handle regression failure with a fallback
             $defaultSalesValue = !empty($targets) ? end($targets) : 0;
 
-            $predictedSales = array_fill(0, 10, max(0, $defaultSalesValue));
+            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // Change to 3 months
             $predictedDates = array_map(
                 fn($i) => date('F Y', strtotime("+{$i} months")),
-                range(0, 9)
+                range(0, 2) // Change to 3 months (i.e., range 0 to 2)
             );
 
             return ['sales' => $predictedSales, 'dates' => $predictedDates];
         }
     }
-
 
     private function getHistoricalData()
     {

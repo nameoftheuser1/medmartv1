@@ -3,16 +3,15 @@
 @endphp
 <x-layout>
     <div class="w-full p-5 px-4 bg-white rounded-lg shadow-lg sm:px-6 lg:px-8">
-        <div class="flex flex-col items-center justify-between mb-5 sm:flex-row">
-            <h1 class="mb-2 text-2xl font-bold sm:mb-0">Product Batch List</h1>
-            <p class="mb-2 text-sm text-gray-600 sm:mb-0">Total Product Batches: {{ $productBatches->total() }}</p>
-            <form method="GET" action="{{ route('product_batches.index') }}"
-                class="flex flex-col w-full sm:flex-row sm:w-auto">
+        <div class="flex flex-col items-center justify-between mb-6 sm:flex-row">
+            <h1 class="mb-3 text-2xl font-bold sm:mb-0">Product Batch List</h1>
+            <p class="mb-3 text-sm text-gray-600 sm:mb-0">Total Product Batches: {{ $productBatches->total() }}</p>
+            <form method="GET" action="{{ route('product_batches.index') }}" class="flex flex-col w-full sm:flex-row sm:w-auto gap-4 sm:gap-6">
                 <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}"
-                    class="w-full px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
+                    class="w-full px-4 py-2 mb-3 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
 
                 <select name="sort"
-                    class="px-4 py-2 mb-2 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0"
+                    class="px-4 py-2 mb-3 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0"
                     onchange="this.form.submit()">
                     <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Ascending Expiration Date
                     </option>
@@ -26,6 +25,8 @@
                 </button>
             </form>
         </div>
+    </div>
+
 
         <div class="mb-2">
             This page displays a comprehensive list of all product batches in the inventory. You can search for specific
