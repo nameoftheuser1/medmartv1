@@ -39,11 +39,7 @@
                 </h5>
                 <!-- Sales chart will be rendered here -->
             </div>
-            <div id="predicted-sales-chart" class="flex-1 p-4 bg-gray-50 rounded-lg shadow-sm">
-                <h5 class="inline-flex items-center mb-2 font-normal leading-none text-gray-500">
-                    Predicted Sales
-                </h5> <!-- Predicted sales chart will be rendered here -->
-            </div>
+
         </div>
     </div>
 
@@ -147,12 +143,202 @@
     <script src="{{ asset('tailwindcharts\js\apexcharts.js') }}"></script>
 
     <script>
-        var salesSeries = @json($salesSeries);
-        var categories = @json($categories);
+        // In your DashboardController's index method, prepare the chart data
+        var historicalData = @json($salesSeries); // Historical sales data (last 11 months)
+        var predictedData = @json($predictedSales); // Predicted sales data (next 3 months)
+        var categories = @json(array_merge($categories, $predictedDates)); // Merge historical and predicted dates
+
+        // Merge predictedData into historicalData
+        var combinedData = historicalData.concat(predictedData);
+
         var dashboardRoute = "{{ e(route('dashboard')) }}";
     </script>
 
-    <script src="{{ asset('js/salesChart.js') }}"></script>
+    <script>
+        // Color definitions
+        const historicalColor = '#1E90FF'; // More distinct blue for historical data
+        const predictedColor = '#FF6347'; // Bright red for predicted data
+
+        // Prepare chart data
+        var historicalData = @json($salesSeries); // Historical sales data (last 11 months)
+        var predictedData = @json($predictedSales); // Predicted sales data (next 3 months)
+        var categories = @json(array_merge($categories, $predictedDates)); // Merge historical and predicted dates
+
+        // Merge predictedData into historicalData
+        var combinedData = historicalData.concat(predictedData);
+
+        // Function to generate color array based on data type
+        function generateColorArray(combinedData) {
+            const historicalLength = combinedData.length - 3; // Last 3 months predicted
+            return combinedData.map((_, index) =>
+                index < historicalLength ? historicalColor : predictedColor
+            );
+        }
+
+        // Function to generate color stops with gradient
+        function generateColorStops(combinedData) {
+            const historicalLength = combinedData.length - 3;
+            return combinedData.map((_, index) => {
+                const baseColor = index < historicalLength ? historicalColor : predictedColor;
+                return {
+                    color: baseColor,
+                    opacity: index < historicalLength ? 0.7 : 0.4
+                };
+            });
+        }
+
+        // Chart configuration options
+        const options = {
+            chart: {
+                height: 400,
+                type: 'line',
+                zoom: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: true,
+                    tools: {
+                        download: true,
+                        selection: true,
+                        zoom: true,
+                        zoomin: true,
+                        zoomout: true,
+                        pan: true,
+                        reset: true
+                    }
+                }
+            },
+            series: [{
+                name: 'Sales',
+                data: combinedData
+            }],
+            colors: generateColorArray(combinedData),
+            stroke: {
+                width: 3,
+                colors: generateColorArray(combinedData),
+                dashArray: combinedData.map((_, index) =>
+                    index < combinedData.length - 3 ? 0 : 5 // Solid for historical, dashed for predicted
+                )
+            },
+            xaxis: {
+                categories: categories,
+                title: {
+                    text: 'Months',
+                    style: {
+                        fontWeight: 600
+                    }
+                },
+                labels: {
+                    rotate: -45,
+                    rotateAlways: false
+                },
+                // Add vertical line between historical and predicted data
+                axisBorder: {
+                    show: true,
+                    color: '#775DD0',
+                    offsetX: 0,
+                    offsetY: 0
+                }
+            },
+            yaxis: {
+                title: {
+                    text: 'Sales Amount',
+                    style: {
+                        fontWeight: 600
+                    }
+                },
+                labels: {
+                    formatter: function(value) {
+                        return '₱' + value.toFixed(2);
+                    }
+                }
+            },
+            title: {
+                text: 'Historical vs Predicted Sales',
+                align: 'center',
+                style: {
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    color: '#333'
+                }
+            },
+            annotations: {
+                xaxis: [{
+                    x: categories[combinedData.length - 3],
+                    strokeDashArray: 2,
+                    borderColor: '#775DD0',
+                    label: {
+                        borderColor: '#775DD0',
+                        style: {
+                            color: '#fff',
+                            background: '#775DD0'
+                        },
+                        text: 'Prediction Starts'
+                    }
+                }]
+            },
+            tooltip: {
+                enabled: true,
+                shared: true,
+                intersect: false,
+                formatter: function(value, {
+                    series,
+                    seriesIndex,
+                    dataPointIndex,
+                    w
+                }) {
+                    const historicalLength = combinedData.length - 3;
+                    const type = dataPointIndex < historicalLength ? 'Historical' : 'Predicted';
+                    return `${type} Sales: ₱${value.toFixed(2)}`;
+                }
+            },
+            markers: {
+                size: 5,
+                colors: generateColorArray(combinedData),
+                strokeColors: generateColorArray(combinedData),
+                hover: {
+                    size: 7,
+                    sizeOffset: 3
+                }
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shade: 'light',
+                    type: 'horizontal',
+                    shadeIntensity: 0.5,
+                    stops: [0, 50, 100],
+                    colorStops: generateColorStops(combinedData)
+                }
+            },
+            grid: {
+                borderColor: '#e7e7e7',
+                strokeDashArray: 5,
+                row: {
+                    colors: ['#f3f3f3', 'transparent'],
+                    opacity: 0.5
+                }
+            },
+            legend: {
+                show: false // Kept false as in original script
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        height: 250
+                    }
+                }
+            }],
+        };
+
+        // Render the chart
+        const chart = new ApexCharts(document.querySelector("#sales-chart"), options);
+        chart.render();
+    </script>
+
+
+
 
     <script>
         var inventoryBatches = @json($inventoryBatches);
@@ -243,51 +429,6 @@
     </script>
 
 
-    <script>
-        var predictedSales = @json($predictedSales);
-        var predictedDates = @json($predictedDates);
 
-        document.addEventListener("DOMContentLoaded", function() {
-            var options = {
-                chart: {
-                    type: 'line',
-                    height: 350,
-                    zoom: {
-                        enabled: false
-                    },
-                    toolbar: {
-                        show: false
-                    },
-                },
-                series: [{
-                    name: 'Predicted Sales',
-                    data: predictedSales,
-                }],
-                xaxis: {
-                    categories: predictedDates,
-                    title: {
-                        text: 'Date',
-                    },
-                },
-                yaxis: {
-                    title: {
-                        text: 'Sales Amount',
-                    },
-                },
-                title: {
-                    text: 'Sales Prediction',
-                    align: 'left',
-                },
-                grid: {
-                    borderColor: '#f1f1f1',
-                    strokeDashArray: 4,
-                },
-                colors: ['#008FFB'],
-            };
-
-            var chart = new ApexCharts(document.querySelector("#sales-prediction-chart"), options);
-            chart.render();
-        });
-    </script>
 
 </x-layout>

@@ -98,6 +98,11 @@ class DashboardController extends Controller
         }
 
         // Return the dashboard view with the required data
+        $historicalData = $salesSeries; // Historical sales data (last 11 months)
+        $predictedData = $predictedSales; // Predicted sales data (next 3 months)
+        $categories = array_merge($categories, $predictedDates); // Merge historical and predicted dates
+
+        // Prepare for JavaScript rendering
         return view('dashboard.index', [
             'productCount' => $productCount,
             'supplierCount' => $supplierCount,
@@ -105,8 +110,8 @@ class DashboardController extends Controller
             'expiringBatches' => $expiringBatches,
             'totalSalesToday' => $totalSalesToday,
             'categories' => $categories,
-            'salesSeries' => $salesSeries,
-            'predictedSales' => $predictedSales,
+            'salesSeries' => $historicalData,
+            'predictedSales' => $predictedData,
             'predictedDates' => $predictedDates,
             'totalSales' => $totalSales,
             'currentPeriod' => $period, // Always 'monthly'
@@ -164,7 +169,7 @@ class DashboardController extends Controller
     {
         // Assuming the only valid period is 'monthly'
         if ($period === 'monthly') {
-            $startDate = Carbon::now()->startOfMonth()->subMonths(11); // Start from 11 months ago
+            $startDate = Carbon::now()->startOfMonth()->subMonths(4); // Start from 11 months ago
             $endDate = Carbon::now()->endOfMonth(); // End at the current month's end
             $groupBy = 'DATE_FORMAT(created_at, "%Y-%m")'; // Group by year and month
             $dateFormat = 'Y-m'; // Date format for grouping
@@ -223,13 +228,13 @@ class DashboardController extends Controller
         // Handle cases with insufficient unique data for predictions
         $uniqueSamples = array_unique(array_map('serialize', $samples));
         if (count($uniqueSamples) < 2) {
-            // Fallback to default prediction
+            // Fallback to default prediction (3 months)
             $defaultSalesValue = !empty($targets) ? end($targets) : 0;
 
-            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // Change to 3 months
+            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // 3 months prediction
             $predictedDates = array_map(
-                fn($i) => date('F Y', strtotime("+{$i} months")),
-                range(0, 2) // Change to 3 months (i.e., range 0 to 2)
+                fn($i) => date('F Y', strtotime("+{$i} months", strtotime('first day of next month'))),
+                range(0, 2) // Predict for 3 months (0 to 2)
             );
 
             return ['sales' => $predictedSales, 'dates' => $predictedDates];
@@ -240,31 +245,28 @@ class DashboardController extends Controller
             $regression = new LeastSquares();
             $regression->train($samples, $targets);
 
-            // Generate predictions for the next 3 months (change from 10 to 3)
+            // Generate predictions for the next 3 months
             $predictedSales = [];
             $predictedDates = [];
-            $currentDate = strtotime('first day of next month');
-            $now = strtotime('first day of this month');
+            $currentDate = strtotime('first day of next month'); // Start from next month
 
-            for ($i = 0; $i < 3; $i++) { // Change the loop to iterate 3 times
+            for ($i = 0; $i < 3; $i++) { // Predict for exactly 3 months
                 // Normalize current date as months offset from base date
                 $currentOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60);
 
                 $predictedValue = max(0, round($regression->predict([$currentOffset])));
                 $predictedDate = date('F Y', $currentDate);
 
-                // Store the prediction in the database if the month is in the past
-                if ($currentDate < $now) {
-                    DB::table('sales_data')->updateOrInsert(
-                        ['key' => 'predicted_sales_' . date('Ym', $currentDate)],
-                        [
-                            'value' => $predictedValue,
-                            'month' => $predictedDate,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]
-                    );
-                }
+                // Store the prediction in the database if it's for a future month
+                DB::table('sales_data')->updateOrInsert(
+                    ['key' => 'predicted_sales_' . date('Ym', $currentDate)],
+                    [
+                        'value' => $predictedValue,
+                        'month' => $predictedDate,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                );
 
                 // Store prediction for return
                 $predictedSales[] = $predictedValue;
@@ -279,10 +281,10 @@ class DashboardController extends Controller
             // Handle regression failure with a fallback
             $defaultSalesValue = !empty($targets) ? end($targets) : 0;
 
-            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // Change to 3 months
+            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // 3 months prediction
             $predictedDates = array_map(
-                fn($i) => date('F Y', strtotime("+{$i} months")),
-                range(0, 2) // Change to 3 months (i.e., range 0 to 2)
+                fn($i) => date('F Y', strtotime("+{$i} months", strtotime('first day of next month'))),
+                range(0, 2) // Predict for 3 months (0 to 2)
             );
 
             return ['sales' => $predictedSales, 'dates' => $predictedDates];
