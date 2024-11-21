@@ -148,7 +148,7 @@
             <!-- Exchange Section -->
             <div class="mt-4 flex flex-col gap-3">
                 <label for="exchange-input">Enter Amount:</label>
-                <input type="number" id="exchange-input" class="input" min="0" value="">
+                <input type="number" id="exchange-input" class="input" min="0" value="{{ $totalPrice }}">
 
                 <div class="mt-4 flex gap-2">
                     <!-- Reset Button -->
