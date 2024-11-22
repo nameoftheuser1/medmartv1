@@ -61,11 +61,11 @@
 
         <div class="bg-white rounded-lg p-4 md:w-1/2 max-h-[430] min-h-[430] overflow-y-scroll">
             <h2 class="mb-2 font-mono text-xl font-bold">Products About to Expire</h2>
-            <p class="mb-5 text-sm text-gray-500">Here showing the products that are about to expire in 30 days</p>
+            <p class="mb-5 text-sm text-gray-500">Here showing the products that are about to expire in 3 months</p>
             @if ($expiringBatches->isEmpty())
-                <p class="text-gray-200">No products are about to expire within the next 30 days.</p>
+                <p class="text-gray-200">No products are about to expire within the next 3 months.</p>
             @else
-                <div class="overflow-x-auto ">
+                <div class="overflow-x-auto">
                     <table class="min-w-full">
                         <thead>
                             <tr>
@@ -77,7 +77,16 @@
                         </thead>
                         <tbody>
                             @foreach ($expiringBatches as $batch)
-                                <tr>
+                                @php
+                                    $monthsToExpiry = now()->diffInMonths($batch->expiration_date);
+                                    $rowClass = '';
+                                    if ($monthsToExpiry <= 1) {
+                                        $rowClass = 'bg-red-100';
+                                    } elseif ($monthsToExpiry <= 2) {
+                                        $rowClass = 'bg-yellow-100';
+                                    }
+                                @endphp
+                                <tr class="{{ $rowClass }}">
                                     <td class="px-4 py-2 border">{{ e($batch->product->product_name) }}</td>
                                     <td class="px-4 py-2 text-center border">{{ e($batch->batch_number) }}</td>
                                     <td class="px-4 py-2 text-center border">

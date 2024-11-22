@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventory;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 
@@ -63,6 +64,21 @@ class SaleController extends Controller
     {
         $sale = Sale::findOrFail($id);
 
+        // Fetch all sale details related to this sale
+        $saleDetails = $sale->saleDetails;
+
+        foreach ($saleDetails as $detail) {
+            // Find the corresponding inventory batch
+            $inventory = Inventory::where('batch_id', $detail->product_id)->first();
+
+            if ($inventory) {
+                // Increment inventory quantity
+                $inventory->quantity += $detail->quantity;
+                $inventory->save();
+            }
+        }
+
+        // Update the sale record
         $sale->refunded += $sale->total_amount;
         $sale->total_amount = 0;
         $sale->status = 'refunded';

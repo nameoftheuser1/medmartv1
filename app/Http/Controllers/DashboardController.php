@@ -64,7 +64,7 @@ class DashboardController extends Controller
         $supplierCount = $counts['supplierCount'];
         $saleCount = $counts['saleCount'];
 
-        $thresholdDate = Carbon::now()->addDays(30);
+        $thresholdDate = Carbon::now()->addMonths(3);
         $expiringBatches = ProductBatch::with(['product', 'inventories'])
             ->where('expiration_date', '>', now())
             ->where('expiration_date', '<=', $thresholdDate)
