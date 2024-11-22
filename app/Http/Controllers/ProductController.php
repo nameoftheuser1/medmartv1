@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -29,7 +30,14 @@ class ProductController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('products.index', ['products' => $products]);
+        // Check if the request is an AJAX request
+        if ($request->ajax()) {
+            return view('products.partials._table', ['products' => $products])->render();
+        }
+
+        return view('products.index', [
+            'products' => $products,
+        ]);
     }
 
 

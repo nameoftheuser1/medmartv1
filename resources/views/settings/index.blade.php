@@ -30,10 +30,10 @@
                     <a href="{{ route('settings.edit.password') }}" class="text-blue-600 hover:underline">Edit
                         Password</a>
                 </li>
-                <li>
+                {{-- <li>
                     <a href="{{ route('settings.edit.prediction') }}" class="text-blue-600 hover:underline">Days
                         Prediction</a>
-                </li>
+                </li> --}}
             </ul>
         </div>
     </div>

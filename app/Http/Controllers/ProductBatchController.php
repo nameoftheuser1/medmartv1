@@ -17,9 +17,11 @@ class ProductBatchController extends Controller
      */
     public function index(Request $request)
     {
+        // Get the search input and sort direction from the request
         $search = $request->input('search');
         $sort = $request->input('sort', 'asc'); // Default sorting to ascending if not specified
 
+        // Query for product batches
         $productBatches = ProductBatch::query()
             ->join('products', 'product_batches.product_id', '=', 'products.id')
             ->select('product_batches.*')
@@ -33,14 +35,17 @@ class ProductBatchController extends Controller
             // Exclude expired product batches
             ->where('product_batches.expiration_date', '>', now())
             ->orderBy('product_batches.expiration_date', $sort)
-            ->latest()
             ->paginate(10);
 
-        return view('product_batches.index', [
-            'productBatches' => $productBatches,
-        ]);
-    }
+        // Check if it's an AJAX request
+        if ($request->ajax()) {
+            // Return the HTML content of the table for the AJAX request
+            return view('product_batches.partials._table', compact('productBatches'));
+        }
 
+        // Otherwise, return the full view
+        return view('product_batches.index', compact('productBatches'));
+    }
 
 
     /**
