@@ -55,6 +55,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/pos/remove-all-items', [POSController::class, 'removeAllItems'])->name('pos.removeAllItems');
 
     Route::patch('/inventories/{inventory}/empty-quantity', [InventoryController::class, 'emptyQuantity'])->name('inventories.emptyQuantity');
+    Route::patch('/product-batches/{productBatch}/return-date', [ProductBatchController::class, 'returnProduct'])->name('product_batches.returnDate');
+
+    
+
 });
 
 Route::get('locale/{lang}', [LocaleController::class, 'setLocale']);
