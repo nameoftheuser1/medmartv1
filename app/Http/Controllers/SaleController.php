@@ -105,7 +105,10 @@ class SaleController extends Controller
         // Validate the incoming request
         $request->validate([
             'created_at' => 'required|date',
-            'total_amount' => 'required|numeric|min:0',
+            'total_amount' => [
+                'required',
+                'regex:/^\d{1,10}$/', // Allows 1 to 10 digits only
+            ],
         ]);
 
         // Create a new Sale record

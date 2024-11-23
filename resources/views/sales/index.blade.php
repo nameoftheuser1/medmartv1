@@ -1,6 +1,21 @@
 <x-layout>
     <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
         <h2 class="mb-2 font-mono text-xl font-bold"></h2>
+        <!-- Dropdown to select period with Tailwind CSS styling -->
+        <div class="mb-4">
+            <label for="period-select" class="block text-sm font-medium text-gray-700 mb-1">
+                Select Period
+            </label>
+            <select
+                id="period-select"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700 focus:ring-indigo-500 focus:border-indigo-500">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+            </select>
+        </div>
+
+
         <div id="sales-chart"></div>
     </div>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
@@ -113,15 +128,77 @@
     <script src="{{ asset('tailwindcharts\js\apexcharts.js') }}"></script>
 
 
+
+
+    <!-- Chart container -->
+    <div id="sales-chart"></div>
+
     <script>
         // Pass chart data from the controller to JavaScript
         var chartData = @json($chartData);
-        var dates = chartData.map(function(sale) {
-            return sale.date;
-        });
-        var totalAmounts = chartData.map(function(sale) {
-            return sale.total_amount;
-        });
+
+        // Function to format the chart data based on the selected period
+        function getChartData(period) {
+            let dates = [];
+            let totalAmounts = [];
+
+            if (period === 'daily') {
+                chartData.forEach(function(sale) {
+                    dates.push(sale.date);
+                    totalAmounts.push(parseFloat(sale.total_amount).toFixed(2)); // Format to 2 decimal places
+                });
+            } else if (period === 'weekly') {
+                let weeklyData = {};
+                chartData.forEach(function(sale) {
+                    let weekNumber = getMonthlyWeekNumber(new Date(sale.date));
+                    if (!weeklyData[weekNumber]) {
+                        weeklyData[weekNumber] = 0;
+                    }
+                    weeklyData[weekNumber] += parseFloat(sale.total_amount);
+                });
+
+                for (let week in weeklyData) {
+                    dates.push('Week ' + week);
+                    totalAmounts.push(weeklyData[week].toFixed(2)); // Format to 2 decimal places
+                }
+            } else if (period === 'monthly') {
+                let monthlyData = {};
+                chartData.forEach(function(sale) {
+                    let month = new Date(sale.date).toLocaleString('default', {
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                    if (!monthlyData[month]) {
+                        monthlyData[month] = 0;
+                    }
+                    monthlyData[month] += parseFloat(sale.total_amount);
+                });
+
+                for (let month in monthlyData) {
+                    dates.push(month);
+                    totalAmounts.push(monthlyData[month].toFixed(2)); // Format to 2 decimal places
+                }
+            }
+
+            return {
+                dates,
+                totalAmounts
+            };
+        }
+
+        // Function to get the week number of the month
+        function getMonthlyWeekNumber(date) {
+            const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+            const daysPassed = (date - startOfMonth) / (1000 * 60 * 60 * 24); // Difference in days
+            return Math.ceil((daysPassed + 1) / 7); // Week number starts from 1
+        }
+
+        // Initial chart setup
+        var period = 'daily'; // Default to daily
+        var {
+            dates,
+            totalAmounts
+        } = getChartData(period);
 
         // ApexCharts configuration
         document.addEventListener("DOMContentLoaded", function() {
@@ -138,17 +215,17 @@
                 },
                 series: [{
                     name: 'Total Sales',
-                    data: totalAmounts,
+                    data: totalAmounts
                 }],
                 xaxis: {
                     categories: dates,
                     title: {
-                        text: 'Date',
+                        text: 'Date'
                     },
                 },
                 yaxis: {
                     title: {
-                        text: 'Total Amount',
+                        text: 'Total Amount'
                     },
                 },
                 title: {
@@ -157,13 +234,38 @@
                 },
                 grid: {
                     borderColor: '#f1f1f1',
-                    strokeDashArray: 4,
+                    strokeDashArray: 4
                 },
                 colors: ['#00E396'],
             };
 
             var chart = new ApexCharts(document.querySelector("#sales-chart"), options);
             chart.render();
+
+            // Event listener for dropdown change
+            document.getElementById('period-select').addEventListener('change', function(event) {
+                period = event.target.value;
+                var {
+                    dates,
+                    totalAmounts
+                } = getChartData(period);
+
+                chart.updateOptions({
+                    xaxis: {
+                        categories: dates
+                    },
+                    series: [{
+                        name: 'Total Sales',
+                        data: totalAmounts
+                    }],
+                    title: {
+                        text: 'Sales for the ' + period.charAt(0).toUpperCase() + period.slice(1),
+                        align: 'left',
+                    },
+                });
+            });
         });
     </script>
+
+
 </x-layout>

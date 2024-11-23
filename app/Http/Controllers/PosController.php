@@ -138,10 +138,28 @@ class POSController extends Controller
 
     public function checkout(Request $request)
     {
+        $request->validate([
+            'exchange' => [
+                'required',
+                'regex:/^\d{1,10}(\.\d{1,2})?$/', // Allows up to 10 digits with optional 2 decimal places
+            ],
+        ]);
+
         $sessionId = $this->getSessionId();
         $cartItems = TemporaryCartItem::where('session_id', $sessionId)->get();
         $discountPercentage = session()->get('discountPercentage', 0);
         $exchange = $request->input('exchange', 0);
+        $exchange = $request->input('exchange');
+
+        // Check if the exchange field is empty
+        if (empty($exchange)) {
+            return back()->withErrors(['exchange' => 'The amount field is required.']);
+        }
+
+        // Check if the exchange field matches the regex pattern for up to 10 digits with 2 decimal places
+        if (!preg_match('/^\d{1,8}(\.\d{1,2})?$/', $exchange)) {
+            return back()->withErrors(['exchange' => 'The amount field must be a valid number with up to 10 digits and 2 decimal places.']);
+        }
 
         if ($cartItems->isEmpty()) {
             return redirect()->route('pos.index')->with('error', 'No items in the cart.');

@@ -1,16 +1,31 @@
 <x-layout>
     <h1>Point of Sale</h1>
 
-    @if (session('success'))
-        <p class="text-green-500">{{ session('success') }}</p>
-    @endif
 
-    @if (session('error'))
-        <p class="text-red-500">{{ session('error') }}</p>
-    @endif
 
     <div class="flex flex-col sm:flex-row w-full gap-2">
         <div class="rounded-lg card w-full">
+            @if (session('success'))
+                <p class="text-green-500">{{ session('success') }}</p>
+            @endif
+            @if ($errors->any())
+            <ul class="text-red-500">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        @endif
+            @if (session('error'))
+                <p class="text-red-500">{{ session('error') }}</p>
+                if (empty($exchange)) {
+                    return back()->withErrors(['exchange' => 'The exchange field is required.']);
+                }
+
+                // Check if the exchange field matches the regex pattern
+                if (!preg_match('/^\d{1,10}(\.\d{1,2})?$/', $exchange)) {
+                    return back()->withErrors(['exchange' => 'The exchange field must be a valid number with up to 10 digits and 2 decimal places.']);
+                }
+            @endif
             <h2>Select Product</h2>
             <div class="mb-4">
                 <input type="text" id="search-input" placeholder="Search products..." class="w-full m-1 input">
@@ -88,15 +103,15 @@
                 <label for="discount_percentage">Discount (1-100%):</label>
                 <input type="number" name="discount_percentage" id="discount_percentage" class="m-2 input"
                     value="{{ $discountPercentage }}" min="0" max="100">
-                    <div class="mt-4 flex gap-2">
-                        @foreach ([3, 50, 100] as $discount)
-                            <button type="button"
-                                class="discount-card w-16 h-16 flex items-center justify-center bg-gray-200 text-lg font-bold rounded-lg hover:bg-gray-300"
-                                data-discount="{{ $discount }}">
-                                {{ $discount }}%
-                            </button>
-                        @endforeach
-                    </div>
+                <div class="mt-4 flex gap-2">
+                    @foreach ([3, 50, 100] as $discount)
+                        <button type="button"
+                            class="discount-card w-16 h-16 flex items-center justify-center bg-gray-200 text-lg font-bold rounded-lg hover:bg-gray-300"
+                            data-discount="{{ $discount }}">
+                            {{ $discount }}%
+                        </button>
+                    @endforeach
+                </div>
                 <div class="flex justify-center mt-4">
                     <button type="submit" class="text-lg btn">Apply Discount</button>
                 </div>
@@ -108,7 +123,7 @@
                         id="final-price">{{ number_format($totalPrice * (1 - $discountPercentage / 100), 2) }}</span>
                 </h3>
                 <h3 class="font-bold">Change: ₱<span id="change-amount">0.00</span></h3>
-             <!-- Discount Cards for 3%, 50%, 100% -->
+                <!-- Discount Cards for 3%, 50%, 100% -->
 
             </div>
 
