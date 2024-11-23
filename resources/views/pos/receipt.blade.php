@@ -1,8 +1,8 @@
 <x-layout>
     <!-- Receipt Layout -->
-    <div class="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+    <div class="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden" id="receipt-card">
         <!-- Header Section -->
-        <div class="bg-gray-800 text-white py-4 px-6 text-center">
+        <div class="bg-green-500 text-white-800 py-4 px-6 text-center">
             <h1 class="text-2xl font-bold">Receipt</h1>
         </div>
 
@@ -77,10 +77,35 @@
         </div>
     </div>
 
-    <!-- Back Button -->
-    <div class="p-6 flex justify-center">
+    <!-- Back and Print Button -->
+    <div class="p-6 flex justify-center space-x-4">
         <a href="{{ url()->previous() }}" class="text-white hover:underline rounded-lg bg-slate-500 p-4">
             <i class="fas fa-arrow-left"></i> Back
         </a>
+        <!-- Print as PDF Button -->
+        <button id="print-pdf" class="text-white hover:underline rounded-lg bg-blue-500 p-4">
+            <i class="fas fa-print"></i> Print as PDF
+        </button>
     </div>
+
+    <!-- JavaScript to handle PDF download using html2pdf -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+    <script>
+        document.getElementById('print-pdf').addEventListener('click', function() {
+            // Get the content of the receipt card (only the div with id 'receipt-card')
+            const receiptContent = document.getElementById('receipt-card');
+
+            // Create a configuration object
+            const options = {
+                margin:       10,
+                filename:     'receipt.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Use html2pdf to convert HTML content to PDF
+            html2pdf().from(receiptContent).set(options).save();
+        });
+    </script>
 </x-layout>
