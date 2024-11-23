@@ -109,12 +109,13 @@
                         @method('DELETE')
                         <button type="submit" class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
                     </form>
-
-                    @if ($inventory->quantity > 0)
-                        <form action="{{ route('inventories.emptyQuantity', $inventory) }}" method="POST">
+                    @if($inventory->quantity != 0)
+                        <form action="{{ route('product_batches.returnDate', $inventory->productBatch->id) }}" method="POST" class="inline">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="font-medium text-yellow-600 dark:text-yellow-500 hover:underline">Empty Quantity</button>
+                                <button type="submit" class="font-small text-green-600 dark:text-green-500 hover:underline">
+                                    Return Product
+                                </button>
                         </form>
                     @endif
                 </div>

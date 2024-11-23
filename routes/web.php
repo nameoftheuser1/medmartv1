@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\POSController;
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('inventories', InventoryController::class);
     Route::resource('sales', SaleController::class);
     Route::resource('sale_details', SaleDetailController::class);
+    Route::resource('expenses', ExpenseController::class);
 
     Route::get('/pos', [POSController::class, 'index'])->name('pos.index');
     Route::get('/receipt/{sale_id}', [POSController::class, 'receipt'])->name('pos.receipt');
@@ -55,6 +57,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/pos/remove-all-items', [POSController::class, 'removeAllItems'])->name('pos.removeAllItems');
 
     Route::patch('/inventories/{inventory}/empty-quantity', [InventoryController::class, 'emptyQuantity'])->name('inventories.emptyQuantity');
+    Route::patch('/product-batches/{productBatch}/return-date', [ProductBatchController::class, 'returnProduct'])->name('product_batches.returnDate');
+
+    
+
 });
 
 Route::get('locale/{lang}', [LocaleController::class, 'setLocale']);

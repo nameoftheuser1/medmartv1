@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace App\Models;
 
@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ProductBatch extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'product_id',
         'supplier_id',
@@ -17,11 +18,13 @@ class ProductBatch extends Model
         'expiration_date',
         'supplier_price',
         'received_date',
+        'return_date', // Added return_date
     ];
 
     protected $casts = [
         'expiration_date' => 'datetime',
         'received_date' => 'datetime',
+        'return_date' => 'datetime', // Added return_date to casts
     ];
 
     public function product(): BelongsTo
