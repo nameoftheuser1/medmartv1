@@ -19,15 +19,12 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->when($search, function ($query, $search) {
-                $query->where('product_name', 'like', "%{$search}%")
-                    ->orWhere('generic_name', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('product_description', 'like', "%{$search}%");
+                $query->where('product_name', 'like', "%{$search}%");
             })
             ->when($category, function ($query, $category) {
                 $query->where('category', $category);
             })
-            ->latest()
+            ->orderBy('product_name', 'asc')
             ->paginate(10);
 
         // Check if the request is an AJAX request

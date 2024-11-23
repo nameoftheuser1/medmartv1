@@ -66,8 +66,16 @@
                         $('#product-table').html(response);
                     },
                     error: function(xhr) {
-                        console.error('AJAX error:', xhr);
-                        alert('An error occurred while fetching product batches.');
+                        // Log the error details in the console
+                        console.error('AJAX error:', {
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText
+                        });
+
+                        // Display the error message in an alert
+                        alert(
+                            `An error occurred while fetching product batches.\n\nStatus: ${xhr.status} ${xhr.statusText}\nMessage: ${xhr.responseText}`);
                     }
                 });
             }

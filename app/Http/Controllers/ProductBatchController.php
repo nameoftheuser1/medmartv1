@@ -26,15 +26,13 @@ class ProductBatchController extends Controller
             ->join('products', 'product_batches.product_id', '=', 'products.id')
             ->select('product_batches.*')
             ->where(function ($query) use ($search) {
-                $query->where('product_batches.batch_number', 'like', "%{$search}%")
-                    ->orWhere('product_batches.expiration_date', 'like', "%{$search}%")
-                    ->orWhere('product_batches.supplier_price', 'like', "%{$search}%")
-                    ->orWhere('product_batches.received_date', 'like', "%{$search}%")
-                    ->orWhere('products.product_name', 'like', "%{$search}%");
+                // Only search for the product name
+                $query->where('products.product_name', 'like', "%{$search}%");
             })
             // Exclude expired product batches
             ->where('product_batches.expiration_date', '>', now())
-            ->orderBy('product_batches.expiration_date', $sort)
+            // Sort alphabetically by product name
+            ->orderBy('products.product_name', $sort)
             ->paginate(10);
 
         // Check if it's an AJAX request
@@ -48,13 +46,14 @@ class ProductBatchController extends Controller
     }
 
 
+
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        $products = Product::all();
-        $suppliers = Supplier::all();
+        $products = Product::orderBy('product_name')->get();
+        $suppliers = Supplier::orderBy('supplier_name')->get();
 
         return view('product_batches.create', [
             'products' => $products,
@@ -62,27 +61,45 @@ class ProductBatchController extends Controller
         ]);
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        // Validate the incoming data for multiple product batches
         $validatedData = $request->validate([
-            'product_id' => ['required', 'exists:products,id'],
-            'supplier_id' => ['nullable', 'exists:suppliers,id'],
-            'batch_number' => ['required', 'string', 'unique:product_batches'],
-            'expiration_date' => ['required', 'date'],
-            'supplier_price' => ['required', 'numeric'],
+            'batch_number' => ['required', 'string'],
             'received_date' => ['required', 'date'],
-            'quantity' => ['required', 'integer'],
+            'supplier_id' => ['nullable', 'exists:suppliers,id'],
+            'product_id' => ['required', 'array'],
+            'product_id.*' => ['exists:products,id'],
+            'expiration_date' => ['required', 'array'],
+            'expiration_date.*' => ['date'],
+            'quantity' => ['required', 'array'],
+            'quantity.*' => ['integer'],
+            'supplier_price' => ['required', 'array'],
+            'supplier_price.*' => ['numeric'],
         ]);
 
-        $productBatch = ProductBatch::create($validatedData);
+        // Loop through each product and create corresponding entries
+        foreach ($validatedData['product_id'] as $index => $productId) {
+            // Create product batch entries
+            $productBatch = ProductBatch::create([
+                'product_id' => $productId,
+                'supplier_id' => $validatedData['supplier_id'][$index] ?? null,
+                'batch_number' => $validatedData['batch_number'],
+                'expiration_date' => $validatedData['expiration_date'][$index],
+                'supplier_price' => $validatedData['supplier_price'][$index],
+                'received_date' => $validatedData['received_date'],
+            ]);
 
-        Inventory::create([
-            'batch_id' => $productBatch->id,
-            'quantity' => $validatedData['quantity'],
-        ]);
+            // Create an inventory record for each product batch
+            Inventory::create([
+                'batch_id' => $productBatch->id,
+                'quantity' => $validatedData['quantity'][$index],
+            ]);
+        }
 
         return redirect()->route('product_batches.index')->with('success', 'Product batch and inventory created successfully.');
     }
@@ -92,8 +109,8 @@ class ProductBatchController extends Controller
      */
     public function show(ProductBatch $productBatch)
     {
-        $products = Product::all();
-        $suppliers = Supplier::all();
+        $products = Product::orderBy('product_name')->get();
+        $suppliers = Supplier::orderBy('supplier_name')->get();
 
         return view('product_batches.show', [
             'productBatch' => $productBatch,
@@ -107,8 +124,8 @@ class ProductBatchController extends Controller
      */
     public function edit(ProductBatch $productBatch)
     {
-        $products = Product::all();
-        $suppliers = Supplier::all();
+        $products = Product::orderBy('product_name')->get();
+        $suppliers = Supplier::orderBy('supplier_name')->get();
 
         return view('product_batches.edit', [
             'productBatches' => $productBatch,

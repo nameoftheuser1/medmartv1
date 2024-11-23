@@ -1,108 +1,150 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const productCards = document.querySelectorAll(".product-card");
-    const addToSaleForm = document.getElementById("add-to-sale-form");
-    const selectedProductIdInput = document.getElementById(
-        "selected-product-id"
-    );
-    const searchInput = document.getElementById("search-input");
-    const exchangeInput = document.getElementById("exchange-input");
-    const exchangeHiddenInput = document.getElementById(
-        "exchange-hidden-input"
-    );
-    const changeAmountElement = document.getElementById("change-amount");
-    const finalPriceElement = document.getElementById("final-price");
-    const amountCards = document.querySelectorAll(".amount-card");
-    const discountCards = document.querySelectorAll(".discount-card"); // New line for discount selection cards
-    const discountInput = document.getElementById("discount_percentage"); // Discount input element
-    const resetExchangeButton = document.getElementById(
-        "reset-exchange-button"
-    );
+$(document).ready(function () {
+    const productCards = $(".product-card");
+    const addToSaleForm = $("#add-to-sale-form");
+    const selectedProductIdInput = $("#selected-product-id");
+    const searchInput = $("#search-input");
+    const exchangeInput = $("#exchange-input");
+    const exchangeHiddenInput = $("#exchange-hidden-input");
+    const changeAmountElement = $("#change-amount");
+    const finalPriceElement = $("#final-price");
+    const amountCards = $(".amount-card");
+    const discountCards = $(".discount-card"); // New line for discount selection cards
+    const discountInput = $("#discount_percentage"); // Discount input element
+    const resetExchangeButton = $("#reset-exchange-button");
 
     // Search functionality for products
-    searchInput.addEventListener("input", function () {
-        const query = this.value.toLowerCase();
-        productCards.forEach((card) => {
-            const productName = card.getAttribute("data-name").toLowerCase();
-            card.classList.toggle("hidden", !productName.includes(query));
+    searchInput.on("input", function () {
+        const query = $(this).val().toLowerCase();
+        productCards.each(function () {
+            const productName = $(this).data("name").toLowerCase();
+            $(this).toggleClass("hidden", !productName.includes(query));
         });
     });
 
     // Product selection functionality
-    productCards.forEach((card) => {
-        card.addEventListener("click", function () {
-            productCards.forEach((card) =>
-                card.classList.remove("ring", "ring-green-500", "bg-green-50")
-            );
-            this.classList.add("ring", "ring-green-500", "bg-green-50");
+    $(document).ready(function () {
+        const productCards = $(".product-card");
+        const addToSaleForm = $("#add-to-sale-form");
+        const selectedProductIdInput = $("#selected-product-id");
+        const searchInput = $("#search-input");
 
-            selectedProductIdInput.value = this.getAttribute("data-id");
-            addToSaleForm.classList.remove("hidden");
+        // Modal elements
+        const quantityModal = $("#quantity-modal");
+        const cancelModalButton = $("#cancel-modal");
+        const quantityInput = $("#quantity");
+        const modalProductName = $("#modal-product-name");
+
+        // Search functionality for products
+        searchInput.on("input", function () {
+            const query = $(this).val().toLowerCase();
+            productCards.each(function () {
+                const productName = $(this).data("name").toLowerCase();
+                $(this).toggleClass("hidden", !productName.includes(query));
+            });
+        });
+
+        // Product selection functionality
+        productCards.on("click", function () {
+            const productId = $(this).data("id");
+            const productName = $(this).data("name");
+            const productQuantity = $(this).data("quantity");
+
+            // Highlight selected product
+            productCards.removeClass("ring ring-green-500 bg-green-50");
+            $(this).addClass("ring ring-green-500 bg-green-50");
+
+            // Set values in the form and modal
+            selectedProductIdInput.val(productId);
+            modalProductName.text(`Select Quantity for ${productName}`);
+            quantityInput.val(1); // Default quantity is 1
+            quantityInput.attr("max", productQuantity); // Limit max quantity to available stock
+
+            // Show the modal
+            quantityModal.removeClass("hidden");
+
+            // Show the "Add to Cart" form
+            addToSaleForm.removeClass("hidden");
+        });
+
+        // Close modal functionality
+        cancelModalButton.on("click", function () {
+            quantityModal.addClass("hidden");
+        });
+
+        // Handling form submission
+        $("#quantity-form").on("submit", function (e) {
+            e.preventDefault();
+            const quantity = quantityInput.val();
+
+            // Add item to cart logic (this can be an AJAX request or form submission)
+            console.log(`Product ID: ${selectedProductIdInput.val()}, Quantity: ${quantity}`);
+
+            // Optionally, hide the modal and reset the form
+            quantityModal.addClass("hidden");
+            quantityInput.val(1); // Reset the quantity input field
         });
     });
 
+
     // Exchange input and change calculation
-    exchangeInput.addEventListener("input", function () {
+    exchangeInput.on("input", function () {
         const finalPrice = parseFloat(
-            finalPriceElement.textContent.replace(/[^0-9.-]+/g, "")
+            finalPriceElement.text().replace(/[^0-9.-]+/g, "")
         );
-        const exchangeAmount = parseFloat(this.value) || 0;
+        const exchangeAmount = parseFloat($(this).val()) || 0;
         const changeAmount = exchangeAmount - finalPrice;
-        changeAmountElement.textContent =
-            changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00";
-        exchangeHiddenInput.value = this.value;
+        changeAmountElement.text(
+            changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00"
+        );
+        exchangeHiddenInput.val($(this).val());
     });
 
     // Amount selection cards functionality
-    amountCards.forEach((card) => {
-        card.addEventListener("click", function () {
-            const amount = parseFloat(this.getAttribute("data-amount"));
+    amountCards.on("click", function () {
+        const amount = parseFloat($(this).data("amount"));
 
-            // Add the selected amount to the current value in the exchange input
-            exchangeInput.value = parseFloat(exchangeInput.value || 0) + amount;
-            exchangeHiddenInput.value = exchangeInput.value;
+        // Add the selected amount to the current value in the exchange input
+        exchangeInput.val((parseFloat(exchangeInput.val()) || 0) + amount);
+        exchangeHiddenInput.val(exchangeInput.val());
 
-            // Update the change calculation
-            const finalPrice = parseFloat(
-                finalPriceElement.textContent.replace(/[^0-9.-]+/g, "")
-            );
-            const exchangeAmount = parseFloat(exchangeInput.value);
-            const changeAmount = exchangeAmount - finalPrice;
-            changeAmountElement.textContent =
-                changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00";
-        });
+        // Update the change calculation
+        const finalPrice = parseFloat(
+            finalPriceElement.text().replace(/[^0-9.-]+/g, "")
+        );
+        const exchangeAmount = parseFloat(exchangeInput.val());
+        const changeAmount = exchangeAmount - finalPrice;
+        changeAmountElement.text(
+            changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00"
+        );
     });
 
     // Discount selection cards functionality
-    discountCards.forEach((card) => {
-        card.addEventListener("click", function () {
-            const discount = parseFloat(this.getAttribute("data-discount"));
+    discountCards.on("click", function () {
+        const discount = parseFloat($(this).data("discount"));
 
-            // Update the discount input with the selected value
-            discountInput.value = discount;
+        // Update the discount input with the selected value
+        discountInput.val(discount);
 
-            // Update the final price based on the selected discount
-            const totalPrice = parseFloat(
-                finalPriceElement.textContent.replace(/[^0-9.-]+/g, "")
-            );
-            finalPriceElement.textContent = (
-                totalPrice *
-                (1 - discount / 100)
-            ).toFixed(2);
-        });
+        // Update the final price based on the selected discount
+        const totalPrice = parseFloat(
+            finalPriceElement.text().replace(/[^0-9.-]+/g, "")
+        );
+        finalPriceElement.text((totalPrice * (1 - discount / 100)).toFixed(2));
     });
 
     // Reset button functionality
-    resetExchangeButton.addEventListener("click", function () {
+    resetExchangeButton.on("click", function () {
         // Set the exchange input to 0
-        exchangeInput.value = 0;
-        exchangeHiddenInput.value = 0;
+        exchangeInput.val(0);
+        exchangeHiddenInput.val(0);
 
         // Recalculate the change amount
         const finalPrice = parseFloat(
-            finalPriceElement.textContent.replace(/[^0-9.-]+/g, "")
+            finalPriceElement.text().replace(/[^0-9.-]+/g, "")
         );
         const changeAmount = 0 - finalPrice;
-        changeAmountElement.textContent =
-            changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00";
+        changeAmountElement.text(
+            changeAmount >= 0 ? changeAmount.toFixed(2) : "0.00"
+        );
     });
 });
