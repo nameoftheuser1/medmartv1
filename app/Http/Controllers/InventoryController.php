@@ -21,18 +21,19 @@ class InventoryController extends Controller
         $inventories = Inventory::query()
             ->join('product_batches', 'inventories.batch_id', '=', 'product_batches.id')
             ->join('products', 'product_batches.product_id', '=', 'products.id')
-            ->select('inventories.*', 'product_batches.expiration_date', 'product_batches.supplier_price', 'product_batches.received_date', 'product_batches.batch_number', 'products.product_name')
+            ->select('inventories.*', 'product_batches.batch_number', 'product_batches.expiration_date', 'product_batches.received_date', 'product_batches.supplier_price', 'products.product_name')
             ->when($showExpired, function ($query) {
                 $query->whereDate('product_batches.expiration_date', '<', now());
             })
             ->where(function ($query) use ($search) {
-                $query->where('product_batches.batch_number', 'like', "%{$search}%")
+                $query->where('inventories.quantity', 'like', "%{$search}%")
+                    ->orWhere('product_batches.batch_number', 'like', "%{$search}%")
                     ->orWhere('product_batches.expiration_date', 'like', "%{$search}%")
-                    ->orWhere('product_batches.supplier_price', 'like', "%{$search}%")
                     ->orWhere('product_batches.received_date', 'like', "%{$search}%")
-                    ->orWhere('products.product_name', 'like', "%{$search}%")
-                    ->orWhere('inventories.quantity', 'like', "%{$search}%");
+                    ->orWhere('product_batches.supplier_price', 'like', "%{$search}%")
+                    ->orWhere('products.product_name', 'like', "%{$search}%");
             })
+            ->orderBy('products.product_name')  // Added this line to order by product name alphabetically
             ->latest()
             ->paginate(10);
 
@@ -40,7 +41,8 @@ class InventoryController extends Controller
         $inventories->getCollection()->transform(function ($inventory) {
             $expirationDate = $inventory->productBatch->expiration_date;
             $quantity = $inventory->quantity;
-   // expired logic
+
+            // expired logic
             $inventory->isExpired = $expirationDate->isPast();
             $inventory->isNearExpiry = $expirationDate->diffInMonths(Carbon::today()) <= 3;
 

@@ -58,7 +58,13 @@
         <div class="flex mb-5">
             <a href="{{ route('products.create') }}" class="w-full text-lg text-center btn sm:w-auto">@lang('message.add', ['item' => 'Product'])
             </a>
+            <button onclick="printProductList()"
+                class="w-full text-lg text-center btn sm:w-auto bg-blue-500 text-white hover:bg-blue-600">Print
+                Product
+                List</button>
+
         </div>
+        <!-- Print Button -->
 
         <div>
             @if (session('success'))
@@ -73,10 +79,11 @@
             @include('products.partials._table', ['products' => $products])
         </div>
 
-
         <div class="mt-4">
             {{ $products->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
+
+
     </div>
 
     <script>
@@ -102,6 +109,21 @@
                 });
             });
         });
+
+        function printProductList() {
+            let content = document.getElementById('product-table').innerHTML;
+            let printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Product List</title>');
+            printWindow.document.write(
+                '<style>body {font-family: Arial, sans-serif; padding: 20px;} table {width: 100%; border-collapse: collapse;} th, td {padding: 8px; border: 1px solid #ddd;} th {background-color: #f4f4f4;}</style>'
+            );
+            printWindow.document.write('</head><body>');
+            printWindow.document.write('<h1>Product List</h1>');
+            printWindow.document.write(content);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.print();
+        }
     </script>
 
 </x-layout>
