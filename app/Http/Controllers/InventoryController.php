@@ -40,10 +40,9 @@ class InventoryController extends Controller
         $inventories->getCollection()->transform(function ($inventory) {
             $expirationDate = $inventory->productBatch->expiration_date;
             $quantity = $inventory->quantity;
-
-            // Expiration logic
+   // expired logic
             $inventory->isExpired = $expirationDate->isPast();
-            $inventory->isNearExpiry = $expirationDate->diffInDays(Carbon::today()) <= 30;
+            $inventory->isNearExpiry = $expirationDate->diffInMonths(Carbon::today()) <= 3;
 
             // Quantity logic
             $inventory->isLowStock = $quantity <= 30;

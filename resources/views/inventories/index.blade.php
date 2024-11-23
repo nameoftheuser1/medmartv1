@@ -74,12 +74,8 @@
             </td>
             <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
                 <span class="
-                    @if($daysToExpiry <= 0)
+                    @if($daysToExpiry <= 90)
                         text-red-500
-                    @elseif($daysToExpiry <= 7)
-                        text-red-500
-                    @elseif($daysToExpiry <= 30)
-                        text-yellow-500
                     @else
                         text-black
                     @endif
@@ -94,10 +90,17 @@
                 {{ $inventory->productBatch->received_date->format('Y-m-d') }}
             </td>
             <td class="px-4 py-4 sm:px-6">
-                <span class="{{ $inventory->isOutOfStock ? 'text-red-500' : ($inventory->isLowStock ? 'text-yellow-500' : '') }}">
+                <span class="
+                    @if($inventory->quantity <= 30)
+                        text-red-500
+                    @else
+                        text-black
+                    @endif
+                ">
                     {{ $inventory->quantity }}
                 </span>
             </td>
+
             <td class="px-4 py-4 sm:px-6">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <a href="{{ route('inventories.edit', $inventory->id) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
