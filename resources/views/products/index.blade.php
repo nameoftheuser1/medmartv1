@@ -55,15 +55,20 @@
             you easily navigate and manage the product inventory.
         </div>
 
-        <div class="flex mb-5">
-            <a href="{{ route('products.create') }}" class="w-full text-lg text-center btn sm:w-auto">@lang('message.add', ['item' => 'Product'])
+        <div class="flex flex-col sm:flex-row sm:justify-between items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-3">
+            <a
+                href="{{ route('products.create') }}"
+                class="w-full sm:w-auto text-sm text-center px-4 py-2 btn btn-primary">
+                @lang('message.add', ['item' => 'Product'])
             </a>
-            <button onclick="printProductList()"
-                class="w-full text-lg text-center btn sm:w-auto bg-blue-500 text-white hover:bg-blue-600">Print
-                Product
-                List</button>
-
+            <a
+                href="{{ route('products.export') }}"
+                class="w-full sm:w-auto text-sm text-center px-4 py-2 btn bg-green-500 text-white hover:bg-green-600">
+                Export to Excel
+            </a>
         </div>
+
+
         <!-- Print Button -->
 
         <div>
@@ -110,20 +115,7 @@
             });
         });
 
-        function printProductList() {
-            let content = document.getElementById('product-table').innerHTML;
-            let printWindow = window.open('', '', 'height=600,width=800');
-            printWindow.document.write('<html><head><title>Product List</title>');
-            printWindow.document.write(
-                '<style>body {font-family: Arial, sans-serif; padding: 20px;} table {width: 100%; border-collapse: collapse;} th, td {padding: 8px; border: 1px solid #ddd;} th {background-color: #f4f4f4;}</style>'
-            );
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<h1>Product List</h1>');
-            printWindow.document.write(content);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-        }
+
     </script>
 
 </x-layout>

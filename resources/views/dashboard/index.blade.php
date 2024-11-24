@@ -83,7 +83,8 @@
                                     if ($monthsToExpiry <= 1) {
                                         $rowClass = 'bg-red-100';
                                     } elseif ($monthsToExpiry <= 2) {
-                                        $rowClass = 'bg-yellow-100';
+                                        $rowClass = 'bg-red-100';
+
                                     }
                                 @endphp
                                 <tr class="{{ $rowClass }}">

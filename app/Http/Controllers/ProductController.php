@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ProductsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductController extends Controller
 {
@@ -108,5 +110,31 @@ class ProductController extends Controller
         $product->delete();
 
         return back()->with('deleted', 'The product was deleted');
+
     }
+    public function export(Request $request)
+    {
+        // Optionally, handle filtering (search, category) here
+        $search = $request->input('search');
+        $category = $request->input('category');
+
+        // Build the query for filtering
+        $productsQuery = Product::query();
+
+        if ($search) {
+            $productsQuery->where('product_name', 'like', "%{$search}%");
+        }
+
+        if ($category) {
+            $productsQuery->where('category', $category);
+        }
+
+        // Add sorting by product_name in ascending order
+        $productsQuery->orderBy('product_name', 'asc');
+
+        // Export filtered and sorted products
+        return Excel::download(new ProductsExport($productsQuery->get()), 'products.xlsx');
+    }
+
+
 }

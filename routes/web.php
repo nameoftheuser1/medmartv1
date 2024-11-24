@@ -13,6 +13,8 @@ use App\Http\Controllers\SaleDetailController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
+
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'auth.login')->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
