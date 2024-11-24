@@ -13,12 +13,12 @@ use Illuminate\Http\Request;
 class ProductBatchController extends Controller
 {
 
-    
+
     public function returnProduct(ProductBatch $productBatch)
 {
     // Step 1: Set the return date to the current date and time (now) for the ProductBatch
     $productBatch->update([
-        'return_date' => now(), 
+        'return_date' => now(),
     ]);
 
     // Step 2: Update all related Inventory records (set their quantity to 0)

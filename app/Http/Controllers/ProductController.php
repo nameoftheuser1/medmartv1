@@ -13,6 +13,15 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function search(Request $request)
+    {
+        $query = $request->get('query');
+        // Search for products by name (using a case-insensitive search)
+        $products = Product::where('product_name', 'like', '%' . $query . '%')->get();
+
+        return response()->json($products);
+    }
+
 
     public function index(Request $request)
     {

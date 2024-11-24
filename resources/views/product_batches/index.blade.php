@@ -8,15 +8,7 @@
                 <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}"
                     class="w-full px-4 py-2 mb-3 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0">
 
-                <select name="sort"
-                    class="px-4 py-2 mb-3 border border-gray-300 rounded-lg sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:mb-0"
-                    onchange="this.form.submit()">
-                    <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>Ascending Expiration Date
-                    </option>
-                    <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Descending Expiration Date
-                    </option>
-                </select>
-            </form>
+
         </div>
 
         <div class="mb-2">
