@@ -11,8 +11,54 @@
             </form>
         </div>
 
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Weekly Financial Overview</h2>
+
+            <div id="weekly-chart" class="w-full h-96"></div>
+
+            <!-- Total Sales Display -->
+            <div class="text-center mt-4">
+                <p class="text-lg font-medium text-gray-800">
+                    <strong>Total Weekly Sales:</strong> ₱{{ number_format($salesThisWeek, 2) }}
+                </p>
+            </div>
+
+            <div class="mt-4">
+                {{ $expenses->links('pagination::tailwind') }}
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var options = {
+                    series: [{{ $expensesThisWeek }}, {{ $weeklyIncome }}],
+                    chart: {
+                        type: 'pie',
+                        height: 350
+                    },
+                    labels: ['Weekly Expenses', 'Weekly Income'],
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return "₱" + val.toLocaleString();
+                            }
+                        }
+                    },
+                    colors: ['#FF0000', '#00C853'] // Red for expenses, Green for income
+                };
+
+                var chart = new ApexCharts(document.querySelector("#weekly-chart"), options);
+                chart.render();
+            });
+        </script>
+
+
+
+
         <div class="mb-2">
-            This page lists all expenses along with their essential details such as total amount and description. Users can
+            This page lists all expenses along with their essential details such as total amount and description. Users
+            can
             search for specific expenses, add new ones, or manage existing records with options to view, edit, or
             delete. The tools provided ensure efficient expense management for maintaining accurate and up-to-date
             records.
@@ -50,7 +96,7 @@
                                     class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
                                     <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">{{ $expense->id }}</td>
                                     <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
-                                    ₱{{ number_format($expense->total_amount, 2) }}
+                                        ₱{{ number_format($expense->total_amount, 2) }}
                                     </td>
                                     <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">
                                         {{ Str::limit($expense->description, 30) }}

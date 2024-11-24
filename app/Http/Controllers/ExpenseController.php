@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -13,14 +14,38 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+
+        // Get expenses based on search
         $expenses = Expense::query()
             ->where('description', 'like', "%{$search}%")
             ->orWhere('total_amount', 'like', "%{$search}%")
             ->latest()
             ->paginate(10);
 
-        return view('expenses.index', ['expenses' => $expenses]);
+        // Define the start and end of the current week
+        $currentWeekStart = now()->startOfWeek();
+        $currentWeekEnd = now()->endOfWeek();
+
+        // Calculate total sales for this week
+        $salesThisWeek = Sale::whereBetween('created_at', [$currentWeekStart, $currentWeekEnd])
+            ->sum('total_amount');
+
+        // Calculate total expenses for this week
+        $expensesThisWeek = Expense::whereBetween('created_at', [$currentWeekStart, $currentWeekEnd])
+            ->sum('total_amount');
+
+        // Calculate weekly income (sales - expenses)
+        $weeklyIncome = $salesThisWeek - $expensesThisWeek;
+
+        // Pass the weekly calculations to the view
+        return view('expenses.index', [
+            'expenses' => $expenses,
+            'salesThisWeek' => $salesThisWeek,
+            'expensesThisWeek' => $expensesThisWeek,
+            'weeklyIncome' => $weeklyIncome,
+        ]);
     }
+
 
     /**
      * Show the form for creating a new resource.
