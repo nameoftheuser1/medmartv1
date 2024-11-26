@@ -1,6 +1,7 @@
 <x-layout>
     <div class="container mx-auto px-4">
-        <a href="{{ route('inventories.index') }}" class="text-blue-500 underline block mb-4">&larr; Go back to inventory list</a>
+        <a href="{{ route('inventories.index') }}" class="text-blue-500 underline block mb-4">&larr; Go back to inventory
+            list</a>
         <div class="card w-full md:w-2/3 lg:w-1/2 mx-auto mt-5">
             <h1 class="text-2xl font-bold mb-5">Edit Inventory</h1>
             <form action="{{ route('inventories.update', $inventory->id) }}" method="post">

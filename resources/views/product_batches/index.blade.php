@@ -67,7 +67,8 @@
 
                         // Display the error message in an alert
                         alert(
-                            `An error occurred while fetching product batches.\n\nStatus: ${xhr.status} ${xhr.statusText}\nMessage: ${xhr.responseText}`);
+                            `An error occurred while fetching product batches.\n\nStatus: ${xhr.status} ${xhr.statusText}\nMessage: ${xhr.responseText}`
+                            );
                     }
                 });
             }

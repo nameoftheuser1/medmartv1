@@ -9,7 +9,7 @@
             <div class="mb-4">
                 <label for="total_amount">Total Amount: </label>
                 <x-tooltip message="Enter the total amount of the expense.">
-                    <input type="number" name="total_amount" id="total_amount" class="input" 
+                    <input type="number" name="total_amount" id="total_amount" class="input"
                         value="{{ old('total_amount') }}" step="0.01">
                 </x-tooltip>
                 @error('total_amount')

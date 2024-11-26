@@ -1,6 +1,7 @@
 <x-layout>
     <div class="container mx-auto px-4">
-        <a href="{{ route('product_batches.index') }}" class="text-blue-500 underline block mb-4">&larr; Go back to Product Batches</a>
+        <a href="{{ route('product_batches.index') }}" class="text-blue-500 underline block mb-4">&larr; Go back to
+            Product Batches</a>
         <div class="card w-full md:w-4/5 lg:w-3/4 mx-auto mt-5">
             <h1 class="text-2xl font-bold mb-5">Add Product Batch</h1>
             <form action="{{ route('product_batches.store') }}" method="POST" id="productBatchForm">
@@ -71,7 +72,7 @@
                             </div>
                             <div class="mb-4">
                                 <select name="product_id[]" class="input w-full rounded-lg border-gray-300"
-                                        id="productSelect1">
+                                    id="productSelect1">
                                     @foreach ($products as $product)
                                         <option value="{{ $product->id }}"
                                             {{ old('product_id.0') == $product->id ? 'selected' : '' }}>
@@ -140,9 +141,12 @@
                 newProductBatch.find('.product-count').text('Product Batch #' + productBatchCount);
 
                 // Update search input IDs and clear values
-                newProductBatch.find('input[id^="productSearchInput"]').attr('id', 'productSearchInput' + productBatchCount);
-                newProductBatch.find('ul[id^="productSearchResults"]').attr('id', 'productSearchResults' + productBatchCount);
-                newProductBatch.find('select[id^="productSelect"]').attr('id', 'productSelect' + productBatchCount);
+                newProductBatch.find('input[id^="productSearchInput"]').attr('id', 'productSearchInput' +
+                    productBatchCount);
+                newProductBatch.find('ul[id^="productSearchResults"]').attr('id', 'productSearchResults' +
+                    productBatchCount);
+                newProductBatch.find('select[id^="productSelect"]').attr('id', 'productSelect' +
+                    productBatchCount);
 
                 // Clear input values for the new batch
                 newProductBatch.find('input, select').val('');

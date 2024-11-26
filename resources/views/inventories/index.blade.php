@@ -14,10 +14,10 @@
                 class="px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50">
                 Show Expired Products
             </a>
-                <a href="{{ route('inventories.returned') }}"
-                    class="px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50">
-                    Show Returned Products
-                </a>
+            <a href="{{ route('inventories.returned') }}"
+                class="px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50">
+                Show Returned Products
+            </a>
 
         </div>
 
@@ -64,70 +64,79 @@
                         </tr>
                     </thead>
                     <tbody>
-    @foreach ($inventories as $inventory)
-        @php
-            $today = \Carbon\Carbon::today(); // Get today's date
-            $expirationDate = \Carbon\Carbon::parse($inventory->productBatch->expiration_date); // Parse the expiration date
-            $daysToExpiry = $today->diffInDays($expirationDate); // Calculate the difference in days
-        @endphp
-        <tr class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
-            <td class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
-                {{ $inventory->productBatch->product->product_name }}
-            </td>
-            <td class="px-4 py-4 sm:px-6">
-                {{ $inventory->productBatch->batch_number }}
-            </td>
-            <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                <span class="
-                    @if($daysToExpiry <= 90)
-                        text-red-500
+                        @foreach ($inventories as $inventory)
+                            @php
+                                $today = \Carbon\Carbon::today(); // Get today's date
+                                $expirationDate = \Carbon\Carbon::parse($inventory->productBatch->expiration_date); // Parse the expiration date
+                                $daysToExpiry = $today->diffInDays($expirationDate); // Calculate the difference in days
+                            @endphp
+                            <tr
+                                class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
+                                <td
+                                    class="px-4 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap hidden md:table-cell">
+                                    {{ $inventory->productBatch->product->product_name }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6">
+                                    {{ $inventory->productBatch->batch_number }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
+                                    <span
+                                        class="
+                    @if ($daysToExpiry <= 90) text-red-500
                     @else
-                        text-black
-                    @endif
+                        text-black @endif
                 ">
-                    {{ $inventory->productBatch->expiration_date->format('Y-m-d') }}
-                </span>
-            </td>
-            <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
-                ₱{{ number_format($inventory->productBatch->supplier_price, 2) }}
-            </td>
-            <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
-                {{ $inventory->productBatch->received_date->format('Y-m-d') }}
-            </td>
-            <td class="px-4 py-4 sm:px-6">
-                <span class="
-                    @if($inventory->quantity <= 30)
-                        text-red-500
+                                        {{ $inventory->productBatch->expiration_date->format('Y-m-d') }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden lg:table-cell">
+                                    ₱{{ number_format($inventory->productBatch->supplier_price, 2) }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6 hidden md:table-cell">
+                                    {{ $inventory->productBatch->received_date->format('Y-m-d') }}
+                                </td>
+                                <td class="px-4 py-4 sm:px-6">
+                                    <span
+                                        class="
+                    @if ($inventory->quantity <= 30) text-red-500
                     @else
-                        text-black
-                    @endif
+                        text-black @endif
                 ">
-                    {{ $inventory->quantity }}
-                </span>
-            </td>
+                                        {{ $inventory->quantity }}
+                                    </span>
+                                </td>
 
-            <td class="px-4 py-4 sm:px-6">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                    <a href="{{ route('inventories.edit', $inventory->id) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                    <form action="{{ route('inventories.destroy', $inventory) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
-                    </form>
-                    @if($inventory->quantity != 0)
-                        <form action="{{ route('product_batches.returnDate', $inventory->productBatch->id) }}" method="POST" class="inline">
-                            @csrf
-                            @method('PATCH')
-                                <button type="submit" class="font-small text-green-600 dark:text-green-500 hover:underline">
-                                    Return Product
-                                </button>
-                        </form>
-                    @endif
-                </div>
-            </td>
-        </tr>
-    @endforeach
-</tbody>
+                                <td class="px-4 py-4 sm:px-6">
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                        <a href="{{ route('inventories.edit', $inventory->id) }}"
+                                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                                        <form action="{{ route('inventories.destroy', $inventory) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                                        </form>
+                                        @if ($inventory->quantity != 0)
+                                            <form
+                                                action="{{ route('product_batches.returnDate', $inventory->productBatch->id) }}"
+                                                method="POST" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="font-small text-green-600 dark:text-green-500 hover:underline">
+                                                    Return Product
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if ($inventory->productBatch->return_date)
+                                            <span class="text-red-600">Returned</span>
+                                            <!-- Display 'Returned' if the return_date is set -->
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
 
                 </table>
             @endif

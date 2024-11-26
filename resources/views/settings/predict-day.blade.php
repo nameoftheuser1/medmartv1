@@ -6,12 +6,17 @@
                     <a href="{{ route('settings') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
                         Settings
                     </a>
-                    <svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 15.293a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414L10 12.586 5.707 8.293a1 1 0 00-1.414 1.414l5 5z" clip-rule="evenodd" /></svg>
+                    <svg class="w-4 h-4 mx-2 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10.293 15.293a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414L10 12.586 5.707 8.293a1 1 0 00-1.414 1.414l5 5z"
+                            clip-rule="evenodd" />
+                    </svg>
                 </div>
             </li>
             <li>
                 <div class="flex items-center">
-                    <a href="{{ route('settings.edit.prediction') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
+                    <a href="{{ route('settings.edit.prediction') }}"
+                        class="text-blue-600 hover:text-blue-800 font-semibold">
                         Prediction Day
                     </a>
                 </div>
@@ -21,7 +26,8 @@
     <div class="container mx-auto px-4">
         <h1 class="text-3xl font-semibold mb-6 text-gray-800">Edit Prediction Days</h1>
 
-        <form action="{{ route('settings.update.prediction') }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
+        <form action="{{ route('settings.update.prediction') }}" method="POST"
+            class="bg-white shadow-md rounded-lg p-6">
             @csrf
             @method('PUT')
 
@@ -41,7 +47,9 @@
                     required min="1">
             </div>
 
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition duration-200">Update Settings</button>
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition duration-200">Update
+                Settings</button>
         </form>
     </div>
 </x-layout>

@@ -3,14 +3,16 @@
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Sale Details Overview</h1>
-            <p class="text-gray-600 text-sm">Total Sale Details: <span class="font-medium">{{ $saleDetails->total() }}</span></p>
+            <p class="text-gray-600 text-sm">Total Sale Details: <span
+                    class="font-medium">{{ $saleDetails->total() }}</span></p>
         </div>
 
         <!-- Time Period Selector and Search -->
         <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
             <div class="flex items-center space-x-3">
                 <label for="time-period" class="text-gray-700 font-medium">View By:</label>
-                <select id="time-period" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <select id="time-period"
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="daily" {{ request('period') == 'daily' ? 'selected' : '' }}>Daily</option>
                     <option value="weekly" {{ request('period') == 'weekly' ? 'selected' : '' }}>Weekly</option>
                     <option value="monthly" {{ request('period') == 'monthly' ? 'selected' : '' }}>Monthly</option>
@@ -37,7 +39,8 @@
         <div class="bg-gray-50 p-4 rounded-lg shadow-lg">
             <h2 class="text-lg font-bold text-gray-800 mb-3">Top Selling Products</h2>
             <p class="text-sm text-gray-600 mb-4">
-                Use the dropdown to view sales data for a specific time period. This chart shows the top-selling products based on total sales amount.
+                Use the dropdown to view sales data for a specific time period. This chart shows the top-selling
+                products based on total sales amount.
             </p>
             <div class="relative">
                 <div id="loading-spinner" class="absolute inset-0 flex items-center justify-center hidden">
@@ -67,7 +70,8 @@
                             <tr class="even:bg-gray-50 odd:bg-white">
                                 <td class="px-4 py-3">{{ $saleDetail->id }}</td>
                                 <td class="px-4 py-3">{{ $saleDetail->sale_id }}</td>
-                                <td class="px-4 py-3 hidden sm:table-cell">{{ $saleDetail->product->product_name }}</td>
+                                <td class="px-4 py-3 hidden sm:table-cell">{{ $saleDetail->product->product_name }}
+                                </td>
                                 <td class="px-4 py-3">{{ $saleDetail->quantity }}</td>
                                 <td class="px-4 py-3">₱{{ number_format($saleDetail->price, 2) }}</td>
                             </tr>
@@ -101,10 +105,21 @@
                         const totalAmounts = data.map(item => item.total_amount);
 
                         const options = {
-                            chart: { type: 'bar', height: 350 },
-                            series: [{ name: 'Total Amount', data: totalAmounts }],
-                            xaxis: { categories: productNames },
-                            title: { text: `Top Selling Products (${period})`, align: 'center' }
+                            chart: {
+                                type: 'bar',
+                                height: 350
+                            },
+                            series: [{
+                                name: 'Total Amount',
+                                data: totalAmounts
+                            }],
+                            xaxis: {
+                                categories: productNames
+                            },
+                            title: {
+                                text: `Top Selling Products (${period})`,
+                                align: 'center'
+                            }
                         };
 
                         const chart = new ApexCharts(chartContainer, options);
