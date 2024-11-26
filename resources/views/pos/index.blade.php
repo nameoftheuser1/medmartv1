@@ -50,7 +50,8 @@
                         <div>
                             <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity:</label>
                             <input type="number" name="quantity" id="quantity" class="input mt-1 w-full"
-                                min="1" required>
+                                min="1" max="9999999999" required oninput="checkQuantity(this)">
+                            <p id="quantity-error" class="text-red-500 text-sm hidden">Quantity must be up to 10 digits.</p>
                         </div>
 
                         <div class="flex justify-center mt-4">
@@ -63,6 +64,20 @@
                 </div>
             </div>
         </div>
+        <script>
+            function checkQuantity(input) {
+                const quantityError = document.getElementById('quantity-error');
+                const quantityValue = input.value;
+
+                if (quantityValue.length > 10) {
+                    quantityError.classList.remove('hidden');
+                    input.setCustomValidity("Quantity cannot exceed 10 digits.");
+                } else {
+                    quantityError.classList.add('hidden');
+                    input.setCustomValidity("");
+                }
+            }
+        </script>
 
         <div class="rounded-lg card min-h-96 w-full lg:w-1/2 ">
             <h2>Cart Items</h2>

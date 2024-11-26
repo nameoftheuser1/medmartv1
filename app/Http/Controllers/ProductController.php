@@ -130,6 +130,9 @@ class ProductController extends Controller
         // Build the query for filtering
         $productsQuery = Product::query();
 
+        // Select only the necessary columns
+        $productsQuery->select('product_name', 'generic_name', 'price');
+
         if ($search) {
             $productsQuery->where('product_name', 'like', "%{$search}%");
         }
@@ -141,8 +144,11 @@ class ProductController extends Controller
         // Add sorting by product_name in ascending order
         $productsQuery->orderBy('product_name', 'asc');
 
+        // Get the filtered and sorted products
+        $products = $productsQuery->get();
+
         // Export filtered and sorted products
-        return Excel::download(new ProductsExport($productsQuery->get()), 'products.xlsx');
+        return Excel::download(new ProductsExport($products), 'products.xlsx');
     }
 
 

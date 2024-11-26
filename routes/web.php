@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
 Route::get('/search-products', [ProductController::class, 'search'])->name('search.products');
+Route::get('/inventories/returned', [InventoryController::class, 'showReturned'])->name('inventories.returned');
+Route::get('/sale-details/chart', [SaleDetailController::class, 'getChartData'])->name('sale_details.chart');
 
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'auth.login')->name('login');

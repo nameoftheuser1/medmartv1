@@ -154,4 +154,16 @@ class InventoryController extends Controller
             'sortBy' => $sortBy, // Always 'quantity'
         ]);
     }
+    public function showReturned(Request $request)
+{
+    // Retrieve all returned products
+    $returnedInventories = Inventory::whereHas('productBatch', function ($query) {
+        $query->whereNotNull('return_date'); // Assuming return_date indicates a returned product
+    })->paginate(10);
+
+    return view('inventories.returned', [
+        'inventories' => $returnedInventories,
+    ]);
+}
+
 }

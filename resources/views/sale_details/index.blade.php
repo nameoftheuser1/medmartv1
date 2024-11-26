@@ -1,68 +1,75 @@
 <x-layout>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
-        <!-- Sale Details and Search Form -->
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
-            <h1 class="text-2xl font-bold mb-2 sm:mb-0">Sale Details List</h1>
-            <p class="mb-2 sm:mb-0">Total Sale Details: {{ $saleDetails->total() }}</p>
-            <form method="GET" action="{{ route('sale_details.index') }}" class="flex w-full sm:w-auto">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Sale Details Overview</h1>
+            <p class="text-gray-600 text-sm">Total Sale Details: <span class="font-medium">{{ $saleDetails->total() }}</span></p>
+        </div>
+
+        <!-- Time Period Selector and Search -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
+            <div class="flex items-center space-x-3">
+                <label for="time-period" class="text-gray-700 font-medium">View By:</label>
+                <select id="time-period" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="daily" {{ request('period') == 'daily' ? 'selected' : '' }}>Daily</option>
+                    <option value="weekly" {{ request('period') == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                    <option value="monthly" {{ request('period') == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                </select>
+            </div>
+            <form method="GET" action="{{ route('sale_details.index') }}" class="flex items-center space-x-2">
                 <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}"
                     class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <button type="submit"
-                    class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">Search</button>
             </form>
-        </div>
-
-        <div class="mb-2">
-            This page provides a detailed list of all sale details associated with the transactions in the system. You
-            can search for specific sale entries, view essential information such as the sale ID, product details,
-            quantity bought, and the price of each item. The table is designed for easy navigation and management,
-            allowing for sorting and quick access to data. Additionally, the sales chart visually displays the
-            top-selling products today, based on total sales amount, helping you track performance. Use the search bar
-            and available tools to efficiently manage and analyze sale details for improved sales strategies.
         </div>
 
         <!-- Flash Messages -->
         <div>
             @if (session('success'))
-                <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
+                <x-flashMsg msg="{{ session('success') }}" bg="bg-green-500" />
             @elseif (session('deleted'))
                 <x-flashMsg msg="{{ session('deleted') }}" bg="bg-red-500" />
             @endif
         </div>
 
-        <!-- Sales Chart -->
-        <div class="mt-6">
-            <div id="sales-chart"></div>
+        <!-- Chart Section -->
+        <div class="bg-gray-50 p-4 rounded-lg shadow-lg">
+            <h2 class="text-lg font-bold text-gray-800 mb-3">Top Selling Products</h2>
+            <p class="text-sm text-gray-600 mb-4">
+                Use the dropdown to view sales data for a specific time period. This chart shows the top-selling products based on total sales amount.
+            </p>
+            <div class="relative">
+                <div id="loading-spinner" class="absolute inset-0 flex items-center justify-center hidden">
+                    <div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <div id="sales-chart"></div>
+            </div>
         </div>
 
         <!-- Table Display -->
-        <div class="relative overflow-x-auto sm:overflow-x-visible sm:rounded-lg">
+        <div class="relative overflow-x-auto sm:rounded-lg mt-6">
             @if ($saleDetails->isEmpty())
-                <p class="text-center py-5 text-gray-500">Wow, this table is empty.</p>
+                <p class="text-center py-5 text-gray-500">No sales data available at the moment.</p>
             @else
-                <table class="w-full text-left rtl:text-right">
-                    <thead class="uppercase">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-100">
                         <tr>
-                            <th scope="col" class="px-2 py-3 sm:px-6">ID</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6">Sale ID</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6 hidden sm:table-cell">Product</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6">Quantity Bought</th>
-                            <th scope="col" class="px-2 py-3 sm:px-6">Price</th>
+                            <th class="px-4 py-3">ID</th>
+                            <th class="px-4 py-3">Sale ID</th>
+                            <th class="px-4 py-3 hidden sm:table-cell">Product</th>
+                            <th class="px-4 py-3">Quantity</th>
+                            <th class="px-4 py-3">Price</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         @foreach ($saleDetails as $saleDetail)
-                            <tr
-                                class="even:bg-white even:dark:bg-gray-200 odd:bg-gray-50 odd:dark:bg-white dark:border-gray-700">
-                                <td class="px-2 py-4 sm:px-6">{{ $saleDetail->id }}</td>
-                                <td class="px-2 py-4 sm:px-6 font-medium text-gray-900 whitespace-nowrap">
-                                    {{ $saleDetail->sale_id }}</td>
-                                <td class="px-2 py-4 sm:px-6 hidden sm:table-cell">
-                                    {{ $saleDetail->product->product_name }}
-                                </td>
-                                <td class="px-2 py-4 sm:px-6">{{ $saleDetail->quantity }}</td>
-                                <td class="px-2 py-4 sm:px-6">₱{{ number_format($saleDetail->price, 2) }}</td>
+                            <tr class="even:bg-gray-50 odd:bg-white">
+                                <td class="px-4 py-3">{{ $saleDetail->id }}</td>
+                                <td class="px-4 py-3">{{ $saleDetail->sale_id }}</td>
+                                <td class="px-4 py-3 hidden sm:table-cell">{{ $saleDetail->product->product_name }}</td>
+                                <td class="px-4 py-3">{{ $saleDetail->quantity }}</td>
+                                <td class="px-4 py-3">₱{{ number_format($saleDetail->price, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -80,79 +87,40 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            var chartData = @json($chartData);
+            const chartContainer = document.querySelector("#sales-chart");
+            const spinner = document.querySelector("#loading-spinner");
 
-            var productNames = chartData.map(function(item) {
-                return item.product_name;
+            function fetchChartData(period) {
+                spinner.classList.remove("hidden"); // Show loading spinner
+                fetch('{{ route('sale_details.chart') }}' + '?period=' + period)
+                    .then(response => response.json())
+                    .then(data => {
+                        spinner.classList.add("hidden"); // Hide loading spinner
+
+                        const productNames = data.map(item => item.product_name);
+                        const totalAmounts = data.map(item => item.total_amount);
+
+                        const options = {
+                            chart: { type: 'bar', height: 350 },
+                            series: [{ name: 'Total Amount', data: totalAmounts }],
+                            xaxis: { categories: productNames },
+                            title: { text: `Top Selling Products (${period})`, align: 'center' }
+                        };
+
+                        const chart = new ApexCharts(chartContainer, options);
+                        chart.render();
+                    });
+            }
+
+            // Fetch default chart data
+            const timePeriodSelect = document.querySelector("#time-period");
+            fetchChartData(timePeriodSelect.value);
+
+            // Update chart on time period change
+            timePeriodSelect.addEventListener("change", () => {
+                chartContainer.innerHTML = ""; // Clear previous chart
+                fetchChartData(timePeriodSelect.value);
             });
-
-            var totalAmounts = chartData.map(function(item) {
-                return item.total_amount;
-            });
-
-            var options = {
-                chart: {
-                    type: 'bar',
-                    height: 350
-                },
-                series: [{
-                    name: 'Total Amount',
-                    data: totalAmounts
-                }],
-                xaxis: {
-                    categories: productNames,
-                    title: {
-                        text: 'Product Name',
-                        style: {
-                            color: '#000', // Black text for x-axis title
-                            fontSize: '14px',
-                            fontWeight: 'bold'
-                        }
-                    },
-                    labels: {
-                        style: {
-                            colors: '#000', // Black text for x-axis labels
-                            fontSize: '12px'
-                        }
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Total Sales Amount (₱)',
-                        style: {
-                            color: '#000', // Black text for y-axis title
-                            fontSize: '14px',
-                            fontWeight: 'bold'
-                        }
-                    },
-                    labels: {
-                        style: {
-                            colors: '#000', // Black text for y-axis labels
-                            fontSize: '12px'
-                        }
-                    }
-                },
-                title: {
-                    text: 'Top Selling Products Today',
-                    align: 'center',
-                    style: {
-                        color: '#000', // Black text for chart title
-                        fontSize: '16px',
-                        fontWeight: 'bold'
-                    }
-                },
-                tooltip: {
-                    theme: 'light',
-                },
-                dataLabels: {
-                    style: {
-                        colors: ['#000'] // Black text for data labels
-                    }
-                }
-            };
-
-            var chart = new ApexCharts(document.querySelector("#sales-chart"), options);
-            chart.render();
         });
     </script>
 </x-layout>

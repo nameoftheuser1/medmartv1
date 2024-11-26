@@ -65,4 +65,36 @@ class SaleDetailController extends Controller
 
         return $saleDetails;
     }
+    public function getChartData(Request $request)
+{
+    $period = $request->input('period', 'daily'); // Default to daily if not set
+
+    // Get sales data based on the selected period
+    $salesQuery = SaleDetail::with('product')
+        ->selectRaw('products.product_name, SUM(sale_details.quantity * sale_details.price) as total_amount')
+        ->join('products', 'sale_details.product_id', '=', 'products.id')
+        ->groupBy('products.product_name');
+
+    // Modify the query based on the period selected
+    switch ($period) {
+        case 'weekly':
+            $salesQuery->whereBetween('sale_details.created_at', [
+                now()->startOfWeek(),
+                now()->endOfWeek()
+            ]);
+            break;
+        case 'monthly':
+            $salesQuery->whereMonth('sale_details.created_at', now()->month);
+            break;
+        default:
+            // Default to daily data
+            $salesQuery->whereDate('sale_details.created_at', now()->toDateString());
+            break;
+    }
+
+    $chartData = $salesQuery->get();
+
+    return response()->json($chartData);
+}
+
 }
