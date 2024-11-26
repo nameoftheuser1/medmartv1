@@ -10,48 +10,51 @@
                     class="ml-2 px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Search</button>
             </form>
         </div>
+<!-- Monthly Income and Expenses Pie Chart -->
+<div class="bg-gray-50 p-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Monthly Income and Expenses Distribution</h2>
 
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-        <div class="bg-gray-50 p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Weekly Financial Overview</h2>
+    <!-- Pie Chart (ApexCharts) -->
+    <div id="monthly-chart" class="w-full h-96"></div>
 
-            <div id="weekly-chart" class="w-full h-96"></div>
+    <!-- Total Monthly Income and Expenses Display -->
+    <div class="text-center mt-4">
+        <p class="text-lg font-medium text-gray-800">
+            <strong>Monthly Income:</strong> ₱{{ number_format($monthlyIncome, 2) }}
+        </p>
+        <p class="text-lg font-medium text-gray-800">
+            <strong>Total Expenses:</strong> ₱{{ number_format($expensesThisMonth, 2) }}
+        </p>
+    </div>
+</div>
 
-            <!-- Total Sales Display -->
-            <div class="text-center mt-4">
-                <p class="text-lg font-medium text-gray-800">
-                    <strong>Total Weekly Sales:</strong> ₱{{ number_format($salesThisWeek, 2) }}
-                </p>
-            </div>
+<!-- Include ApexCharts Script -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-            <div class="mt-4">
-                {{ $expenses->links('pagination::tailwind') }}
-            </div>
-        </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Pie chart options showing Monthly Income and Expenses
+        var options = {
+            series: [{{ $monthlyIncome }}, {{ $expensesThisMonth }}],  // Show both Monthly Income and Expenses
+            chart: {
+                type: 'pie',
+                height: 350
+            },
+            labels: ['Monthly Income', 'Expenses'],  // Labels for the two sections
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return "₱" + val.toLocaleString();  // Format value as currency
+                    }
+                }
+            },
+            colors: ['#00C853', '#FF0000']  // Green for Monthly Income and Red for Expenses
+        };
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var options = {
-                    series: [{{ $expensesThisWeek }}, {{ $weeklyIncome }}],
-                    chart: {
-                        type: 'pie',
-                        height: 350
-                    },
-                    labels: ['Weekly Expenses', 'Weekly Income'],
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return "₱" + val.toLocaleString();
-                            }
-                        }
-                    },
-                    colors: ['#FF0000', '#00C853'] // Red for expenses, Green for income
-                };
-
-                var chart = new ApexCharts(document.querySelector("#weekly-chart"), options);
-                chart.render();
-            });
-        </script>
+        var chart = new ApexCharts(document.querySelector("#monthly-chart"), options);
+        chart.render();
+    });
+</script>
 
 
 

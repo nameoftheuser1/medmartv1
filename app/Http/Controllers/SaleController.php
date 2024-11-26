@@ -27,28 +27,41 @@ class SaleController extends Controller
             ->latest()
             ->paginate(10);
 
-        // Get combined sales per day for the last 30 days
+        // Get combined sales per day, week, and month
         $salesPerDay = $this->getSalesPerDay();
+        $salesPerWeek = $this->getSalesPerWeek();
+        $salesPerMonth = $this->getSalesPerMonth();
 
-        // Prepare data for ApexChart (Dates and Total Amounts)
-        $chartData = $salesPerDay->map(function ($sale) {
+        // Prepare data for ApexChart (Dates and Total Amounts for daily, weekly, and monthly charts)
+        $dailyChartData = $salesPerDay->map(function ($sale) {
             return [
                 'date' => $sale->date,
                 'total_amount' => $sale->total_amount,
             ];
         });
 
+        $weeklyChartData = $salesPerWeek->map(function ($sale) {
+            return [
+                'week' => $sale->week,
+                'total_amount' => $sale->total_amount,
+            ];
+        });
+
+        $monthlyChartData = $salesPerMonth->map(function ($sale) {
+            return [
+                'month' => $sale->month,
+                'total_amount' => $sale->total_amount,
+            ];
+        });
         // Pass data to the view
         return view('sales.index', [
             'sales' => $sales,
-            'salesPerDay' => $salesPerDay,
-            'chartData' => $chartData,
+            'dailyChartData' => $dailyChartData,
+            'weeklyChartData' => $weeklyChartData,
+            'monthlyChartData' => $monthlyChartData,
         ]);
     }
 
-    /**
-     * Get combined sales data per day for the past 30 days.
-     */
     private function getSalesPerDay()
     {
         return Sale::query()
@@ -59,7 +72,32 @@ class SaleController extends Controller
             ->get();
     }
 
+    /**
+     * Get combined sales data per week for the past 30 days.
+     */
+    private function getSalesPerWeek()
+    {
+        return Sale::query()
+            ->selectRaw('YEAR(created_at) as year, WEEK(created_at) as week, SUM(total_amount) as total_amount')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupByRaw('YEAR(created_at), WEEK(created_at)')
+            ->orderBy('year', 'asc')
+            ->orderBy('week', 'asc')
+            ->get();
+    }
 
+    /**
+     * Get combined sales data per month for the past 12 months.
+     */
+    private function getSalesPerMonth()
+    {
+        return Sale::query()
+            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total_amount')
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->groupByRaw('MONTH(created_at)')
+            ->orderBy('month', 'asc')
+            ->get();
+    }
     public function refund($id)
     {
         $sale = Sale::findOrFail($id);

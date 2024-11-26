@@ -17,14 +17,7 @@
         @endif
             @if (session('error'))
                 <p class="text-red-500">{{ session('error') }}</p>
-                if (empty($exchange)) {
-                    return back()->withErrors(['exchange' => 'The exchange field is required.']);
-                }
 
-                // Check if the exchange field matches the regex pattern
-                if (!preg_match('/^\d{1,10}(\.\d{1,2})?$/', $exchange)) {
-                    return back()->withErrors(['exchange' => 'The exchange field must be a valid number with up to 10 digits and 2 decimal places.']);
-                }
             @endif
             <h2>Select Product</h2>
             <div class="mb-4">

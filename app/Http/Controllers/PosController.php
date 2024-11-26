@@ -138,6 +138,7 @@ class POSController extends Controller
 
     public function checkout(Request $request)
     {
+        // Validate the exchange field with regex
         $request->validate([
             'exchange' => [
                 'required',
@@ -145,38 +146,34 @@ class POSController extends Controller
             ],
         ]);
 
+        // Retrieve session ID and cart items
         $sessionId = $this->getSessionId();
         $cartItems = TemporaryCartItem::where('session_id', $sessionId)->get();
         $discountPercentage = session()->get('discountPercentage', 0);
-        $exchange = $request->input('exchange', 0);
         $exchange = $request->input('exchange');
 
-        // Check if the exchange field is empty
-        if (empty($exchange)) {
-            return back()->withErrors(['exchange' => 'The amount field is required.']);
-        }
-
-        // Check if the exchange field matches the regex pattern for up to 10 digits with 2 decimal places
-        if (!preg_match('/^\d{1,8}(\.\d{1,2})?$/', $exchange)) {
-            return back()->withErrors(['exchange' => 'The amount field must be a valid number with up to 10 digits and 2 decimal places.']);
-        }
-
+        // Check if the cart is empty
         if ($cartItems->isEmpty()) {
             return redirect()->route('pos.index')->with('error', 'No items in the cart.');
         }
 
+        // Calculate the total amount of the cart
         $totalAmount = $cartItems->sum(function ($item) {
             return $item->quantity * $item->price;
         });
 
+        // Apply discount
         $totalAmount = $totalAmount * (1 - $discountPercentage / 100);
 
+        // Calculate change amount
         $changeAmount = $exchange - $totalAmount;
 
+        // Check if the exchange amount is sufficient
         if ($changeAmount < 0) {
             return redirect()->route('pos.index')->with('error', 'Insufficient funds.');
         }
 
+        // Create a sale record
         $sale = Sale::create([
             'user_id' => auth()->user()->id,
             'total_amount' => $totalAmount,
@@ -184,6 +181,7 @@ class POSController extends Controller
             'exchange' => $exchange,
         ]);
 
+        // Loop through cart items, create sale details and update inventory
         foreach ($cartItems as $cartItem) {
             SaleDetail::create([
                 'sale_id' => $sale->id,
@@ -192,14 +190,19 @@ class POSController extends Controller
                 'price' => $cartItem->price,
             ]);
 
+            // Update inventory for each product
             $this->updateInventory($cartItem->product_id, $cartItem->quantity);
         }
 
+        // Clear the cart and reset discount session
         TemporaryCartItem::where('session_id', $sessionId)->delete();
         session()->forget('discountPercentage');
 
-        return redirect()->route('pos.receipt', ['sale_id' => $sale->id])->with('success', 'Sale completed successfully. Change: ₱' . number_format($changeAmount, 2));
+        // Return success response
+        return redirect()->route('pos.receipt', ['sale_id' => $sale->id])
+            ->with('success', 'Sale completed successfully. Change: ₱' . number_format($changeAmount, 2));
     }
+
 
     public function receipt($saleId)
     {

@@ -22,29 +22,30 @@ class ExpenseController extends Controller
             ->latest()
             ->paginate(10);
 
-        // Define the start and end of the current week
-        $currentWeekStart = now()->startOfWeek();
-        $currentWeekEnd = now()->endOfWeek();
+        // Define the start and end of the current month
+        $currentMonthStart = now()->startOfMonth();  // Start of the current month
+        $currentMonthEnd = now()->endOfMonth();      // End of the current month
 
-        // Calculate total sales for this week
-        $salesThisWeek = Sale::whereBetween('created_at', [$currentWeekStart, $currentWeekEnd])
+        // Calculate total sales for this month
+        $salesThisMonth = Sale::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->sum('total_amount');
 
-        // Calculate total expenses for this week
-        $expensesThisWeek = Expense::whereBetween('created_at', [$currentWeekStart, $currentWeekEnd])
+        // Calculate total expenses for this month
+        $expensesThisMonth = Expense::whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
             ->sum('total_amount');
 
-        // Calculate weekly income (sales - expenses)
-        $weeklyIncome = $salesThisWeek - $expensesThisWeek;
+        // Calculate monthly income (sales - expenses)
+        $monthlyIncome = $salesThisMonth - $expensesThisMonth;
 
-        // Pass the weekly calculations to the view
+        // Pass the monthly calculations to the view
         return view('expenses.index', [
             'expenses' => $expenses,
-            'salesThisWeek' => $salesThisWeek,
-            'expensesThisWeek' => $expensesThisWeek,
-            'weeklyIncome' => $weeklyIncome,
+            'salesThisMonth' => $salesThisMonth,
+            'expensesThisMonth' => $expensesThisMonth,
+            'monthlyIncome' => $monthlyIncome,
         ]);
     }
+
 
 
     /**
