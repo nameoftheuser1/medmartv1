@@ -152,7 +152,7 @@
                 newProductBatch.attr('id', 'batch' + productBatchCount);
 
                 // Update product count display
-                newProductBatch.find('.product-count').text('Product Batch #' + productBatchCount);
+                newProductBatch.find('.product-count').text('Product #' + productBatchCount);
 
                 // Update search input IDs and clear values
                 newProductBatch.find('input[id^="productSearchInput"]').attr('id', 'productSearchInput' +

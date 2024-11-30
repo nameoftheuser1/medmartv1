@@ -110,7 +110,7 @@
                                 height: 350
                             },
                             series: [{
-                                name: 'Total Amount',
+                                name: 'Quantity',
                                 data: totalAmounts
                             }],
                             xaxis: {

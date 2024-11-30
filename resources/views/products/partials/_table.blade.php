@@ -8,7 +8,6 @@
                     <th scope="col" class="px-4 py-3 sm:px-6">Product Name</th>
                     <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Generic</th>
                     <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Category</th>
-                    <th scope="col" class="hidden px-4 py-3 sm:px-6 sm:table-cell">Description</th>
                     <th scope="col" class="px-4 py-3 sm:px-6">Price</th>
                     <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
                 </tr>
@@ -18,15 +17,12 @@
                     <tr class="transition duration-150 ease-in-out cursor-pointer hover:bg-green-300"
                         onclick="window.location='{{ route('products.show', $product->id) }}'">
                         <td class="px-4 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap">
-                            {{ Str::limit($product->product_name, 15) }}
+                            {{ $product->product_name }}
                         </td>
                         <td class="hidden px-4 py-4 sm:px-6 sm:table-cell">
                             {{ Str::limit($product->generic_name, 15) }}</td>
                         <td class="hidden px-4 py-4 sm:px-6 sm:table-cell">
                             {{ Str::limit($product->category, 15) }}</td>
-                        <td class="hidden px-4 py-4 sm:px-6 sm:table-cell">
-                            {{ Str::limit($product->product_description, 20) }}
-                        </td>
                         <td class="flex px-4 py-4 sm:px-6">
                             ₱{{ number_format($product->price, 2) }}
                         </td>
