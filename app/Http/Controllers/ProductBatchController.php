@@ -49,11 +49,8 @@ class ProductBatchController extends Controller
                 // Only search for the product name
                 $query->where('products.product_name', 'like', "%{$search}%");
             })
-            ->where(function ($query) {
-                // Include non-expired batches and those with null expiration_date
-                $query->where('product_batches.expiration_date', '>', now())
-                    ->orWhereNull('product_batches.expiration_date');
-            })
+            // Exclude expired product batches
+            ->where('product_batches.expiration_date', '>', now())
             // Sort alphabetically by product name
             ->orderBy('products.product_name', $sort)
             ->paginate(10);
@@ -97,12 +94,12 @@ class ProductBatchController extends Controller
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'product_id' => ['required', 'array'],
             'product_id.*' => ['exists:products,id'],
-            'expiration_date' => ['nullable', 'array'], // Expiration date array is nullable
-            'expiration_date.*' => ['nullable', 'date'], // Each expiration date is nullable
+            'expiration_date' => ['nullable', 'array'],
+            'expiration_date.*' => ['date'],
             'quantity' => ['required', 'array'],
-            'quantity.*' => ['integer', 'min:1'], // Ensure quantity is at least 1
+            'quantity.*' => ['integer'],
             'supplier_price' => ['required', 'array'],
-            'supplier_price.*' => ['numeric', 'min:0'], // Ensure price is non-negative
+            'supplier_price.*' => ['numeric'],
         ]);
 
         // Loop through each product and create corresponding entries
@@ -110,9 +107,9 @@ class ProductBatchController extends Controller
             // Create product batch entries
             $productBatch = ProductBatch::create([
                 'product_id' => $productId,
-                'supplier_id' => $validatedData['supplier_id'] ?? null, // Use supplier_id directly as it's not an array
+                'supplier_id' => $validatedData['supplier_id'][$index] ?? null,
                 'batch_number' => $validatedData['batch_number'],
-                'expiration_date' => $validatedData['expiration_date'][$index] ?? null, // Handle nullable expiration date
+                'expiration_date' => $validatedData['expiration_date'][$index] ?? null,
                 'supplier_price' => $validatedData['supplier_price'][$index],
                 'received_date' => $validatedData['received_date'],
             ]);
