@@ -82,7 +82,7 @@
                                 </select>
                             </div>
                             <div class="mb-4">
-                                <label for="expiration_date" class="block mb-2 font-medium">Expiration Date:</label>
+                                <label for="expiration_date" class="block mb-2 font-medium">Expiration Date (Optional):</label>
                                 <input type="date" name="expiration_date[]"
                                     class="input w-full rounded-lg border-gray-300"
                                     value="{{ old('expiration_date.0') }}">

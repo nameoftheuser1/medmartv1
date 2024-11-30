@@ -74,10 +74,6 @@ $(document).ready(function () {
         // Handling form submission
         $("#quantity-form").on("submit", function (e) {
             e.preventDefault();
-            const quantity = quantityInput.val();
-
-            // Add item to cart logic (this can be an AJAX request or form submission)
-            console.log(`Product ID: ${selectedProductIdInput.val()}, Quantity: ${quantity}`);
 
             // Optionally, hide the modal and reset the form
             quantityModal.addClass("hidden");

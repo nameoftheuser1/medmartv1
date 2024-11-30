@@ -66,7 +66,7 @@ class ProductController extends Controller
             'product_name' => ['required', 'max:100'],
             'generic_name' => ['max:100'],
             'category' => ['required'],
-            'product_description' => ['required'],
+            'product_description' => ['nullable'],
             'price' => ['required', 'numeric'],
             'barcode' => ['nullable', 'string', 'unique:products,barcode'],
         ]);
@@ -101,7 +101,7 @@ class ProductController extends Controller
             'product_name' => ['required', 'max:100'],
             'generic_name' => ['nullable', 'max:100'],
             'category' => ['required'],
-            'product_description' => ['required'],
+            'product_description' => ['nullable'],
             'price' => ['required', 'numeric'],
             'barcode' => ['nullable', 'string', 'unique:products,barcode'],
         ]);
@@ -119,7 +119,6 @@ class ProductController extends Controller
         $product->delete();
 
         return back()->with('deleted', 'The product was deleted');
-
     }
     public function export(Request $request)
     {
@@ -150,6 +149,4 @@ class ProductController extends Controller
         // Export filtered and sorted products
         return Excel::download(new ProductsExport($products), 'products.xlsx');
     }
-
-
 }

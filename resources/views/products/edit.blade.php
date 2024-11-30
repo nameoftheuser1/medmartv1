@@ -87,7 +87,7 @@
             </div>
 
             <div class="mb-4">
-                <label for="product_description">Product Description: </label>
+                <label for="product_description">(optional)Product Description: </label>
                 <textarea name="product_description" id="product_description" cols="20" rows="3" class="input">{{ $product->product_description }}</textarea>
                 @error('product_description')
                     <p class="error">{{ $message }}</p>

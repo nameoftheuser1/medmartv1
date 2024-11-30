@@ -15,20 +15,20 @@ class ProductBatchController extends Controller
 
 
     public function returnProduct(ProductBatch $productBatch)
-{
-    // Step 1: Set the return date to the current date and time (now) for the ProductBatch
-    $productBatch->update([
-        'return_date' => now(),
-    ]);
+    {
+        // Step 1: Set the return date to the current date and time (now) for the ProductBatch
+        $productBatch->update([
+            'return_date' => now(),
+        ]);
 
-    // Step 2: Update all related Inventory records (set their quantity to 0)
-    $productBatch->inventories->each(function ($inventory) {
-        $inventory->update(['quantity' => 0]);
-    });
+        // Step 2: Update all related Inventory records (set their quantity to 0)
+        $productBatch->inventories->each(function ($inventory) {
+            $inventory->update(['quantity' => 0]);
+        });
 
-    // Step 3: Redirect back with a success message
-    return redirect()->back()->with('success', 'Product returned successfully, quantity set to zero.');
-}
+        // Step 3: Redirect back with a success message
+        return redirect()->back()->with('success', 'Product returned successfully, quantity set to zero.');
+    }
 
 
 
@@ -94,7 +94,7 @@ class ProductBatchController extends Controller
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'product_id' => ['required', 'array'],
             'product_id.*' => ['exists:products,id'],
-            'expiration_date' => ['required', 'array'],
+            'expiration_date' => ['nullable', 'array'],
             'expiration_date.*' => ['date'],
             'quantity' => ['required', 'array'],
             'quantity.*' => ['integer'],
@@ -109,7 +109,7 @@ class ProductBatchController extends Controller
                 'product_id' => $productId,
                 'supplier_id' => $validatedData['supplier_id'][$index] ?? null,
                 'batch_number' => $validatedData['batch_number'],
-                'expiration_date' => $validatedData['expiration_date'][$index],
+                'expiration_date' => $validatedData['expiration_date'][$index] ?? null,
                 'supplier_price' => $validatedData['supplier_price'][$index],
                 'received_date' => $validatedData['received_date'],
             ]);
@@ -163,7 +163,7 @@ class ProductBatchController extends Controller
             'product_id' => ['required', 'exists:products,id'],
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'batch_number' => ['required', 'string', 'unique:product_batches,batch_number,' . $productBatch->id],
-            'expiration_date' => ['required', 'date'],
+            'expiration_date' => ['nullable', 'date'],
             'supplier_price' => ['required', 'numeric'],
             'received_date' => ['required', 'date'],
         ]);
