@@ -4,6 +4,19 @@
             Product Batches</a>
         <div class="card w-full md:w-4/5 lg:w-3/4 mx-auto mt-5">
             <h1 class="text-2xl font-bold mb-5">Add Product Batch</h1>
+
+            @if ($errors->any())
+                <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Whoops!</strong>
+                    <span class="block sm:inline">There are some problems with your input.</span>
+                    <ul class="mt-2 list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="{{ route('product_batches.store') }}" method="POST" id="productBatchForm">
                 @csrf
 
@@ -82,7 +95,8 @@
                                 </select>
                             </div>
                             <div class="mb-4">
-                                <label for="expiration_date" class="block mb-2 font-medium">Expiration Date (Optional):</label>
+                                <label for="expiration_date" class="block mb-2 font-medium">Expiration Date
+                                    (Optional):</label>
                                 <input type="date" name="expiration_date[]"
                                     class="input w-full rounded-lg border-gray-300"
                                     value="{{ old('expiration_date.0') }}">
