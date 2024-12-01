@@ -49,7 +49,7 @@
                         @foreach ($inventories as $inventory)
                             <tr class="transition duration-150 ease-in-out cursor-pointer hover:bg-green-300">
                                 <td class="px-4 py-4 font-medium text-gray-900 sm:px-6 whitespace-nowrap">
-                                    {{ Str::limit($inventory->product_name, 15) }}
+                                    {{ $inventory->product_name }}
                                 </td>
                                 <td
                                     class="px-4 py-4 sm:px-6 text-sm {{ $inventory->total_quantity <= 0 ? 'text-red-500 font-bold' : 'text-gray-500' }}">

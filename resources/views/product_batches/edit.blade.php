@@ -45,7 +45,7 @@
             </div>
 
             <div class="mb-4">
-                <label for="expiration_date">(optional)Expiration Date:</label>
+                <label for="expiration_date">Expiration Date:</label>
                 <input type="date" name="expiration_date" id="expiration_date" class="input"
                     value="{{ $productBatches->expiration_date ? $productBatches->expiration_date->format('Y-m-d') : '' }}">
                 @error('expiration_date')
