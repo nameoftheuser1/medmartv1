@@ -204,6 +204,21 @@
             const searchInput = document.getElementById('search-input');
             const productList = document.getElementById('product-list');
 
+            function setupProductListeners() {
+                const productElements = document.querySelectorAll('.product-card');
+                productElements.forEach(product => {
+                    product.addEventListener('click', function() {
+                        const productId = this.getAttribute('data-id');
+                        const modal = document.getElementById('quantity-modal');
+                        const selectedProductIdInput = document.getElementById(
+                            'selected-product-id');
+
+                        selectedProductIdInput.value = productId;
+                        modal.classList.remove('hidden');
+                    });
+                });
+            }
+
             searchInput.addEventListener('input', function() {
                 const searchTerm = this.value.trim();
 
@@ -216,11 +231,15 @@
                     .then(response => response.text())
                     .then(html => {
                         productList.innerHTML = html;
+                        setupProductListeners(); // Reattach event listeners
                     })
                     .catch(error => {
                         console.error('Error searching products:', error);
                     });
             });
+
+            // Initial setup of product listeners
+            setupProductListeners();
         });
     </script>
 
