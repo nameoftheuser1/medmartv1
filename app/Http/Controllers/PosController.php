@@ -22,12 +22,22 @@ class POSController extends Controller
         return session()->get('cart_session_id');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::whereHas('productBatches.inventories', function ($query) {
+        $query = Product::whereHas('productBatches.inventories', function ($query) {
             $query->where('quantity', '>', 0);
-        })->with(['productBatches.inventories'])
-            ->paginate(10);
+        })->with(['productBatches.inventories']);
+
+        if ($request->has('search')) {
+            $searchTerm = $request->input('search');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                    ->orWhere('barcode', 'like', "%{$searchTerm}%")
+                    ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $products = $query->paginate(10);
 
         $products->getCollection()->map(function ($product) {
             $product->total_inventory = $product->productBatches->sum(function ($batch) {

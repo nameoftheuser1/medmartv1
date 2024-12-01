@@ -13,11 +13,19 @@ $(document).ready(function () {
     const resetExchangeButton = $("#reset-exchange-button");
 
     // Search functionality for products
-    searchInput.on("input", function () {
-        const query = $(this).val().toLowerCase();
-        productCards.each(function () {
-            const productName = $(this).data("name").toLowerCase();
-            $(this).toggleClass("hidden", !productName.includes(query));
+    $("#search-input").on("input", function () {
+        const searchTerm = $(this).val();
+
+        $.ajax({
+            url: "{{ route('pos.index') }}",
+            method: "GET",
+            data: { search: searchTerm },
+            success: function (response) {
+                // Update product list with the new response
+                $("#product-list").html(
+                    $(response).find("#product-list").html()
+                );
+            },
         });
     });
 
@@ -80,7 +88,6 @@ $(document).ready(function () {
             quantityInput.val(1); // Reset the quantity input field
         });
     });
-
 
     // Exchange input and change calculation
     exchangeInput.on("input", function () {
