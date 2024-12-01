@@ -32,14 +32,15 @@ class POSController extends Controller
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                    ->orWhere('barcode', 'like', "%{$searchTerm}%")
-                    ->orWhere('description', 'like', "%{$searchTerm}%");
+                $q->where('product_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('generic_name', 'like', "%{$searchTerm}%")
+                    ->orWhere('id', 'like', "%{$searchTerm}%");
             });
         }
 
         $products = $query->paginate(12);
 
+        // Calculate total inventory for each product
         $products->getCollection()->map(function ($product) {
             $product->total_inventory = $product->productBatches->sum(function ($batch) {
                 return $batch->inventories->sum('quantity');

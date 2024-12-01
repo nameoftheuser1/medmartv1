@@ -1,23 +1,20 @@
 <x-layout>
     <h1>Point of Sale</h1>
 
-
-
     <div class="flex flex-col sm:flex-row w-full gap-2">
         <div class="rounded-lg card w-full">
             @if (session('success'))
                 <p class="text-green-500">{{ session('success') }}</p>
             @endif
             @if ($errors->any())
-            <ul class="text-red-500">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        @endif
+                <ul class="text-red-500">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            @endif
             @if (session('error'))
                 <p class="text-red-500">{{ session('error') }}</p>
-
             @endif
             <h2>Select Product</h2>
             <div class="mb-4">
@@ -44,7 +41,8 @@
                             <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity:</label>
                             <input type="number" name="quantity" id="quantity" class="input mt-1 w-full"
                                 min="1" max="9999999999" required oninput="checkQuantity(this)">
-                            <p id="quantity-error" class="text-red-500 text-sm hidden">Quantity must be up to 10 digits.</p>
+                            <p id="quantity-error" class="text-red-500 text-sm hidden">Quantity must be up to 10 digits.
+                            </p>
                         </div>
 
                         <div class="flex justify-center mt-4">
@@ -135,8 +133,6 @@
 
             </div>
 
-
-
             <!-- Exchange Section -->
             <div class="mt-4 flex flex-col gap-3">
                 <label for="exchange-input">Enter Amount:</label>
@@ -155,7 +151,8 @@
                         <form action="{{ route('pos.checkout') }}" method="POST">
                             @csrf
                             <input type="hidden" name="exchange" id="exchange-hidden-input">
-                            <button type="submit" class="w-full px-6 py-2 mt-4 text-white bg-blue-600 rounded">Checkout</button>
+                            <button type="submit"
+                                class="w-full px-6 py-2 mt-4 text-white bg-blue-600 rounded">Checkout</button>
                         </form>
                     </button>
                 </div>
@@ -201,6 +198,46 @@
         // Close the modal
         closeModalButton.addEventListener('click', function() {
             modal.classList.add('hidden');
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const productList = document.getElementById('product-list');
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+
+                // If search is empty, show all products
+                if (searchTerm === '') {
+                    const allProducts = document.querySelectorAll('.product-card');
+                    allProducts.forEach(product => {
+                        product.style.display = 'flex';
+                    });
+                    return;
+                }
+
+                // Get all product cards
+                const products = document.querySelectorAll('.product-card');
+
+                products.forEach(product => {
+                    // Extract data attributes
+                    const productName = product.getAttribute('data-name')?.toLowerCase() || '';
+                    const productId = product.getAttribute('data-id') || '';
+
+                    // Check other text content
+                    const genericName = product.querySelector('p')?.textContent.toLowerCase() || '';
+
+                    if (
+                        productName.includes(searchTerm) ||
+                        genericName.includes(searchTerm) ||
+                        productId.includes(searchTerm)
+                    ) {
+                        product.style.display = 'flex';
+                    } else {
+                        product.style.display = 'none';
+                    }
+                });
+            });
         });
     </script>
 
