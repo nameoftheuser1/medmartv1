@@ -23,7 +23,7 @@
             <div class="mb-4">
                 <input type="text" id="search-input" placeholder="Search products..." class="w-full m-1 input">
             </div>
-            <div class="product-container overflow-y-auto max-h-[1000px] flex flex-wrap">
+            <div id="product-list" class="product-container overflow-y-auto max-h-[1000px] flex flex-wrap">
                 @foreach ($products as $product)
                     @include('pos.partials.products', ['product' => $product])
                 @endforeach
