@@ -205,38 +205,21 @@
             const productList = document.getElementById('product-list');
 
             searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase().trim();
+                const searchTerm = this.value.trim();
 
-                // If search is empty, show all products
-                if (searchTerm === '') {
-                    const allProducts = document.querySelectorAll('.product-card');
-                    allProducts.forEach(product => {
-                        product.style.display = 'flex';
+                // Use AJAX to search and reload products
+                fetch(`{{ route('pos.index') }}?search=${searchTerm}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        productList.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Error searching products:', error);
                     });
-                    return;
-                }
-
-                // Get all product cards
-                const products = document.querySelectorAll('.product-card');
-
-                products.forEach(product => {
-                    // Extract data attributes
-                    const productName = product.getAttribute('data-name')?.toLowerCase() || '';
-                    const productId = product.getAttribute('data-id') || '';
-
-                    // Check other text content
-                    const genericName = product.querySelector('p')?.textContent.toLowerCase() || '';
-
-                    if (
-                        productName.includes(searchTerm) ||
-                        genericName.includes(searchTerm) ||
-                        productId.includes(searchTerm)
-                    ) {
-                        product.style.display = 'flex';
-                    } else {
-                        product.style.display = 'none';
-                    }
-                });
             });
         });
     </script>
