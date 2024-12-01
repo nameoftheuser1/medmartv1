@@ -15,16 +15,16 @@ $(document).ready(function () {
     // Search functionality for products
     $("#search-input").on("input", function () {
         const searchTerm = $(this).val();
-
         $.ajax({
-            url: "{{ route('pos.index') }}",
+            url: "/pos",
             method: "GET",
             data: { search: searchTerm },
             success: function (response) {
-                // Update product list with the new response
-                $("#product-list").html(
-                    $(response).find("#product-list").html()
-                );
+                // Assuming you want to replace entire product list
+                $("#product-list").html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error("Search error:", error);
             },
         });
     });

@@ -46,6 +46,11 @@ class POSController extends Controller
             return $product;
         });
 
+        // Check kung AJAX request
+        if ($request->ajax()) {
+            return view('pos.product-list', compact('products'))->render();
+        }
+
         $sessionId = $this->getSessionId();
         $cartItems = TemporaryCartItem::where('session_id', $sessionId)->get();
         $discountPercentage = session()->get('discountPercentage', 0);
