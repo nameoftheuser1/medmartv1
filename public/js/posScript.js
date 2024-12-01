@@ -15,12 +15,16 @@ $(document).ready(function () {
     // Search functionality for products
     $("#search-input").on("input", function () {
         const searchTerm = $(this).val();
+
         $.ajax({
             url: "/pos",
             method: "GET",
-            data: { search: searchTerm },
+            data: {
+                search: searchTerm,
+                _token: $('meta[name="csrf-token"]').attr("content"),
+            },
             success: function (response) {
-                // Assuming you want to replace entire product list
+                // Update product list and pagination
                 $("#product-list").html(response);
             },
             error: function (xhr, status, error) {

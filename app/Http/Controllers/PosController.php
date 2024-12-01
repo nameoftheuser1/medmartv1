@@ -28,6 +28,7 @@ class POSController extends Controller
             $query->where('quantity', '>', 0);
         })->with(['productBatches.inventories']);
 
+        // Magdagdag ng search functionality
         if ($request->has('search')) {
             $searchTerm = $request->input('search');
             $query->where(function ($q) use ($searchTerm) {
@@ -48,7 +49,7 @@ class POSController extends Controller
 
         // Check kung AJAX request
         if ($request->ajax()) {
-            return view('pos.product-list', compact('products'))->render();
+            return view('pos.partials.product-list', compact('products'))->render();
         }
 
         $sessionId = $this->getSessionId();
