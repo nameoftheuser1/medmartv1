@@ -50,7 +50,7 @@ class POSController extends Controller
 
         // Check kung AJAX request
         if ($request->ajax()) {
-            return view('pos.partials.product-list', compact('products'))->render();
+            return view('pos.partials.products', compact('products'))->render();
         }
 
         $sessionId = $this->getSessionId();
