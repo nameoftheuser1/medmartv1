@@ -130,25 +130,43 @@
     </div>
 
     <script>
+        function setupProductSearchListener(input) {
+            input.addEventListener('input', function() {
+                searchProduct(this);
+            });
+        }
+
         $(document).ready(function() {
             let productBatchCount = 1;
+
+            // Initial setup for the first product input
+            setupProductSearchListener(document.getElementById('product_input1'));
 
             // Add Another Product Batch
             $('#addAnotherProduct').click(function() {
                 productBatchCount++;
                 let newProductBatch = $('#batch1').clone();
 
-                // Update IDs
-                newProductBatch.find('input[id^="product_input"]')
-                    .attr('id', 'product_input' + productBatchCount)
-                    .attr('onchange', 'searchProduct(this)');
-                newProductBatch.find('ul[id^="productSearchResults"]')
-                    .attr('id', 'productSearchResults' + productBatchCount);
-                newProductBatch.find('select[id^="productSelect"]')
-                    .attr('id', 'productSelect' + productBatchCount);
+                // Reset the ID of the new batch
+                newProductBatch.attr('id', 'batch' + productBatchCount);
+
+                // Update IDs for inputs
+                newProductBatch.find('input[id^="product_input"]').attr('id', 'product_input' +
+                    productBatchCount);
+                newProductBatch.find('select[id^="productSelect"]').attr('id', 'productSelect' +
+                    productBatchCount);
+                newProductBatch.find('ul[id^="productSearchResults"]').attr('id', 'productSearchResults' +
+                    productBatchCount);
+
+                // Update product count text
+                newProductBatch.find('.product-count').text('Product #' + productBatchCount);
 
                 // Clear input values
                 newProductBatch.find('input, select').val('');
+
+                // Setup search listener for new input
+                const newInput = newProductBatch.find('input[id^="product_input"]')[0];
+                setupProductSearchListener(newInput);
 
                 $('#productBatchesContainer').append(newProductBatch);
             });
@@ -159,6 +177,11 @@
                 const query = input.value;
                 const resultsContainer = document.getElementById('productSearchResults' + batchNumber);
                 const productSelect = document.getElementById('productSelect' + batchNumber);
+
+                if (!resultsContainer || !productSelect) {
+                    console.error('Results container or product select not found for batch', batchNumber);
+                    return;
+                }
 
                 if (query.length < 2) {
                     resultsContainer.classList.add('hidden');
@@ -181,7 +204,7 @@
                                 const resultLi = document.createElement('li');
                                 resultLi.textContent = product.product_name;
                                 resultLi.classList.add('p-2', 'hover:bg-gray-100',
-                                    'cursor-pointer');
+                                'cursor-pointer');
                                 resultLi.onclick = () => {
                                     input.value = product.product_name;
                                     const option = document.createElement('option');
@@ -205,17 +228,22 @@
                     .catch(error => console.error('Error:', error));
             };
 
-            // Add event listener for input
-            document.getElementById('product_input1').addEventListener('input', function() {
-                searchProduct(this);
-            });
+            // Function to set up product search listener
+            function setupProductSearchListener(input) {
+                if (!input) return;
+                input.addEventListener('input', function() {
+                    searchProduct(this);
+                });
+            }
 
             // Hide results when clicking outside
             document.addEventListener('click', function(e) {
-                const searchResults = document.getElementById('productSearchResults1');
-                if (searchResults && !e.target.closest('.relative')) {
-                    searchResults.classList.add('hidden');
-                }
+                const searchResults = document.querySelectorAll('[id^="productSearchResults"]');
+                searchResults.forEach(resultsContainer => {
+                    if (!e.target.closest('.relative')) {
+                        resultsContainer.classList.add('hidden');
+                    }
+                });
             });
         });
     </script>

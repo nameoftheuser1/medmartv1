@@ -20,4 +20,4 @@
     </div>
 @endforeach
 
-
+{{ $products->appends(request()->input())->links() }}
