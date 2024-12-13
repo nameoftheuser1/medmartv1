@@ -18,7 +18,8 @@
 
         <div class="mb-2">
             This page provides a comprehensive overview of all sales transactions in the system. You can search for
-            specific sales records, view detailed information such as total amount, discount applied, transaction number,
+            specific sales records, view detailed information such as total amount, discount applied, transaction
+            number,
             sale time, and status. The table allows for sorting and quick access to actions like viewing receipts or
             processing refunds. Additionally, the sales chart visualizes trends over the past 30 days, helping you track
             performance and identify patterns. Use the search bar and available tools to efficiently manage and analyze
@@ -109,14 +110,23 @@
         <div class="mt-4">
             {{ $sales->appends(['search' => request('search')])->links('vendor.pagination.tailwind') }}
         </div>
+
+        <div class="mb-4">
+            <label for="chart-selector" class="block text-sm font-medium text-gray-700">Select Chart View</label>
+            <select id="chart-selector"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="daily">Daily Sales</option>
+                <option value="weekly">Weekly Sales</option>
+                <option value="monthly">Monthly Sales</option>
+            </select>
+        </div>
+
         <!-- Daily Chart -->
-        <div id="daily-chart" class="chart-container"></div>
-
-        <!-- Weekly Chart -->
-        <div id="weekly-chart" class="chart-container"></div>
-
-        <!-- Monthly Chart -->
-        <div id="monthly-chart" class="chart-container"></div>
+        <div id="chart-container">
+            <div id="daily-chart" class="chart-container" style="display: block;"></div>
+            <div id="weekly-chart" class="chart-container" style="display: none;"></div>
+            <div id="monthly-chart" class="chart-container" style="display: none;"></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -127,14 +137,25 @@
         const weeklyChartData = @json($weeklyChartData);
         const monthlyChartData = @json($monthlyChartData);
 
+        // Variables to store chart instances
+        let dailyChart, weeklyChart, monthlyChart;
+
         // Function to render the daily chart
         function renderDailyChart() {
+            const chartElement = document.querySelector("#daily-chart");
+            if (!chartElement) return;
+
             const chartData = dailyChartData.map(item => item.total_amount);
             const categories = dailyChartData.map(item => item.date);
+
             const chartOptions = {
                 chart: {
                     type: 'line',
-                    height: 350
+                    height: 350,
+                    width: '100%',
+                    toolbar: {
+                        show: false
+                    }
                 },
                 series: [{
                     name: 'Total Amount',
@@ -144,30 +165,60 @@
                     categories: categories,
                     title: {
                         text: 'Date'
+                    },
+                    labels: {
+                        rotate: -45,
+                        rotateAlways: true,
+                        trim: true
                     }
                 },
                 yaxis: {
                     title: {
                         text: 'Total Amount'
+                    },
+                    labels: {
+                        formatter: function(value) {
+                            return '₱' + value.toFixed(2);
+                        }
                     }
                 },
                 title: {
                     text: 'Sales Per Day',
                     align: 'center'
+                },
+                tooltip: {
+                    x: {
+                        format: 'dd/MM/yyyy'
+                    },
+                    y: {
+                        formatter: function(value) {
+                            return '₱' + value.toFixed(2);
+                        }
+                    }
                 }
             };
-            const dailyChart = new ApexCharts(document.querySelector("#daily-chart"), chartOptions);
+
+            if (dailyChart) dailyChart.destroy();
+            dailyChart = new ApexCharts(chartElement, chartOptions);
             dailyChart.render();
         }
 
         // Function to render the weekly chart
         function renderWeeklyChart() {
+            const chartElement = document.querySelector("#weekly-chart");
+            if (!chartElement) return;
+
             const chartData = weeklyChartData.map(item => item.total_amount);
             const categories = weeklyChartData.map(item => `Week ${item.week}`);
+
             const chartOptions = {
                 chart: {
                     type: 'line',
-                    height: 350
+                    height: 350,
+                    width: '100%',
+                    toolbar: {
+                        show: false
+                    }
                 },
                 series: [{
                     name: 'Total Amount',
@@ -182,25 +233,47 @@
                 yaxis: {
                     title: {
                         text: 'Total Amount'
+                    },
+                    labels: {
+                        formatter: function(value) {
+                            return '₱' + value.toFixed(2);
+                        }
                     }
                 },
                 title: {
                     text: 'Sales Per Week',
                     align: 'center'
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return '₱' + value.toFixed(2);
+                        }
+                    }
                 }
             };
-            const weeklyChart = new ApexCharts(document.querySelector("#weekly-chart"), chartOptions);
+
+            if (weeklyChart) weeklyChart.destroy();
+            weeklyChart = new ApexCharts(chartElement, chartOptions);
             weeklyChart.render();
         }
 
         // Function to render the monthly chart
         function renderMonthlyChart() {
+            const chartElement = document.querySelector("#monthly-chart");
+            if (!chartElement) return;
+
             const chartData = monthlyChartData.map(item => item.total_amount);
             const categories = monthlyChartData.map(item => `Month ${item.month}`);
+
             const chartOptions = {
                 chart: {
                     type: 'line',
-                    height: 350
+                    height: 350,
+                    width: '100%',
+                    toolbar: {
+                        show: false
+                    }
                 },
                 series: [{
                     name: 'Total Amount',
@@ -215,21 +288,76 @@
                 yaxis: {
                     title: {
                         text: 'Total Amount'
+                    },
+                    labels: {
+                        formatter: function(value) {
+                            return '₱' + value.toFixed(2);
+                        }
                     }
                 },
                 title: {
                     text: 'Sales Per Month',
                     align: 'center'
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return '₱' + value.toFixed(2);
+                        }
+                    }
                 }
             };
-            const monthlyChart = new ApexCharts(document.querySelector("#monthly-chart"), chartOptions);
+
+            if (monthlyChart) monthlyChart.destroy();
+            monthlyChart = new ApexCharts(chartElement, chartOptions);
             monthlyChart.render();
         }
 
-        // Initialize all charts
-        renderDailyChart();
-        renderWeeklyChart();
-        renderMonthlyChart();
+        // Function to handle chart switching
+        function switchChart(selectedView) {
+            // Remove display logic, use ApexCharts built-in show/hide
+            const chartContainers = document.querySelectorAll('.chart-container');
+            chartContainers.forEach(container => {
+                container.style.display = 'none';
+            });
+
+            const selectedChart = document.getElementById(`${selectedView}-chart`);
+            if (selectedChart) {
+                selectedChart.style.display = 'block';
+
+                // Redraw the selected chart
+                switch (selectedView) {
+                    case 'daily':
+                        if (dailyChart) dailyChart.render();
+                        break;
+                    case 'weekly':
+                        if (weeklyChart) weeklyChart.render();
+                        break;
+                    case 'monthly':
+                        if (monthlyChart) monthlyChart.render();
+                        break;
+                }
+            }
+        }
+
+        // Event listener for chart selector
+        document.addEventListener('DOMContentLoaded', () => {
+            const chartSelector = document.getElementById('chart-selector');
+
+            if (chartSelector) {
+                chartSelector.addEventListener('change', function() {
+                    switchChart(this.value);
+                });
+
+                // Render all charts
+                renderDailyChart();
+                renderWeeklyChart();
+                renderMonthlyChart();
+
+                // Ensure initial chart is visible
+                switchChart('daily');
+            }
+        });
     </script>
 
 

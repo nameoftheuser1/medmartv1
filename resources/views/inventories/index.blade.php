@@ -39,6 +39,16 @@
             ensure efficient inventory tracking and management for maintaining optimal stock levels.
         </div>
 
+        <div class="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
+            <h2 class="text-lg font-bold mb-2">Legend</h2>
+            <ul class="list-disc list-inside">
+                <li><span class="text-red-500 font-bold">Red</span>: Expiration date within 90 days or quantity less
+                    than or equal to 30.</li>
+                <li><span class="text-black">Black</span>: Expiration date more than 90 days and quantity greater than
+                    30.</li>
+            </ul>
+        </div>
+
         <div>
             @if (session('success'))
                 <x-flashMsg msg="{{ session('success') }}" bg="bg-yellow-500" />
