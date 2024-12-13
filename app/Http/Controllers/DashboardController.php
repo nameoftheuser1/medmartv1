@@ -12,6 +12,7 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Phpml\Regression\LeastSquares;
 
 class DashboardController extends Controller
@@ -197,117 +198,212 @@ class DashboardController extends Controller
 
     public function predictSales()
     {
-        // Retrieve historical sales data
-        $salesData = $this->getHistoricalData();
+        // Retrieve historical sales data with more comprehensive retrieval
+        $salesData = $this->getExtendedHistoricalData();
 
+        // Prepare data for advanced prediction
+        $processedData = $this->preprocessSalesData($salesData);
+
+        // Handle cases with insufficient data
+        if (count($processedData['samples']) < 5) {
+            return $this->fallbackPrediction($processedData['targets']);
+        }
+
+        try {
+            // Implement multiple prediction strategies
+            $predictions = $this->generateMultiModelPredictions($processedData);
+
+            // Store and return predictions
+            return $this->storePredictionsAndPrepareResponse($predictions);
+        } catch (\Exception $e) {
+            // Fallback to simple prediction if advanced methods fail
+            return $this->fallbackPrediction($processedData['targets'], $e->getMessage());
+        }
+    }
+
+    private function getExtendedHistoricalData()
+    {
+        // Extended data retrieval with more context
+        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 1800; // Increased from 900 to 1800 days
+        $cutoffDate = now()->subDays($historicalDataDays);
+
+        return DB::table('sales')
+            ->whereDate('created_at', '>=', $cutoffDate)
+            ->select(
+                'created_at as date',
+                'total_amount',
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('YEAR(created_at) as year'),
+                DB::raw('DAYOFWEEK(created_at) as day_of_week')
+            )
+            ->get()
+            ->map(function ($record) {
+                $record->date = Carbon::parse($record->date);
+                return $record;
+            });
+    }
+
+    private function preprocessSalesData($salesData)
+    {
         $samples = [];
         $targets = [];
+        $baseDate = $salesData->min('date');
 
-        // Base date for normalizing
-        $baseDate = null;
-
+        // More sophisticated feature engineering
         foreach ($salesData as $data) {
             if (!isset($data->date, $data->total_amount)) {
                 continue;
             }
 
             $totalAmount = (float) $data->total_amount;
-            $dataDate = strtotime($data->date);
+            $monthsOffset = $data->date->diffInMonths($baseDate);
 
-            // Initialize base date for normalization
-            if ($baseDate === null) {
-                $baseDate = $dataDate;
-            }
+            // Advanced feature vector
+            $features = [
+                'months_offset' => $monthsOffset,
+                'month' => $data->month,
+                'day_of_week' => $data->day_of_week,
+                // Add more contextual features as needed
+            ];
 
-            // Normalize date as months offset
-            $monthsOffset = ($dataDate - $baseDate) / (30 * 24 * 60 * 60);
-
-            $samples[] = [$monthsOffset];
+            $samples[] = $features;
             $targets[] = $totalAmount;
         }
 
-        // Handle cases with insufficient unique data for predictions
-        $uniqueSamples = array_unique(array_map('serialize', $samples));
-        if (count($uniqueSamples) < 2) {
-            // Fallback to default prediction (3 months)
-            $defaultSalesValue = !empty($targets) ? end($targets) : 0;
+        return [
+            'samples' => $samples,
+            'targets' => $targets,
+            'base_date' => $baseDate
+        ];
+    }
 
-            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // 3 months prediction
-            $predictedDates = array_map(
-                fn($i) => date('F Y', strtotime("+{$i} months", strtotime('first day of next month'))),
-                range(0, 2) // Predict for 3 months (0 to 2)
-            );
+    private function generateMultiModelPredictions($processedData)
+    {
+        $samples = $processedData['samples'];
+        $targets = $processedData['targets'];
+        $baseDate = $processedData['base_date'];
 
-            return ['sales' => $predictedSales, 'dates' => $predictedDates];
-        }
+        // Ensemble of prediction methods
+        $predictions = [
+            'linear_regression' => $this->linearRegressionPrediction($samples, $targets),
+            'moving_average' => $this->movingAveragePrediction($targets),
+            'seasonal_adjustment' => $this->seasonalAdjustmentPrediction($samples, $targets)
+        ];
 
-        // Perform linear regression with Phpml
+        // Ensemble method: Weighted average
+        $finalPredictions = array_map(function ($month) use ($predictions) {
+            $monthPredictions = array_column($predictions, $month);
+            return round(array_sum($monthPredictions) / count($monthPredictions));
+        }, range(0, 2));
+
+        return $finalPredictions;
+    }
+
+    private function linearRegressionPrediction($samples, $targets)
+    {
         try {
             $regression = new LeastSquares();
             $regression->train($samples, $targets);
 
-            // Generate predictions for the next 3 months
-            $predictedSales = [];
-            $predictedDates = [];
-            $currentDate = strtotime('first day of next month'); // Start from next month
+            $currentDate = strtotime('first day of next month');
+            $baseDate = strtotime('first day of January 2020'); // Set a consistent base date
 
-            for ($i = 0; $i < 3; $i++) { // Predict for exactly 3 months
-                // Normalize current date as months offset from base date
-                $currentOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60);
-
-                $predictedValue = max(0, round($regression->predict([$currentOffset])));
-                $predictedDate = date('F Y', $currentDate);
-
-                // Store the prediction in the database if it's for a future month
-                DB::table('sales_data')->updateOrInsert(
-                    ['key' => 'predicted_sales_' . date('Ym', $currentDate)],
-                    [
-                        'value' => $predictedValue,
-                        'month' => $predictedDate,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]
-                );
-
-                // Store prediction for return
-                $predictedSales[] = $predictedValue;
-                $predictedDates[] = $predictedDate;
-
-                // Move to the next prediction month
-                $currentDate = strtotime("+1 month", $currentDate);
-            }
-
-            return ['sales' => $predictedSales, 'dates' => $predictedDates];
-        } catch (\Phpml\Exception\MatrixException $e) {
-            // Handle regression failure with a fallback
-            $defaultSalesValue = !empty($targets) ? end($targets) : 0;
-
-            $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue)); // 3 months prediction
-            $predictedDates = array_map(
-                fn($i) => date('F Y', strtotime("+{$i} months", strtotime('first day of next month'))),
-                range(0, 2) // Predict for 3 months (0 to 2)
-            );
-
-            return ['sales' => $predictedSales, 'dates' => $predictedDates];
+            return array_map(function ($i) use ($regression, $currentDate, $baseDate) {
+                $monthsOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60) + $i;
+                $features = [
+                    'months_offset' => $monthsOffset,
+                    'month' => date('n', strtotime("+{$i} months", $currentDate)),
+                    'day_of_week' => date('w', strtotime("+{$i} months", $currentDate))
+                ];
+                return max(0, round($regression->predict([$features])));
+            }, range(0, 2));
+        } catch (\Exception $e) {
+            // Fallback if regression fails
+            $lastValue = end($targets);
+            return array_fill(0, 3, max(0, $lastValue));
         }
     }
 
-    private function getHistoricalData()
+    private function movingAveragePrediction($targets, $periods = 3)
     {
-        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 900;
+        // Calculate moving average of last n periods
+        if (count($targets) < $periods) {
+            $lastValue = end($targets);
+            return array_fill(0, 3, max(0, $lastValue));
+        }
 
-        $cutoffDate = now()->subDays($historicalDataDays);
+        $slice = array_slice($targets, -$periods);
+        $average = array_sum($slice) / count($slice);
 
-        $salesData = DB::table('sales')
-            ->whereDate('created_at', '>=', $cutoffDate)
-            ->select('created_at as date', 'total_amount')
-            ->get()
-            ->map(function ($record) {
-                $record->date = Carbon::parse($record->date)->format('Y-m-d');
-                return $record;
+        return array_fill(0, 3, round($average));
+    }
+
+    private function seasonalAdjustmentPrediction($samples, $targets)
+    {
+        // Basic seasonal adjustment method
+        $monthlyAverages = collect($samples)
+            ->groupBy('month')
+            ->map(function ($group) use ($targets) {
+                $indices = $group->keys();
+                $monthTargets = collect($indices)->map(fn($i) => $targets[$i]);
+                return $monthTargets->avg();
             });
 
-        return $salesData;
+        $lastMonths = collect($samples)
+            ->sortByDesc('months_offset')
+            ->take(3)
+            ->pluck('month');
+
+        return $lastMonths->map(function ($month) use ($monthlyAverages) {
+            return round($monthlyAverages->get($month, 0));
+        })->toArray();
+    }
+
+    private function storePredictionsAndPrepareResponse($predictions)
+    {
+        $currentDate = strtotime('first day of next month');
+
+        $predictedSales = [];
+        $predictedDates = [];
+
+        foreach ($predictions as $index => $predictedValue) {
+            $predictionDate = strtotime("+{$index} months", $currentDate);
+            $formattedDate = date('F Y', $predictionDate);
+
+            // Store prediction in database
+            DB::table('sales_data')->updateOrInsert(
+                ['key' => 'predicted_sales_' . date('Ym', $predictionDate)],
+                [
+                    'value' => $predictedValue,
+                    'month' => $formattedDate,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+
+            $predictedSales[] = $predictedValue;
+            $predictedDates[] = $formattedDate;
+        }
+
+        return ['sales' => $predictedSales, 'dates' => $predictedDates];
+    }
+
+    private function fallbackPrediction($targets, $errorMessage = null)
+    {
+        $defaultSalesValue = !empty($targets) ? end($targets) : 0;
+
+        $predictedSales = array_fill(0, 3, max(0, $defaultSalesValue));
+        $predictedDates = array_map(
+            fn($i) => date('F Y', strtotime("+{$i} months", strtotime('first day of next month'))),
+            range(0, 2)
+        );
+
+        // Optional: Log the error or prediction fallback
+        if ($errorMessage) {
+            Log::warning('Sales Prediction Fallback: ' . $errorMessage);
+        }
+
+        return ['sales' => $predictedSales, 'dates' => $predictedDates];
     }
     private function getFastMovingProducts($startDate, $endDate)
     {
