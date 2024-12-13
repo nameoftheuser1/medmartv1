@@ -42,7 +42,6 @@
                         </p>
                         <p class="text-center text-lg">₱{{ number_format($product->price, 2) }}</p>
                     </div>
-                    {{ $products->appends(request()->input())->links() }}
                 @endforeach
             </div>
             <div class="mt-4">
