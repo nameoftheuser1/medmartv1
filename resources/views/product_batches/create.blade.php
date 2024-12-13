@@ -73,30 +73,20 @@
 
                         <!-- Product Info - 2x2 Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="mb-4">
-                                <div class="relative">
-                                    <input type="text" id="productSearchInput1" name="product_search_input[]"
-                                        autocomplete="off" class="input w-full rounded-lg border-gray-300"
-                                        placeholder="Search for a product" oninput="searchProduct(this)">
-                                    <ul id="productSearchResults1"
-                                        class="hidden bg-white border border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto">
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <select name="product_id[]" class="input w-full rounded-lg border-gray-300"
-                                    id="productSelect1">
-                                    @foreach ($products as $product)
-                                        <option value="{{ $product->id }}"
-                                            {{ old('product_id.0') == $product->id ? 'selected' : '' }}>
-                                            {{ $product->product_name }}
-                                        </option>
-                                    @endforeach
+                            <div class="mb-4 relative">
+                                <label for="product_input1" class="block mb-2 font-medium">Product:</label>
+                                <input type="text" id="product_input1" name="product_input[]"
+                                    class="input w-full rounded-lg border-gray-300"
+                                    placeholder="Search or select a product" autocomplete="off">
+                                <select name="product_id[]" id="productSelect1" class="hidden" required>
+                                    <!-- Existing product options will be dynamically populated here -->
                                 </select>
+                                <ul id="productSearchResults1"
+                                    class="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto hidden w-full">
+                                </ul>
                             </div>
                             <div class="mb-4">
-                                <label for="expiration_date" class="block mb-2 font-medium">Expiration Date
-                                    (Optional):</label>
+                                <label for="expiration_date" class="block mb-2 font-medium">Expiration Date:</label>
                                 <input type="date" name="expiration_date[]"
                                     class="input w-full rounded-lg border-gray-300"
                                     value="{{ old('expiration_date.0') }}">
@@ -148,30 +138,24 @@
                 productBatchCount++;
                 let newProductBatch = $('#batch1').clone();
 
-                // Update IDs and clear values for new batch
-                newProductBatch.attr('id', 'batch' + productBatchCount);
+                // Update IDs
+                newProductBatch.find('input[id^="product_input"]')
+                    .attr('id', 'product_input' + productBatchCount)
+                    .attr('onchange', 'searchProduct(this)');
+                newProductBatch.find('ul[id^="productSearchResults"]')
+                    .attr('id', 'productSearchResults' + productBatchCount);
+                newProductBatch.find('select[id^="productSelect"]')
+                    .attr('id', 'productSelect' + productBatchCount);
 
-                // Update product count display
-                newProductBatch.find('.product-count').text('Product #' + productBatchCount);
-
-                // Update search input IDs and clear values
-                newProductBatch.find('input[id^="productSearchInput"]').attr('id', 'productSearchInput' +
-                    productBatchCount);
-                newProductBatch.find('ul[id^="productSearchResults"]').attr('id', 'productSearchResults' +
-                    productBatchCount);
-                newProductBatch.find('select[id^="productSelect"]').attr('id', 'productSelect' +
-                    productBatchCount);
-
-                // Clear input values for the new batch
+                // Clear input values
                 newProductBatch.find('input, select').val('');
 
-                // Append the new product batch to the container
                 $('#productBatchesContainer').append(newProductBatch);
             });
 
             // Function to search products dynamically
             window.searchProduct = function(input) {
-                const batchNumber = input.id.replace('productSearchInput', '');
+                const batchNumber = input.id.replace('product_input', '');
                 const query = input.value;
                 const resultsContainer = document.getElementById('productSearchResults' + batchNumber);
                 const productSelect = document.getElementById('productSelect' + batchNumber);
@@ -190,29 +174,47 @@
                         if (data.length === 0) {
                             resultsContainer.innerHTML =
                                 '<li class="p-2 text-gray-500">No products found</li>';
+                            resultsContainer.classList.remove('hidden');
                         } else {
                             data.forEach(product => {
+                                // Create search results
+                                const resultLi = document.createElement('li');
+                                resultLi.textContent = product.product_name;
+                                resultLi.classList.add('p-2', 'hover:bg-gray-100',
+                                    'cursor-pointer');
+                                resultLi.onclick = () => {
+                                    input.value = product.product_name;
+                                    const option = document.createElement('option');
+                                    option.value = product.id;
+                                    option.selected = true;
+                                    productSelect.innerHTML = '';
+                                    productSelect.appendChild(option);
+                                    resultsContainer.classList.add('hidden');
+                                };
+                                resultsContainer.appendChild(resultLi);
+
+                                // Populate select for form submission
                                 const option = document.createElement('option');
                                 option.value = product.id;
                                 option.textContent = product.product_name;
                                 productSelect.appendChild(option);
                             });
+                            resultsContainer.classList.remove('hidden');
                         }
-
-                        resultsContainer.classList.remove('hidden');
                     })
                     .catch(error => console.error('Error:', error));
             };
 
-            // Remove product batch functionality
-            $(document).on('click', '.removeProductBatch', function() {
-                $(this).closest('.productBatch').remove();
-                productBatchCount--;
+            // Add event listener for input
+            document.getElementById('product_input1').addEventListener('input', function() {
+                searchProduct(this);
             });
 
-            document.getElementById('productBatchForm').addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                const searchResults = document.getElementById('productSearchResults1');
+                if (searchResults && !e.target.closest('.relative')) {
+                    searchResults.classList.add('hidden');
                 }
             });
         });

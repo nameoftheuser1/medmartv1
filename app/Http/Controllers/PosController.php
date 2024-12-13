@@ -38,7 +38,7 @@ class POSController extends Controller
             });
         }
 
-        $products = $query->paginate(12);
+        $products = $query->paginate(6);
 
         // Calculate total inventory for each product
         $products->getCollection()->map(function ($product) {

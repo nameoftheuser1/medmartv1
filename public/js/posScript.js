@@ -12,7 +12,6 @@ $(document).ready(function () {
     const discountInput = $("#discount_percentage"); // Discount input element
     const resetExchangeButton = $("#reset-exchange-button");
 
-
     // Product selection functionality
     $(document).ready(function () {
         const productCards = $(".product-card");
@@ -37,7 +36,7 @@ $(document).ready(function () {
 
         // Product selection functionality
         productCards.on("click", function () {
-            const productId = $(this).data("id");
+            const productId = $(this).data("product-id"); // Change here
             const productName = $(this).data("name");
             const productQuantity = $(this).data("quantity");
 

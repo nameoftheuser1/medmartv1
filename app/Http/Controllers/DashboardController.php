@@ -294,7 +294,7 @@ class DashboardController extends Controller
 
     private function getHistoricalData()
     {
-        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 90;
+        $historicalDataDays = Setting::where('key', 'historicalDataDays')->value('value') ?? 900;
 
         $cutoffDate = now()->subDays($historicalDataDays);
 

@@ -18,7 +18,7 @@
 
         <div class="mb-2">
             This page provides a comprehensive overview of all sales transactions in the system. You can search for
-            specific sales records, view detailed information such as total amount, discount applied, transaction key,
+            specific sales records, view detailed information such as total amount, discount applied, transaction number,
             sale time, and status. The table allows for sorting and quick access to actions like viewing receipts or
             processing refunds. Additionally, the sales chart visualizes trends over the past 30 days, helping you track
             performance and identify patterns. Use the search bar and available tools to efficiently manage and analyze
@@ -42,7 +42,7 @@
                         <p><strong>Total Amount:</strong> ₱{{ number_format($sale->total_amount, 2) }}</p>
                         <p><strong>Discount:</strong>
                             {{ $sale->discount_percentage > 0 ? $sale->discount_percentage . '%' : 'No Discount' }}</p>
-                        <p><strong>Transaction Key:</strong> {{ $sale->transaction_key }}</p>
+                        <p><strong>Transaction Number:</strong> {{ $sale->transaction_key }}</p>
                         <p><strong>Sale Time:</strong> {{ $sale->created_at }}</p>
                         <p><strong>Status:</strong> {{ $sale->status ?? 'Completed' }}</p>
                         <div class="mt-2">
@@ -70,7 +70,7 @@
                             <th scope="col" class="px-6 py-3">ID</th>
                             <th scope="col" class="px-6 py-3">Total Amount</th>
                             <th scope="col" class="px-6 py-3">Discount</th>
-                            <th scope="col" class="px-6 py-3">Transaction Key</th>
+                            <th scope="col" class="px-6 py-3">Transaction Number</th>
                             <th scope="col" class="px-6 py-3">Sale Time</th>
                             <th scope="col" class="px-6 py-3">Status</th>
                             <th scope="col" class="px-6 py-3">Actions</th>

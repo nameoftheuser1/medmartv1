@@ -2,7 +2,7 @@
     <div class="card">
         <div>
             <div class="card-title text-center m-5">Sale ID: {{ $sale->id }}</div>
-            <p>Transaction Key: {{ $sale->transaction_key }}</p>
+            <p>Transaction Number: {{ $sale->transaction_key }}</p>
         </div>
 
         <div class="mt-5">
