@@ -19,5 +19,3 @@
         <p class="text-center text-lg">₱{{ number_format($product->price, 2) }}</p>
     </div>
 @endforeach
-
-{{ $products->appends(request()->input())->links() }}
