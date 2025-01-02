@@ -285,7 +285,8 @@ class DashboardController extends Controller
 
             return array_map(function ($i) use ($regression, $currentDate, $baseDate) {
                 $monthsOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60) + $i;
-                return max(0, round($regression->predict([[$monthsOffset]])));
+                $prediction = $regression->predict([[$monthsOffset]]);
+                return max(0, round((float)$prediction));
             }, range(0, 2));
         } catch (\Exception $e) {
             // Fallback if regression fails
