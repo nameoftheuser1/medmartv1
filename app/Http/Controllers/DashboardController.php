@@ -212,7 +212,7 @@ class DashboardController extends Controller
 
         try {
             // Perform linear regression prediction
-            $predictions = $this->linearRegressionPrediction($processedData['samples'], $processedData['targets']);
+            $predictions = $this->simpleLinearRegression($processedData['samples'], $processedData['targets']);
 
             // Store and return predictions
             return $this->storePredictionsAndPrepareResponse($predictions);
@@ -259,7 +259,7 @@ class DashboardController extends Controller
             $totalAmount = (float) $data->total_amount;
             $monthsOffset = $data->date->diffInMonths($baseDate);
 
-            $samples[] = [$monthsOffset];
+            $samples[] = $monthsOffset;
             $targets[] = $totalAmount;
         }
 
@@ -270,30 +270,33 @@ class DashboardController extends Controller
         ];
     }
 
-    private function linearRegressionPrediction($samples, $targets)
+    private function simpleLinearRegression($samples, $targets)
     {
-        try {
-            if (empty($samples) || empty($targets)) {
-                throw new \Exception('Insufficient data for linear regression');
-            }
-
-            $regression = new LeastSquares();
-            $regression->train($samples, $targets);
-
-            $currentDate = strtotime('first day of next month');
-            $baseDate = strtotime('first day of January 2020'); // Set a consistent base date
-
-            return array_map(function ($i) use ($regression, $currentDate, $baseDate) {
-                $monthsOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60) + $i;
-                $prediction = $regression->predict([[$monthsOffset]]);
-                return max(0, round((float)$prediction));
-            }, range(0, 2));
-        } catch (\Exception $e) {
-            // Fallback if regression fails
-            Log::error('Linear regression prediction error: ' . $e->getMessage());
-            $lastValue = end($targets) ?: 0;
-            return array_fill(0, 3, max(0, $lastValue));
+        $n = count($samples);
+        if ($n === 0) {
+            throw new \Exception('No data available for linear regression');
         }
+
+        $sumX = array_sum($samples);
+        $sumY = array_sum($targets);
+        $sumXY = array_sum(array_map(function ($x, $y) {
+            return $x * $y;
+        }, $samples, $targets));
+        $sumX2 = array_sum(array_map(function ($x) {
+            return $x * $x;
+        }, $samples));
+
+        $slope = ($n * $sumXY - $sumX * $sumY) / ($n * $sumX2 - $sumX * $sumX);
+        $intercept = ($sumY - $slope * $sumX) / $n;
+
+        $currentDate = strtotime('first day of next month');
+        $baseDate = strtotime('first day of January 2020'); // Set a consistent base date
+
+        return array_map(function ($i) use ($slope, $intercept, $currentDate, $baseDate) {
+            $monthsOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60) + $i;
+            $prediction = $slope * $monthsOffset + $intercept;
+            return max(0, round($prediction));
+        }, range(0, 2));
     }
 
     private function storePredictionsAndPrepareResponse($predictions)
