@@ -198,10 +198,10 @@ class DashboardController extends Controller
 
     public function predictSales()
     {
-        // Retrieve historical sales data with more comprehensive retrieval
+        // Retrieve historical sales data
         $salesData = $this->getExtendedHistoricalData();
 
-        // Prepare data for advanced prediction
+        // Prepare data for prediction
         $processedData = $this->preprocessSalesData($salesData);
 
         // Handle cases with insufficient data
@@ -211,8 +211,8 @@ class DashboardController extends Controller
         }
 
         try {
-            // Implement multiple prediction strategies
-            $predictions = $this->generateMultiModelPredictions($processedData);
+            // Perform linear regression prediction
+            $predictions = $this->linearRegressionPrediction($processedData['samples'], $processedData['targets']);
 
             // Store and return predictions
             return $this->storePredictionsAndPrepareResponse($predictions);
@@ -251,7 +251,6 @@ class DashboardController extends Controller
         $targets = [];
         $baseDate = $salesData->min('date');
 
-        // More sophisticated feature engineering
         foreach ($salesData as $data) {
             if (!isset($data->date, $data->total_amount)) {
                 continue;
@@ -260,15 +259,7 @@ class DashboardController extends Controller
             $totalAmount = (float) $data->total_amount;
             $monthsOffset = $data->date->diffInMonths($baseDate);
 
-            // Advanced feature vector
-            $features = [
-                'months_offset' => $monthsOffset,
-                'month' => $data->month,
-                'day_of_week' => $data->day_of_week,
-                // Add more contextual features as needed
-            ];
-
-            $samples[] = $features;
+            $samples[] = [$monthsOffset];
             $targets[] = $totalAmount;
         }
 
@@ -277,28 +268,6 @@ class DashboardController extends Controller
             'targets' => $targets,
             'base_date' => $baseDate
         ];
-    }
-
-    private function generateMultiModelPredictions($processedData)
-    {
-        $samples = $processedData['samples'];
-        $targets = $processedData['targets'];
-        $baseDate = $processedData['base_date'];
-
-        // Ensemble of prediction methods
-        $predictions = [
-            'linear_regression' => $this->linearRegressionPrediction($samples, $targets),
-            'moving_average' => $this->movingAveragePrediction($targets),
-            'seasonal_adjustment' => $this->seasonalAdjustmentPrediction($samples, $targets)
-        ];
-
-        // Ensemble method: Weighted average
-        $finalPredictions = array_map(function ($month) use ($predictions) {
-            $monthPredictions = array_column($predictions, $month);
-            return round(array_sum($monthPredictions) / count($monthPredictions));
-        }, range(0, 2));
-
-        return $finalPredictions;
     }
 
     private function linearRegressionPrediction($samples, $targets)
@@ -316,12 +285,7 @@ class DashboardController extends Controller
 
             return array_map(function ($i) use ($regression, $currentDate, $baseDate) {
                 $monthsOffset = ($currentDate - $baseDate) / (30 * 24 * 60 * 60) + $i;
-                $features = [
-                    'months_offset' => $monthsOffset,
-                    'month' => date('n', strtotime("+{$i} months", $currentDate)),
-                    'day_of_week' => date('w', strtotime("+{$i} months", $currentDate))
-                ];
-                return max(0, round($regression->predict([$features])));
+                return max(0, round($regression->predict([[$monthsOffset]])));
             }, range(0, 2));
         } catch (\Exception $e) {
             // Fallback if regression fails
@@ -329,41 +293,6 @@ class DashboardController extends Controller
             $lastValue = end($targets) ?: 0;
             return array_fill(0, 3, max(0, $lastValue));
         }
-    }
-
-    private function movingAveragePrediction($targets, $periods = 3)
-    {
-        // Calculate moving average of last n periods
-        if (count($targets) < $periods) {
-            $lastValue = end($targets);
-            return array_fill(0, 3, max(0, $lastValue));
-        }
-
-        $slice = array_slice($targets, -$periods);
-        $average = array_sum($slice) / count($slice);
-
-        return array_fill(0, 3, round($average));
-    }
-
-    private function seasonalAdjustmentPrediction($samples, $targets)
-    {
-        // Basic seasonal adjustment method
-        $monthlyAverages = collect($samples)
-            ->groupBy('month')
-            ->map(function ($group) use ($targets) {
-                $indices = $group->keys();
-                $monthTargets = collect($indices)->map(fn($i) => $targets[$i]);
-                return $monthTargets->avg();
-            });
-
-        $lastMonths = collect($samples)
-            ->sortByDesc('months_offset')
-            ->take(3)
-            ->pluck('month');
-
-        return $lastMonths->map(function ($month) use ($monthlyAverages) {
-            return round($monthlyAverages->get($month, 0));
-        })->toArray();
     }
 
     private function storePredictionsAndPrepareResponse($predictions)
