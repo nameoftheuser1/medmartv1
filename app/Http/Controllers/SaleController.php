@@ -64,12 +64,21 @@ class SaleController extends Controller
 
     private function getSalesPerDay()
     {
-        return Sale::query()
+        $salesPerDay = Sale::query()
             ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total_amount')
             ->where('created_at', '>=', now()->subDays(30))
             ->groupByRaw('DATE(created_at)')
             ->orderBy('date', 'asc')
             ->get();
+
+        if ($salesPerDay->isEmpty()) {
+            $salesPerDay->push((object)[
+                'date' => now()->format('Y-m-d'),
+                'total_amount' => 0,
+            ]);
+        }
+
+        return $salesPerDay;
     }
 
     /**
@@ -77,13 +86,23 @@ class SaleController extends Controller
      */
     private function getSalesPerWeek()
     {
-        return Sale::query()
+        $salesPerWeek = Sale::query()
             ->selectRaw('YEAR(created_at) as year, WEEK(created_at) as week, SUM(total_amount) as total_amount')
             ->where('created_at', '>=', now()->subDays(30))
             ->groupByRaw('YEAR(created_at), WEEK(created_at)')
             ->orderBy('year', 'asc')
             ->orderBy('week', 'asc')
             ->get();
+
+        if ($salesPerWeek->isEmpty()) {
+            $salesPerWeek->push((object)[
+                'year' => now()->year,
+                'week' => now()->week,
+                'total_amount' => 0,
+            ]);
+        }
+
+        return $salesPerWeek;
     }
 
     /**
@@ -91,12 +110,21 @@ class SaleController extends Controller
      */
     private function getSalesPerMonth()
     {
-        return Sale::query()
+        $salesPerMonth = Sale::query()
             ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total_amount')
             ->where('created_at', '>=', now()->subMonths(12))
             ->groupByRaw('MONTH(created_at)')
             ->orderBy('month', 'asc')
             ->get();
+
+        if ($salesPerMonth->isEmpty()) {
+            $salesPerMonth->push((object)[
+                'month' => now()->month,
+                'total_amount' => 0,
+            ]);
+        }
+
+        return $salesPerMonth;
     }
     public function refund($id)
     {

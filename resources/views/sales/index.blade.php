@@ -1,9 +1,5 @@
 <x-layout>
-    <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
 
-
-        <div id="sales-chart"></div>
-    </div>
     <div class="w-full px-4 sm:px-6 lg:px-8 bg-white p-5 rounded-lg shadow-lg">
         <div class="flex flex-col sm:flex-row justify-between items-center mb-5">
             <h1 class="text-2xl font-bold mb-2 sm:mb-0">Sales List</h1>
@@ -121,245 +117,123 @@
             </select>
         </div>
 
-        <!-- Daily Chart -->
-        <div id="chart-container">
-            <div id="daily-chart" class="chart-container" style="display: block;"></div>
-            <div id="weekly-chart" class="chart-container" style="display: none;"></div>
-            <div id="monthly-chart" class="chart-container" style="display: none;"></div>
+        <!-- Single Chart Container -->
+        <div class="w-full p-4 mb-3 bg-white rounded-lg md:p-6">
+            <div id="sales-chart"></div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-    <script>
-        // Data for the charts
-        const dailyChartData = @json($dailyChartData);
-        const weeklyChartData = @json($weeklyChartData);
-        const monthlyChartData = @json($monthlyChartData);
+        <script>
+            // Data for the charts
+            const dailyChartData = @json($dailyChartData);
+            const weeklyChartData = @json($weeklyChartData);
+            const monthlyChartData = @json($monthlyChartData);
 
-        // Variables to store chart instances
-        let dailyChart, weeklyChart, monthlyChart;
+            // Variable to store chart instance
+            let salesChart;
 
-        // Function to render the daily chart
-        function renderDailyChart() {
-            const chartElement = document.querySelector("#daily-chart");
-            if (!chartElement) return;
+            // Function to render the chart
+            function renderChart(chartData, categories, titleText, xAxisTitle) {
+                const chartElement = document.querySelector("#sales-chart");
+                if (!chartElement) return;
 
-            const chartData = dailyChartData.map(item => item.total_amount);
-            const categories = dailyChartData.map(item => item.date);
-
-            const chartOptions = {
-                chart: {
-                    type: 'line',
-                    height: 350,
-                    width: '100%',
-                    toolbar: {
-                        show: false
-                    }
-                },
-                series: [{
-                    name: 'Total Amount',
-                    data: chartData
-                }],
-                xaxis: {
-                    categories: categories,
-                    title: {
-                        text: 'Date'
+                const chartOptions = {
+                    chart: {
+                        type: 'line',
+                        height: 350,
+                        width: '100%',
+                        toolbar: {
+                            show: false
+                        }
                     },
-                    labels: {
-                        rotate: -45,
-                        rotateAlways: true,
-                        trim: true
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Total Amount'
+                    series: [{
+                        name: 'Total Amount',
+                        data: chartData
+                    }],
+                    xaxis: {
+                        categories: categories,
+                        title: {
+                            text: xAxisTitle
+                        },
+                        labels: {
+                            rotate: -45,
+                            rotateAlways: true,
+                            trim: true
+                        }
                     },
-                    labels: {
-                        formatter: function(value) {
-                            return '₱' + value.toFixed(2);
+                    yaxis: {
+                        title: {
+                            text: 'Total Amount'
+                        },
+                        labels: {
+                            formatter: function(value) {
+                                return '₱' + value.toFixed(2);
+                            }
                         }
-                    }
-                },
-                title: {
-                    text: 'Sales Per Day',
-                    align: 'center'
-                },
-                tooltip: {
-                    x: {
-                        format: 'dd/MM/yyyy'
                     },
-                    y: {
-                        formatter: function(value) {
-                            return '₱' + value.toFixed(2);
-                        }
-                    }
-                }
-            };
-
-            if (dailyChart) dailyChart.destroy();
-            dailyChart = new ApexCharts(chartElement, chartOptions);
-            dailyChart.render();
-        }
-
-        // Function to render the weekly chart
-        function renderWeeklyChart() {
-            const chartElement = document.querySelector("#weekly-chart");
-            if (!chartElement) return;
-
-            const chartData = weeklyChartData.map(item => item.total_amount);
-            const categories = weeklyChartData.map(item => `Week ${item.week}`);
-
-            const chartOptions = {
-                chart: {
-                    type: 'line',
-                    height: 350,
-                    width: '100%',
-                    toolbar: {
-                        show: false
-                    }
-                },
-                series: [{
-                    name: 'Total Amount',
-                    data: chartData
-                }],
-                xaxis: {
-                    categories: categories,
                     title: {
-                        text: 'Week'
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Total Amount'
+                        text: titleText,
+                        align: 'center'
                     },
-                    labels: {
-                        formatter: function(value) {
-                            return '₱' + value.toFixed(2);
+                    tooltip: {
+                        x: {
+                            format: 'dd/MM/yyyy'
+                        },
+                        y: {
+                            formatter: function(value) {
+                                return '₱' + value.toFixed(2);
+                            }
                         }
                     }
-                },
-                title: {
-                    text: 'Sales Per Week',
-                    align: 'center'
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(value) {
-                            return '₱' + value.toFixed(2);
-                        }
-                    }
-                }
-            };
+                };
 
-            if (weeklyChart) weeklyChart.destroy();
-            weeklyChart = new ApexCharts(chartElement, chartOptions);
-            weeklyChart.render();
-        }
+                if (salesChart) salesChart.destroy();
+                salesChart = new ApexCharts(chartElement, chartOptions);
+                salesChart.render();
+            }
 
-        // Function to render the monthly chart
-        function renderMonthlyChart() {
-            const chartElement = document.querySelector("#monthly-chart");
-            if (!chartElement) return;
+            // Function to handle chart switching
+            function switchChart(selectedView) {
+                let chartData, categories, titleText, xAxisTitle;
 
-            const chartData = monthlyChartData.map(item => item.total_amount);
-            const categories = monthlyChartData.map(item => `Month ${item.month}`);
-
-            const chartOptions = {
-                chart: {
-                    type: 'line',
-                    height: 350,
-                    width: '100%',
-                    toolbar: {
-                        show: false
-                    }
-                },
-                series: [{
-                    name: 'Total Amount',
-                    data: chartData
-                }],
-                xaxis: {
-                    categories: categories,
-                    title: {
-                        text: 'Month'
-                    }
-                },
-                yaxis: {
-                    title: {
-                        text: 'Total Amount'
-                    },
-                    labels: {
-                        formatter: function(value) {
-                            return '₱' + value.toFixed(2);
-                        }
-                    }
-                },
-                title: {
-                    text: 'Sales Per Month',
-                    align: 'center'
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(value) {
-                            return '₱' + value.toFixed(2);
-                        }
-                    }
-                }
-            };
-
-            if (monthlyChart) monthlyChart.destroy();
-            monthlyChart = new ApexCharts(chartElement, chartOptions);
-            monthlyChart.render();
-        }
-
-        // Function to handle chart switching
-        function switchChart(selectedView) {
-            // Remove display logic, use ApexCharts built-in show/hide
-            const chartContainers = document.querySelectorAll('.chart-container');
-            chartContainers.forEach(container => {
-                container.style.display = 'none';
-            });
-
-            const selectedChart = document.getElementById(`${selectedView}-chart`);
-            if (selectedChart) {
-                selectedChart.style.display = 'block';
-
-                // Redraw the selected chart
                 switch (selectedView) {
                     case 'daily':
-                        if (dailyChart) dailyChart.render();
+                        chartData = dailyChartData.map(item => item.total_amount);
+                        categories = dailyChartData.map(item => item.date);
+                        titleText = 'Sales Per Day';
+                        xAxisTitle = 'Date';
                         break;
                     case 'weekly':
-                        if (weeklyChart) weeklyChart.render();
+                        chartData = weeklyChartData.map(item => item.total_amount);
+                        categories = weeklyChartData.map(item => `Week ${item.week}`);
+                        titleText = 'Sales Per Week';
+                        xAxisTitle = 'Week';
                         break;
                     case 'monthly':
-                        if (monthlyChart) monthlyChart.render();
+                        chartData = monthlyChartData.map(item => item.total_amount);
+                        categories = monthlyChartData.map(item => `Month ${item.month}`);
+                        titleText = 'Sales Per Month';
+                        xAxisTitle = 'Month';
                         break;
                 }
+
+                renderChart(chartData, categories, titleText, xAxisTitle);
             }
-        }
 
-        // Event listener for chart selector
-        document.addEventListener('DOMContentLoaded', () => {
-            const chartSelector = document.getElementById('chart-selector');
+            // Event listener for chart selector
+            document.addEventListener('DOMContentLoaded', () => {
+                const chartSelector = document.getElementById('chart-selector');
 
-            if (chartSelector) {
-                chartSelector.addEventListener('change', function() {
-                    switchChart(this.value);
-                });
+                if (chartSelector) {
+                    chartSelector.addEventListener('change', function() {
+                        switchChart(this.value);
+                    });
 
-                // Render all charts
-                renderDailyChart();
-                renderWeeklyChart();
-                renderMonthlyChart();
-
-                // Ensure initial chart is visible
-                switchChart('daily');
-            }
-        });
-    </script>
-
-
-
+                    // Render initial chart
+                    switchChart('daily');
+                }
+            });
+        </script>
+    </div>
 </x-layout>

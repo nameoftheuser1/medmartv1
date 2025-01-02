@@ -206,6 +206,7 @@ class DashboardController extends Controller
 
         // Handle cases with insufficient data
         if (count($processedData['samples']) < 5) {
+            Log::warning('Insufficient data for prediction');
             return $this->fallbackPrediction($processedData['targets']);
         }
 
@@ -217,6 +218,7 @@ class DashboardController extends Controller
             return $this->storePredictionsAndPrepareResponse($predictions);
         } catch (\Exception $e) {
             // Fallback to simple prediction if advanced methods fail
+            Log::error('Prediction error: ' . $e->getMessage());
             return $this->fallbackPrediction($processedData['targets'], $e->getMessage());
         }
     }
@@ -302,6 +304,10 @@ class DashboardController extends Controller
     private function linearRegressionPrediction($samples, $targets)
     {
         try {
+            if (empty($samples) || empty($targets)) {
+                throw new \Exception('Insufficient data for linear regression');
+            }
+
             $regression = new LeastSquares();
             $regression->train($samples, $targets);
 
@@ -319,7 +325,8 @@ class DashboardController extends Controller
             }, range(0, 2));
         } catch (\Exception $e) {
             // Fallback if regression fails
-            $lastValue = end($targets);
+            Log::error('Linear regression prediction error: ' . $e->getMessage());
+            $lastValue = end($targets) ?: 0;
             return array_fill(0, 3, max(0, $lastValue));
         }
     }

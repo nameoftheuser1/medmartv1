@@ -48,6 +48,10 @@
         <div class="w-full p-4 mx-auto bg-white rounded-lg card md:mb-0 md:w-1/2">
             <form id="inventory-form" method="GET" action="{{ e(route('dashboard')) }}">
                 <h2 class="mb-2 font-mono text-xl font-bold">Inventory Level</h2>
+                <div class="mb-4 text-sm text-gray-500">
+                    This chart shows the current inventory levels across products. Select between highest and lowest
+                    inventory to view different perspectives.
+                </div>
                 <select id="inventory-type-selector" name="inventory-type" class="items-end">
                     <option value="highest" {{ e($currentInventoryType) == 'highest' ? 'selected' : '' }}>Highest
                         Inventory</option>
@@ -114,7 +118,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
-
             </div>
             <div class="ml-4">
                 <p class="text-lg font-semibold">Sales Count:</p>
